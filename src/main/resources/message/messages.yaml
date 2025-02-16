@@ -1,0 +1,30 @@
+validation:
+  auth:
+    email: Invalid email format. Check its again.
+    password: Password must meet the required criteria.
+
+mailing:
+  register-email:
+    subject: "Activate Your Account"
+    path: "/activate"
+    content: "Hi %s,\n\nWelcome to our service! Please click the link below to activate your account:\n\n%s\n\nIf you didn't sign up, please ignore this email.\n\nBest regards,\nYour Team"
+
+exception:
+  resource-not-found:
+    default: Resource {} Not Found.
+    rate-limit: Limit Resources not found.
+  rate-limit:
+    exceed: Rate limit exceeded. Please try again later.
+  entity-not-found:
+    category-name: Can not found category with name [%s]
+    category-id: Can not found category with id [%d]
+    product-name: Can not found product with name [%s]
+    product-id: Can not found product with id [%d]
+  entity-exists:
+    category: Category with name [%s] already exist.
+    product: Product with name [%s] already exists.
+  worker-busy:
+    thread: Server is not responding correctly. Try again later.
+    db-lock: Service is busy at the moment. Try again later.
+  key-lock:
+    missed: Error while executing task with lock on key [%s].

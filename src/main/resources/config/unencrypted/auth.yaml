@@ -1,0 +1,37 @@
+auth-token:
+  register-exp-date: 2
+  register-exp-date-format: hour
+  register-revoke-exp-date: 30
+  register-revoke-exp-date-format: minute
+
+security-path:
+  everyone: [
+      #! ⇩ ⇩ ⇩ CAUTION: DO NOT public these in production enviroment ⇩ ⇩ ⇩
+      /swagger-ui.html,
+      /docs/**,
+      /ui-docs/**,
+      /swagger-ui/**,
+      /v3/api-docs/**,
+      /,
+      /h2-console/**,
+      #! ⇧ ⇧ ⇧ CAUTION: DO NOT public these in production enviroment ⇧ ⇧ ⇧
+      /products,
+      /products/**,
+      /categories,
+      /categories/**,
+      /auth,
+      /auth/**,
+    ]
+  user: [/users/**, /dashboard/user, /dashboard/user/**]
+  super-user:
+    [
+      /manage/products,
+      /manage/products/**,
+      /manage/categories,
+      /manage/categories/**,
+      /manage/users,
+      /manage/users/**,
+      /dashboard/admin,
+      /dashboard/admin/**,
+    ]
+  admin: [/app, /app/**]

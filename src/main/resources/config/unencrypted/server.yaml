@@ -1,0 +1,29 @@
+lvoxx-server:
+  dev-server:
+    base-url: http://localhost:9090
+    description: Dev BE Server
+  prod-server:
+    base-url: http://www.lvoxxapplication.com
+    description: Product BE Server
+  contact:
+    name: Lvoxx
+    email: lvoxxartist@gmail.com
+    url: https://github.com/lvoxx
+  license:
+    name: GNU General Public License
+    url: https://www.gnu.org/licenses/gpl-3.0.html
+  info:
+    title: Simple Selling Application
+    version: 1.0.0
+    description: This API exposes endpoints to manage users, categories, products and more.
+  external-documentation:
+    description: Full Documentation
+    url: https://github.com/lvoxx/SimpleSellingApplication
+  product-deploy: false
+
+client:
+  name: simple-selling-application
+  roles:
+    user: user
+    super-user: super-user
+    admin: admin

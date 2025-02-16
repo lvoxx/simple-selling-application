@@ -1,0 +1,34 @@
+server:
+  port: 9090
+  servlet:
+    context-path: /api
+
+spring:
+  application:
+    name: simple-selling-application
+  config:
+    import:
+      # ENCRYPT CONFIGURATION
+      - config/encrypted/accounts.yaml
+      - config/encrypted/database.yaml
+      - config/encrypted/email.yaml
+      # UNENCRYPT CONFIGURATION
+      - config/unencrypted/auth.yaml
+      - config/unencrypted/server.yaml
+      - config/unencrypted/security.yaml
+      - config/unencrypted/jasypt.yaml
+      - config/unencrypted/logging.yaml
+
+---
+spring:
+  jackson:
+    property-naming-strategy: KEBAB_CASE
+  messages:
+    basename: messages
+
+springdoc:
+  api-docs:
+    path: /docs
+  swagger-ui:
+    path: /ui-docs
+    url: /docs
