@@ -1,11 +1,16 @@
 # BASIC - 15 / 2 minutes
 # MAX - 1000 / 1 hours
 # HEAVY_LOADS - 50 /5 minutes
+# SOFT - 30 / 5 minutes
+# MEDIUM - 25 / 5 minutes
+# HARD - 12 / 10 minutes
+# AUTH - 5 / 30 minutes
+# REGRANT_AUTH - 3 / 45 minutes
 rate-limiter:
   category:
     find-all: HARD
     id: MAX
-    curd: HARD
+    manage: MEDIUM
   product:
     insell-find-all: HEAVY_LOADS
     admin-find-all: SOFT
@@ -16,4 +21,3 @@ rate-limiter:
     find-all: SOFT
     id: SOFT
     manage: MEDIUM
-

@@ -16,6 +16,7 @@ import com.shitcode.demo1.annotation.logging.LogCollector;
 import com.shitcode.demo1.dto.CategoryDTO;
 import com.shitcode.demo1.dto.ResponseDTO;
 import com.shitcode.demo1.exception.model.ErrorModel;
+import com.shitcode.demo1.properties.RateLimiterConfigData;
 import com.shitcode.demo1.service.CategoryService;
 import com.shitcode.demo1.service.ResponseService;
 import com.shitcode.demo1.utils.RateLimiterPlan;
@@ -28,6 +29,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.annotation.PostConstruct;
 import jakarta.validation.Valid;
 import lombok.Data;
 
@@ -40,11 +42,25 @@ public class CategoryController {
 
         private final CategoryService categoryService;
         private final ResponseService responseService;
-        private static final RateLimiterPlan PLAN = RateLimiterPlan.SOFT;
+        private final RateLimiterConfigData rateLimiterConfigData;
 
-        public CategoryController(CategoryService categoryService, ResponseService responseService) {
+        public CategoryController(CategoryService categoryService, ResponseService responseService,
+                        RateLimiterConfigData rateLimiterConfigData) {
                 this.categoryService = categoryService;
                 this.responseService = responseService;
+                this.rateLimiterConfigData = rateLimiterConfigData;
+        }
+
+        private RateLimiterPlan ID_PLAN;
+        private RateLimiterPlan FIND_ALL_PLAN;
+        private RateLimiterPlan MANAGE_PLAN;
+
+        @PostConstruct
+        public void setup() {
+                var categoryRateLimits = rateLimiterConfigData.getLimiters().get("category");
+                ID_PLAN = categoryRateLimits.get("id");
+                FIND_ALL_PLAN = categoryRateLimits.get("find-all");
+                MANAGE_PLAN = categoryRateLimits.get("manage");
         }
 
         @GetMapping
@@ -64,7 +80,7 @@ public class CategoryController {
                 return responseService.mapping(
                                 () -> ResponseEntity.ok().body(
                                                 categoryService.findCategoryWithPagination(page, size, sort, asc)),
-                                PLAN);
+                                FIND_ALL_PLAN);
         }
 
         @GetMapping("/{id}")
@@ -77,7 +93,7 @@ public class CategoryController {
         public ResponseEntity<?> findByIdV1(
                         @Parameter(description = "ID of the category to retrieve", required = true) @PathVariable Long id) {
                 return responseService.mapping(() -> ResponseEntity.ok().body(categoryService.findCategoryById(id)),
-                                PLAN);
+                                ID_PLAN);
         }
 
         @PostMapping
@@ -96,7 +112,7 @@ public class CategoryController {
 
                 return responseService.mapping(
                                 () -> new ResponseEntity<>(categoryService.createCategory(request), HttpStatus.CREATED),
-                                PLAN);
+                                MANAGE_PLAN);
 
         }
 
@@ -119,7 +135,7 @@ public class CategoryController {
 
                 return responseService.mapping(
                                 () -> ResponseEntity.ok(categoryService.updateCategory(request, id)),
-                                PLAN);
+                                MANAGE_PLAN);
         }
 
         @DeleteMapping("/{id}")
@@ -142,7 +158,7 @@ public class CategoryController {
                                         // * Returns 204 No Content for successful deletion
                                         return ResponseEntity.noContent().build();
                                 },
-                                PLAN);
+                                MANAGE_PLAN);
         }
 
 }

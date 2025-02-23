@@ -59,6 +59,24 @@ public enum RateLimiterPlan {
                     .refillIntervally(12, Duration.ofMinutes(10))
                     .build();
         }
+    },
+    AUTH {
+        @Override
+        public Bandwidth getLimit() {
+            return Bandwidth.builder()
+                    .capacity(5)
+                    .refillIntervally(5, Duration.ofMinutes(30))
+                    .build();
+        }
+    },
+    REGRANT_AUTH {
+        @Override
+        public Bandwidth getLimit() {
+            return Bandwidth.builder()
+                    .capacity(3)
+                    .refillIntervally(3, Duration.ofMinutes(45))
+                    .build();
+        }
     };
 
     // Abstract method that each constant must implement
