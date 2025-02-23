@@ -18,6 +18,7 @@ spring:
       - config/unencrypted/security.yaml
       - config/unencrypted/jasypt.yaml
       - config/unencrypted/logging.yaml
+      - config/unencrypted/rate-limiter.yaml
 
 ---
 spring:
