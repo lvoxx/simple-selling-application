@@ -57,10 +57,9 @@ public class CategoryController {
 
         @PostConstruct
         public void setup() {
-                var categoryRateLimits = rateLimiterConfigData.getLimiters().get("category");
-                ID_PLAN = categoryRateLimits.get("id");
-                FIND_ALL_PLAN = categoryRateLimits.get("find-all");
-                MANAGE_PLAN = categoryRateLimits.get("manage");
+                ID_PLAN = rateLimiterConfigData.getRateLimiterPlan("category", "id");
+                FIND_ALL_PLAN = rateLimiterConfigData.getRateLimiterPlan("category", "find-all");
+                MANAGE_PLAN = rateLimiterConfigData.getRateLimiterPlan("category", "manage");
         }
 
         @GetMapping
