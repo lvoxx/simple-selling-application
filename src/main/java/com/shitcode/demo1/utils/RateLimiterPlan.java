@@ -77,6 +77,15 @@ public enum RateLimiterPlan {
                     .refillIntervally(3, Duration.ofMinutes(45))
                     .build();
         }
+    },
+    RENEW_TOKEN {
+        @Override
+        public Bandwidth getLimit() {
+            return Bandwidth.builder()
+                    .capacity(5)
+                    .refillIntervally(5, Duration.ofDays(30))
+                    .build();
+        }
     };
 
     // Abstract method that each constant must implement

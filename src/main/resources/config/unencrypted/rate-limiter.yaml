@@ -6,6 +6,7 @@
 # HARD - 12 / 10 minutes
 # AUTH - 5 / 30 minutes
 # REGRANT_AUTH - 3 / 45 minutes
+# RENEW_TOKEN - 5 / 30 days
 rate-limiter:
   category:
     find-all: HARD
@@ -21,3 +22,7 @@ rate-limiter:
     find-all: SOFT
     id: SOFT
     manage: MEDIUM
+  auth:
+    login: AUTH
+    renew-token: RENEW_TOKEN
+    forgot-password: REGRANT_AUTH
