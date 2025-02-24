@@ -16,7 +16,7 @@
 	<name>Simple Selling Application</name>
 	<description>
     	A straightforward project leveraging vanilla Java and Spring Boot, 
-    	designed without Docker for simplicity and ease of use.
+    	designed with minimal Docker for simplicity and ease of use.
 	</description>
 
 	<url>https://github.com/lvoxx</url>
