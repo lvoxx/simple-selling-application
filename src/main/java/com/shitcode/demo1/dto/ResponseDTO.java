@@ -1,6 +1,12 @@
 package com.shitcode.demo1.dto;
 
-import org.springframework.http.HttpStatus;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+
+import org.springframework.http.HttpStatusCode;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonFormat.Shape;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
@@ -11,23 +17,19 @@ import lombok.Data;
 @Schema(name = "ResponseDTO", description = "Standard API response structure")
 public class ResponseDTO {
 
-    @Schema(description = "The API endpoint that was accessed", example = "/api/v1/products")
-    private String path;
-
-    @Schema(description = "Timestamp when the request was received", example = "2024-10-13 14:55:30 GTM+7")
-    private String requestTime;
-
     @Schema(description = "The actual response data returned by the API")
     private Object data;
 
-    @Schema(description = "Identifier of the user who made the request", example = "Annonymous User")
-    private String requester;
+    @Schema(description = "Timestamp when the request was received", example = "2024-10-13 14:55:30 GTM+7")
+    @JsonFormat(shape = Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss.SSS 'GMT'XXX")
+    @Builder.Default
+    private ZonedDateTime requestTime = ZonedDateTime.now(ZoneId.systemDefault());
+
+    @Schema(description = "HTTP status of the response", example = "OK")
+    private HttpStatusCode status;
 
     @Schema(description = "Information regarding rate limits for the requester")
     private RateLimits rateLimits;
-
-    @Schema(description = "Details about the response status and processing time")
-    private Transper transper;
 
     @Data
     @Builder
@@ -42,17 +44,5 @@ public class ResponseDTO {
 
         @Schema(description = "Time when the rate limit will reset", example = "00:05:00")
         private String resetAfter;
-    }
-
-    @Data
-    @Builder
-    @Schema(name = "Transper", description = "Information about the HTTP response and processing time")
-    public static class Transper {
-
-        @Schema(description = "HTTP status code of the response", example = "200", implementation = HttpStatus.class)
-        private int statusCode;
-
-        @Schema(description = "Time taken to process the request, in milliseconds", example = "123")
-        private long processingTimeMs;
     }
 }

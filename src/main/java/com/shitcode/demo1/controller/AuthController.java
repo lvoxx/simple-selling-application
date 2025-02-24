@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.shitcode.demo1.annotation.logging.LogCollector;
 import com.shitcode.demo1.dto.AuthDTO;
-import com.shitcode.demo1.dto.ResponseDTO;
 import com.shitcode.demo1.service.AuthService;
 import com.shitcode.demo1.service.ResponseService;
 import com.shitcode.demo1.utils.RateLimiterPlan;
@@ -45,7 +44,7 @@ public class AuthController {
             @ApiResponse(responseCode = "400", description = "Invalid request", content = @Content)
     })
     @PostMapping("/login")
-    public ResponseEntity<ResponseDTO> loginV1(
+    public ResponseEntity<?> loginV1(
             @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Login credentials", required = true, content = @Content(schema = @Schema(implementation = AuthDTO.Request.class))) @Valid @RequestBody AuthDTO.Request request) {
         return responseService.mapping(() -> new ResponseEntity<>(authService.login(request), HttpStatus.CREATED),
                 RateLimiterPlan.HARD);

@@ -69,13 +69,13 @@ public class CategoryController {
                         @ApiResponse(responseCode = "500", description = "Internal server error")
         })
         public ResponseEntity<?> findAllWithPaginationV1(
-                        @Parameter(description = "Number of categories per page", example = "30") @RequestParam(defaultValue = "30") int size,
+                        @Parameter(description = "Number of categories per page", example = "30") @RequestParam(name = "s", defaultValue = "30") int size,
 
-                        @Parameter(description = "Page number to retrieve", example = "1") @RequestParam(defaultValue = "1") int page,
+                        @Parameter(description = "Page number to retrieve", example = "1") @RequestParam(name = "p", defaultValue = "1") int page,
 
-                        @Parameter(description = "Field to sort by", example = "id") @RequestParam(defaultValue = "id") String sort,
+                        @Parameter(description = "Field to sort by", example = "id") @RequestParam(name = "sb", defaultValue = "id") String sort,
 
-                        @Parameter(description = "Sort order, true for ascending", example = "false") @RequestParam(defaultValue = "false") boolean asc) {
+                        @Parameter(description = "Sort order, true for ascending", example = "false") @RequestParam(name = "a", defaultValue = "false") boolean asc) {
                 return responseService.mapping(
                                 () -> ResponseEntity.ok().body(
                                                 categoryService.findCategoryWithPagination(page, size, sort, asc)),
@@ -106,7 +106,7 @@ public class CategoryController {
 
                         @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorModel.class)))
         })
-        public ResponseEntity<ResponseDTO> createCategoryByBodyV1(
+        public ResponseEntity<?> createCategoryByBodyV1(
                         @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Category details to be created", required = true, content = @Content(mediaType = "application/json", schema = @Schema(implementation = CategoryDTO.Request.class))) @Valid @RequestBody CategoryDTO.Request request) {
 
                 return responseService.mapping(
@@ -128,7 +128,7 @@ public class CategoryController {
 
                         @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorModel.class)))
         })
-        public ResponseEntity<ResponseDTO> updateCategoryByIdAndBodyV1(
+        public ResponseEntity<?> updateCategoryByIdAndBodyV1(
                         @Parameter(description = "ID of the category to update", required = true) @PathVariable Long id,
                         @Valid @RequestBody CategoryDTO.Request request) {
 
@@ -148,7 +148,7 @@ public class CategoryController {
 
                         @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorModel.class)))
         })
-        public ResponseEntity<ResponseDTO> deleteCategoryByIdV1(
+        public ResponseEntity<?> deleteCategoryByIdV1(
                         @Parameter(description = "ID of the category to delete", required = true) @PathVariable Long id) {
 
                 return responseService.mapping(
