@@ -1,4 +1,4 @@
-version: '3.5'
+version: "3.5"
 
 services:
   simple-selling-application:
@@ -16,5 +16,10 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/lvoxx-db
       SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-postgres}
       SPRING_DATASOURCE_PASSWORD: ${POSTGRES_USER:-p0s7GrEs@12*}
+      SPRING_MAIL_HOST: ${MAIL_HOST:-smtp.gmail.com}
+      SPRING_MAIL_PORT: ${MAIL_PORT:-587}
+      SPRING_MAIL_USERNAME: ${MAIL_USERNAME:-<yours.gmail@gmail.com>}
+      SPRING_MAIL_PASSWORD: ${MAIL_PASSWORD:-<Yours.P4ssw0rd>}
+      SPRING_MAIL_PROTOCOL: ${MAIL_PROTOCOL:-smtp}
     depends_on:
       - postgres
