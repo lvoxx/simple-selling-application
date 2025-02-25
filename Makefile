@@ -1,55 +1,45 @@
-# Define the default environment (change to prod if needed)
-ENV ?= dev
+DEV ?= true
+ENV := $(if $(filter true,$(DEV)),.env.dev,.env.prod)
+EMAIL_ENV = mailserver.env
+COMMON_COMPOSE= -f docker-compose.yaml
+COMPOSE_CMD = docker-compose --env-file $(ENV) $(COMMON_COMPOSE)
+EMAIL_COMPOSE_CMD = docker-compose --env-file $(EMAIL_ENV) $(COMMON_COMPOSE)
+SERVICES = db app
 
-# Define individual Compose files
-COMPOSE_DB=docker-compose.db.yaml
-COMPOSE_EMAIL=docker-compose.email.yaml
-COMPOSE_APP=docker-compose.yaml
+help:
+	@echo "\nUsage: make [command] [SERVICE=<service>] [DEV=true|false]\n"
+	@echo "Available commands:"
+	@echo "  up                Start all services (uses ENV=${ENV})"
+	@echo "  down              Stop all services"
+	@echo "  up SERVICE=name   Start a specific service (email, db, app, etc.)"
+	@echo "  down SERVICE=name Stop a specific service (email, db, app, etc.)"
+	@echo "  logs              View logs of all running services"
+	@echo "  ps                Show running containers"
 
-# Function to run Docker Compose with the selected environment
-define COMPOSE_CMD
-	env $(shell cat .env.$(ENV) | xargs) docker-compose -f $(1)
-endef
-
-.PHONY: up down restart logs build
-
-# Start all services
 up:
-	$(call COMPOSE_CMD, $(COMPOSE_DB) $(COMPOSE_EMAIL) $(COMPOSE_APP)) up -d
+	$(EMAIL_COMPOSE_CMD) -f docker-compose.email.yaml up -d
+	$(COMPOSE_CMD) $(foreach svc,$(SERVICES),-f docker-compose.$(svc).yaml) up -d
 
-# Stop all services
 down:
-	$(call COMPOSE_CMD, $(COMPOSE_DB) $(COMPOSE_EMAIL) $(COMPOSE_APP)) down
+	$(EMAIL_COMPOSE_CMD) -f docker-compose.email.yaml down
+	$(COMPOSE_CMD) $(foreach svc,$(SERVICES),-f docker-compose.$(svc).yaml) down
 
-# Start individual services
-up-db:
-	$(call COMPOSE_CMD, $(COMPOSE_DB)) up -d
+up-%:
+	@if [ "$*" = "email" ]; then \
+		$(EMAIL_COMPOSE_CMD) -f docker-compose.$*.yaml up -d; \
+	else \
+		$(COMPOSE_CMD) -f docker-compose.$*.yaml up -d; \
+	fi
 
-up-email:
-	$(call COMPOSE_CMD, $(COMPOSE_EMAIL)) up -d
+down-%:
+	@if [ "$*" = "email" ]; then \
+		$(EMAIL_COMPOSE_CMD) -f docker-compose.$*.yaml down; \
+	else \
+		$(COMPOSE_CMD) -f docker-compose.$*.yaml down; \
+	fi
 
-up-app:
-	$(call COMPOSE_CMD, $(COMPOSE_APP)) up -d
-
-# Stop individual services
-down-db:
-	$(call COMPOSE_CMD, $(COMPOSE_DB)) down
-
-down-email:
-	$(call COMPOSE_CMD, $(COMPOSE_EMAIL)) down
-
-down-app:
-	$(call COMPOSE_CMD, $(COMPOSE_APP)) down
-
-# Restart all services
-restart:
-	$(MAKE) down ENV=$(ENV)
-	$(MAKE) up ENV=$(ENV)
-
-# View logs from all services
 logs:
-	$(call COMPOSE_CMD, $(COMPOSE_DB) $(COMPOSE_EMAIL) $(COMPOSE_APP)) logs -f
+	$(COMPOSE_CMD) logs -f
 
-# Build images and start all services
-build:
-	$(call COMPOSE_CMD, $(COMPOSE_DB) $(COMPOSE_EMAIL) $(COMPOSE_APP)) up --build -d
+ps:
+	$(COMPOSE_CMD) ps
