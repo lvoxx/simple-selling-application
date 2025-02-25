@@ -1,6 +1,0 @@
-jasypt:
-  encryptor:
-    pool-size: 4
-    property:
-      prefix: "LVOXX@["
-      suffix: "]"

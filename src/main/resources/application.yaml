@@ -8,17 +8,14 @@ spring:
     name: simple-selling-application
   config:
     import:
-      # ENCRYPT CONFIGURATION
-      - config/encrypted/accounts.yaml
-      - config/encrypted/database.yaml
-      - config/encrypted/email.yaml
-      # UNENCRYPT CONFIGURATION
-      - config/unencrypted/auth.yaml
-      - config/unencrypted/server.yaml
-      - config/unencrypted/security.yaml
-      - config/unencrypted/jasypt.yaml
-      - config/unencrypted/logging.yaml
-      - config/unencrypted/rate-limiter.yaml
+      - config/accounts.yaml
+      - config/database.yaml
+      - config/email.yaml
+      - config/auth.yaml
+      - config/server.yaml
+      - config/security.yaml
+      - config/logging.yaml
+      - config/rate-limiter.yaml
 
 ---
 spring:

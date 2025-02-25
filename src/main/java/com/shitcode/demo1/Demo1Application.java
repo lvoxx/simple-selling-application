@@ -6,11 +6,8 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.data.web.config.EnableSpringDataWebSupport.PageSerializationMode;
 
-import com.ulisesbocchio.jasyptspringboot.annotation.EnableEncryptableProperties;
-
 @SpringBootApplication
 @EnableConfigurationProperties
-@EnableEncryptableProperties
 @EnableSpringDataWebSupport(pageSerializationMode = PageSerializationMode.VIA_DTO) // For a stable JSON structure
 public class Demo1Application {
 

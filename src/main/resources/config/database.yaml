@@ -1,0 +1,32 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://postgres:5432/lvoxx-db
+    driver-class-name: org.postgresql.Driver
+    username: <change-me>
+    password: <change-me>
+    # Keep the connection alive if idle for a long time (needed in production)
+    hikari:
+      minimum-idle: 5
+      maximum-pool-size: 20
+      idle-timeout: 30000
+      validation-timeout: 5000
+      leak-detection-threshold: 60000
+      connection-test-query: "SELECT 1"
+  jpa:
+    hibernate:
+      naming:
+        # Naming strategy
+        implicit-strategy: org.hibernate.boot.model.naming.ImplicitNamingStrategyLegacyHbmImpl
+        physical-strategy: org.springframework.boot.orm.jpa.hibernate.SpringPhysicalNamingStrategy
+      # Hibernate ddl auto (create, create-drop, update): with "create-drop" the database
+      # schema will be automatically created afresh for every start of application
+      ddl-auto: create-drop
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: true
+    # Allows Hibernate to generate SQL optimized for a particular DBMS
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+  sql:
+    init:
+      platform: postgres

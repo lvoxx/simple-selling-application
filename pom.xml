@@ -46,7 +46,6 @@
 		<mapstruct.version>1.6.3</mapstruct.version>
 		<caffeine.version>3.2.0</caffeine.version>
 		<jjwt.version>0.12.6</jjwt.version>
-		<jasypt.version>3.0.5</jasypt.version>
 		<openapi.version>2.8.4</openapi.version>
 		<bucket4j.version>8.10.1</bucket4j.version>
 
@@ -126,11 +125,6 @@
 			<artifactId>jjwt-jackson</artifactId>
 			<version>${jjwt.version}</version>
 			<scope>runtime</scope>
-		</dependency>
-		<dependency>
-			<groupId>com.github.ulisesbocchio</groupId>
-			<artifactId>jasypt-spring-boot-starter</artifactId>
-			<version>${jasypt.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.bucket4j</groupId>
@@ -213,12 +207,6 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-report-plugin</artifactId>
 				<version>${maven-surefire-plugin.version}</version>
-			</plugin>
-
-			<plugin>
-				<groupId>com.github.ulisesbocchio</groupId>
-				<artifactId>jasypt-maven-plugin</artifactId>
-				<version>${jasypt.version}</version>
 			</plugin>
 		</plugins>
 	</build>

@@ -1,0 +1,10 @@
+accounts:
+  root:
+    first-name: Lvoxx
+    last-name: Aegg Srtist
+    email: <change-me>
+    password: <change-me>
+    locked: false
+    enabled: true
+    points: 999999999
+    roles: ["ADMIN"]
