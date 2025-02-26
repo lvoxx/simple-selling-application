@@ -20,8 +20,8 @@ help:
 
 # Start Services
 up:
-	$(EMAIL_COMPOSE_CMD) -f docker-compose.email.yaml up -d --remove-orphans
-	$(COMPOSE_CMD) $(foreach svc,$(SERVICES),-f docker-compose.$(svc).yaml) up -d --remove-orphans
+	$(EMAIL_COMPOSE_CMD) -f docker-compose.email.yaml up -d
+	$(COMPOSE_CMD) $(foreach svc,$(SERVICES),-f docker-compose.$(svc).yaml) up -d
 
 # Stop Services
 down:
@@ -30,7 +30,7 @@ down:
 
 # Start a Specific Service
 up-%:
-	$(COMPOSE_CMD) -f docker-compose.$*.yaml up -d --remove-orphans
+	$(COMPOSE_CMD) -f docker-compose.$*.yaml up -d
 
 # Stop a Specific Service
 down-%:
