@@ -6,10 +6,9 @@ services:
       context: .
       dockerfile: Dockerfile
     ports:
-      - 9090:9090
+      - "9090:9090"
     environment:
-      environment:
-      JAVA_TOOL_OPTIONS: "-javaagent:/agent/java-agent.jar"
+      JAVA_TOOL_OPTIONS: -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:9090
       JAVA_OPTS: >
         -XX:+UseG1GC
         -Djava.security.egd=file:/dev/./urandom

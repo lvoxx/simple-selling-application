@@ -14,7 +14,7 @@ WORKDIR /build
 RUN mvn package -DskipTests
 
 # ------------ LAYERS_BUILD ------------
-FROM eclipse-temurin:${JAVA_VERSION}-jdk-alpine-3.21 as LAYERS_BUILD
+FROM eclipse-temurin:${JAVA_VERSION}-jre-alpine-3.21 as LAYERS_BUILD
 WORKDIR /application
 ARG JAR_FILE=/build/target/*.jar
 
@@ -32,6 +32,4 @@ COPY --from=LAYERS_BUILD application/spring-boot-loader/ ./
 COPY --from=LAYERS_BUILD application/snapshot-dependencies/ ./
 COPY --from=LAYERS_BUILD application/application/ ./
 
-EXPOSE ${PORT}
-
-ENTRYPOINT ["java", "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:${PORT}", "org.springframework.boot.loader.JarLauncher"]
+ENTRYPOINT ["java", "org.springframework.boot.loader.launch.JarLauncher"]

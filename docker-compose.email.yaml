@@ -22,7 +22,7 @@ services:
     restart: always
     networks:
       - lvoxx-networks
-    stop_grace_period: 1m
+    stop_grace_period: 15s
     # Uncomment if using `ENABLE_FAIL2BAN=1`:
     # cap_add:
     #   - NET_ADMIN
