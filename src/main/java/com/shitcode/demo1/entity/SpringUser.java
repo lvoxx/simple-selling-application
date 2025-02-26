@@ -12,6 +12,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Index;
+import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -25,40 +26,48 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "SPRING_USER", // Uppercase table name for H2
-        indexes = @Index(name = "IDX_CUSTOMER_EMAIL", columnList = "EMAIL"))
+@Table(name = "spring_user", // Lowercase for PostgreSQL
+        indexes = @Index(name = "idx_spring_user_email", columnList = "email"))
 public class SpringUser extends AbstractAuditableEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "EMAIL", unique = true, nullable = false, length = 255)
-    private String email; // Remove CHECK constraint, validate in the app layer
+    @Column(name = "email", unique = true, nullable = false, length = 255)
+    private String email; // Validation should be handled in the service layer
 
-    @Column(name = "PASSWORD", columnDefinition = "TEXT", nullable = false)
+    @Column(name = "password", nullable = false)
     private String password;
 
-    @Column(name = "FIRST_NAME", length = 60, nullable = false)
+    @Column(name = "first_name", length = 60, nullable = false)
     private String firstName;
 
-    @Column(name = "LAST_NAME", length = 60, nullable = false)
+    @Column(name = "last_name", length = 60, nullable = false)
     private String lastName;
 
-    @Column(name = "LOCKED")
+    @Column(name = "locked", nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
     @Builder.Default
     private boolean locked = false;
 
-    @Column(name = "ENABLED")
+    @Column(name = "enabled", nullable = false, columnDefinition = "BOOLEAN DEFAULT TRUE")
     @Builder.Default
     private boolean enabled = true;
 
-    @Column(name = "POINTS", nullable = false, columnDefinition = "DECIMAL(12, 0) DEFAULT 0")
+    @Column(name = "points", nullable = false, columnDefinition = "NUMERIC(12,0) DEFAULT 0")
     @Builder.Default
-    private BigDecimal points = BigDecimal.ZERO; // Default value at the entity level
+    private BigDecimal points = BigDecimal.ZERO;
 
-    @Column(name = "ROLES", columnDefinition = "TEXT")
+    @Column(name = "roles", columnDefinition = "TEXT[]", nullable = false)
     @Convert(converter = RoleConverter.class)
     @Builder.Default
     private List<String> roles = List.of("CUSTOMER");
+
+    @PrePersist
+    public void setDefaults() {
+        if (points == null)
+            points = BigDecimal.ZERO;
+        if (roles == null || roles.isEmpty())
+            roles = List.of("CUSTOMER");
+    }
 }

@@ -8,34 +8,31 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.Data;
 
-@AllArgsConstructor
-@NoArgsConstructor
+@Data
 @Builder
-@Getter
-@Setter
-@ToString
 @Entity
-@Table(name = "registrationtoken")
+@Table(name = "registration_token", // Lowercase and underscore for PostgreSQL
+       indexes = {
+           @Index(name = "idx_registration_token_token", columnList = "token"),
+           @Index(name = "idx_registration_token_user_id", columnList = "user_id")
+       })
 public class RegistrationToken implements Serializable {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    
-    @Column(nullable = false, unique = true)
+
+    @Column(name = "token", nullable = false, unique = true)
     private String token;
 
-    @Column(nullable = false, unique = true)
+    @Column(name = "user_id", nullable = false, unique = true) // Remove `unique = true` if a user can have multiple tokens
     private Long userId;
 
-    @Column(nullable = false)
+    @Column(name = "expiration_time", nullable = false)
     private Instant expirationTime;
-
 }
