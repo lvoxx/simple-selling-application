@@ -1,5 +1,7 @@
 package com.shitcode.demo1.entity;
 
+import java.math.BigDecimal;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -46,7 +48,7 @@ public class Product extends AbstractAuditableEntity {
 
     @Column(name = "price", nullable = false, precision = 10, scale = 2)
     @Builder.Default
-    private Double price = Double.valueOf(0.00);
+    private BigDecimal price = BigDecimal.valueOf(0.00);
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id", nullable = false, foreignKey = @ForeignKey(name = "fk_product_category"))
@@ -61,7 +63,7 @@ public class Product extends AbstractAuditableEntity {
             inSellQuantity = 0;
         }
         if (price == null) {
-            price = Double.valueOf(0.00);
+            price = BigDecimal.valueOf(0.00);
         }
     }
 }

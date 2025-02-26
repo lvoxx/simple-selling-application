@@ -2,6 +2,7 @@ package com.shitcode.demo1.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
@@ -46,7 +47,7 @@ public class ProductRepositoryTest {
                         .name("Smartphone")
                         .inStockQuantity(50)
                         .inSellQuantity(30)
-                        .price(499.99)
+                        .price(BigDecimal.valueOf(499.99))
                         .category(categories.get(0))
                         .build(),
 
@@ -54,7 +55,7 @@ public class ProductRepositoryTest {
                         .name("T-Shirt")
                         .inStockQuantity(100)
                         .inSellQuantity(70)
-                        .price(19.99)
+                        .price(BigDecimal.valueOf(19.99))
                         .category(categories.get(1))
                         .build(),
 
@@ -62,7 +63,7 @@ public class ProductRepositoryTest {
                         .name("Laptop")
                         .inStockQuantity(20)
                         .inSellQuantity(5)
-                        .price(999.99)
+                        .price(BigDecimal.valueOf(999.99))
                         .category(categories.get(2))
                         .build());
         productRepository.saveAllAndFlush(products);

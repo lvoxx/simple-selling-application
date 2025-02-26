@@ -1,5 +1,7 @@
 package com.shitcode.demo1.dto;
 
+import java.math.BigDecimal;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Digits;
@@ -40,7 +42,7 @@ public abstract class ProductDTO {
         @DecimalMin(value = "0.0", inclusive = false, message = "Price must be greater than 0")
         @Digits(integer = 10, fraction = 2, message = "Price must be a valid monetary value with up to 10 digits and 2 decimal places")
         @Schema(description = "Price of the product", example = "199.99", minimum = "0.01", required = true, format = "double")
-        private Double price;
+        private BigDecimal price;
 
         @NotNull(message = "Category ID cannot be null")
         @Min(value = 1, message = "Category ID must be greater than 0")
