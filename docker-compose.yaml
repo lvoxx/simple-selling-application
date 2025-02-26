@@ -1,4 +1,3 @@
-
 networks:
-  lvoxx-application:
+  lvoxx-networks:
     driver: bridge

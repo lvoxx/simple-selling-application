@@ -21,7 +21,7 @@ services:
       - /etc/localtime:/etc/localtime:ro
     restart: always
     networks:
-      - lvoxx-application
+      - lvoxx-networks
     stop_grace_period: 1m
     # Uncomment if using `ENABLE_FAIL2BAN=1`:
     # cap_add:
