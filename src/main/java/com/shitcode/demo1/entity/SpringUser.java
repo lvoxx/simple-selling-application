@@ -58,7 +58,7 @@ public class SpringUser extends AbstractAuditableEntity {
     @Builder.Default
     private BigDecimal points = BigDecimal.ZERO;
 
-    @Column(name = "roles", columnDefinition = "TEXT[]", nullable = false)
+    @Column(name = "roles", columnDefinition = "TEXT")
     @Convert(converter = RoleConverter.class)
     @Builder.Default
     private List<String> roles = List.of("CUSTOMER");

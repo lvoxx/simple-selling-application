@@ -50,12 +50,19 @@ public class Product extends AbstractAuditableEntity {
     @Builder.Default
     private BigDecimal price = BigDecimal.valueOf(0.00);
 
+    @Column(name = "currency", nullable = false, length = 3)
+    @Builder.Default
+    private String currency = "USD";
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id", nullable = false, foreignKey = @ForeignKey(name = "fk_product_category"))
     private Category category;
 
     @PrePersist
     public void prePersist() {
+        if(currency == null){
+            currency = "USD";
+        }
         if (inStockQuantity == null) {
             inStockQuantity = 0;
         }
