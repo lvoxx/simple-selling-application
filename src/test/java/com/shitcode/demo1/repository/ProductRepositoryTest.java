@@ -90,7 +90,7 @@ public class ProductRepositoryTest extends AbstractTestContainer {
             assertThat(p.getName()).isEqualTo("Smartphone");
             assertThat(p.getInStockQuantity()).isEqualTo(50);
             assertThat(p.getInSellQuantity()).isEqualTo(30);
-            assertThat(p.getPrice()).isEqualTo(499.99);
+            assertThat(p.getPrice()).isEqualTo(BigDecimal.valueOf(499.99));
             assertThat(p.getCategory().getName()).isEqualTo("Phone");
         });
     }
@@ -111,7 +111,7 @@ public class ProductRepositoryTest extends AbstractTestContainer {
             assertThat(p.getName()).isEqualTo("Smartphone");
             assertThat(p.getInStockQuantity()).isEqualTo(50);
             assertThat(p.getInSellQuantity()).isEqualTo(30);
-            assertThat(p.getPrice()).isEqualTo(499.99);
+            assertThat(p.getPrice()).isEqualTo(BigDecimal.valueOf(499.99));
             assertThat(p.getCategory().getName()).isEqualTo("Phone");
         });
     }
@@ -149,7 +149,7 @@ public class ProductRepositoryTest extends AbstractTestContainer {
                     assertThat(p.getName()).isEqualTo("Smartphone");
                     assertThat(p.getInStockQuantity()).isEqualTo(50);
                     assertThat(p.getInSellQuantity()).isEqualTo(30);
-                    assertThat(p.getPrice()).isEqualTo(499.99);
+                    assertThat(p.getPrice()).isEqualTo(BigDecimal.valueOf(499.99));
                     assertThat(p.getCategory().getName()).isEqualTo("Phone");
                 });
     }

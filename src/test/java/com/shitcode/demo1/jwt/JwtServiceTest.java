@@ -25,7 +25,7 @@ import com.shitcode.demo1.security.SpringUserDetails;
 @DisplayName("Jwt Service Tests")
 @SpringBootTest
 @Tags({
-                @Tag("Service"), @Tag("Jwt"), @Tag("No Mock")
+                @Tag("Service")
 })
 public class JwtServiceTest {
         @Autowired
