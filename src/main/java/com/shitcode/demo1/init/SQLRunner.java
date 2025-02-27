@@ -19,6 +19,8 @@ import org.springframework.jdbc.datasource.init.ScriptStatementFailedException;
 import org.springframework.jdbc.datasource.init.ScriptUtils;
 import org.springframework.stereotype.Component;
 
+import com.shitcode.demo1.utils.LogPrinter;
+
 import jakarta.annotation.PostConstruct;
 
 @Component
@@ -41,18 +43,22 @@ public class SQLRunner implements CommandLineRunner {
                 .ifPresentOrElse(dataSource -> {
                     try (Connection connection = dataSource.getConnection()) {
                         if (connection.isValid(2)) { // Check if connection is valid within 2 seconds
-                            log.info("Database connection established successfully.");
+                            LogPrinter.printLog(LogPrinter.Type.INFO, LogPrinter.Flag.START_UP,
+                                    "Database connection established successfully.");
                             sqlMap.add("database/categories.sql");
                             sqlMap.add("database/products.sql");
                         } else {
-                            log.error("Database connection is not valid.");
+                            LogPrinter.printLog(LogPrinter.Type.ERROR, LogPrinter.Flag.START_UP,
+                                    "Database connection is not valid.");
                         }
                     } catch (SQLException e) {
-                        log.error("Failed to establish a connection to the database: " + e.getMessage());
+                        LogPrinter.printLog(LogPrinter.Type.ERROR, LogPrinter.Flag.START_UP,
+                                "Failed to establish a connection to the database: " + e.getMessage());
                     }
                 },
                         () -> {
-                            log.error("No DataSource available. Skipping SQL execution.");
+                            LogPrinter.printLog(LogPrinter.Type.ERROR, LogPrinter.Flag.START_UP,
+                                    "No DataSource available. Skipping SQL execution.");
                         });
     }
 
@@ -68,9 +74,12 @@ public class SQLRunner implements CommandLineRunner {
 
                     if (matcher.find()) {
                         ScriptUtils.executeSqlScript(connection, new ClassPathResource(sql));
-                        log.info("SQL script executed from initial database {}", matcher.group(1).toUpperCase());
+                        LogPrinter.printLog(LogPrinter.Type.INFO, LogPrinter.Flag.START_UP,
+                                String.format("SQL script executed from initial database %s",
+                                        matcher.group(1).toUpperCase()));
                     } else {
-                        log.error("Cannt find the initial database [{}]", sql);
+                        LogPrinter.printLog(LogPrinter.Type.ERROR, LogPrinter.Flag.START_UP,
+                                String.format("Cannt find the initial database [%s]", sql));
                     }
                 } catch (CannotReadScriptException | ScriptStatementFailedException e) {
                     log.error(e.getMessage());
