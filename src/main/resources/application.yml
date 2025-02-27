@@ -8,14 +8,14 @@ spring:
     name: simple-selling-application
   config:
     import:
-      - config/accounts.yaml
-      - config/database.yaml
-      - config/email.yaml
-      - config/auth.yaml
-      - config/server.yaml
-      - config/security.yaml
-      - config/logging.yaml
-      - config/rate-limiter.yaml
+      - config/accounts.yml
+      - config/database.yml
+      - config/email.yml
+      - config/auth.yml
+      - config/server.yml
+      - config/security.yml
+      - config/logging.yml
+      - config/rate-limiter.yml
 
 ---
 spring:

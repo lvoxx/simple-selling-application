@@ -17,7 +17,7 @@ services:
         -XX:+ExitOnOutOfMemoryError
         -XX:+AlwaysPreTouch
         -XX:+UnlockExperimentalVMOptions
-      LVOXX-SERVER_PRODUCT-DEPLOY: ${PRODUCT-DEPLOY:-false}
+      LVOXX-SERVER_PRODUCT-DEPLOY: ${PRODUCT_DEPLOY:-false}
       ACCOUNTS_ROOT_EMAIL: ${ROOT_ACCOUNT_EMAIL:-lvoxxartist@gmail.com}
       ACCOUNTS_ROOT_PASSWORD: ${ROOT_ACCOUNT_PASSWORD:-Sup!r3tr@nGP4ssW0r5}
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-mydb}
