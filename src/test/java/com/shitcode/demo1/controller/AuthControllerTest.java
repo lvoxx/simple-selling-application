@@ -21,6 +21,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
@@ -29,6 +30,7 @@ import com.shitcode.demo1.dto.AuthDTO;
 import com.shitcode.demo1.service.AuthService;
 
 @ExtendWith(MockitoExtension.class)
+@ActiveProfiles("test")
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @Tags({
         @Tag("Controller"), @Tag("Mock")
@@ -64,7 +66,7 @@ public class AuthControllerTest {
         // When
         when(authService.login(any(AuthDTO.Request.class))).thenReturn(response);
         // Then
-        mockMvc.perform(post("/api/v1/auth/login")
+        mockMvc.perform(post("/api/auth/login")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(new ObjectMapper().writeValueAsString(request)))
                 .andDo(print())

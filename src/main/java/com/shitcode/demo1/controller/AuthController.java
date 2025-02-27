@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.shitcode.demo1.annotation.logging.LogCollector;
 import com.shitcode.demo1.dto.AuthDTO;
+import com.shitcode.demo1.dto.ResponseDTO;
 import com.shitcode.demo1.properties.RateLimiterConfigData;
 import com.shitcode.demo1.service.AuthService;
 import com.shitcode.demo1.service.ResponseService;
@@ -52,14 +53,14 @@ public class AuthController {
         @Operation(summary = "User login", description = "Authenticate a user and return JWT tokens.", tags = {
                         "Authentication" })
         @ApiResponses(value = {
-                        @ApiResponse(responseCode = "201", description = "Login successful", content = @Content(mediaType = "application/json", schema = @Schema(implementation = AuthDTO.Response.class))),
+                        @ApiResponse(responseCode = "200", description = "Login successful", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseDTO.class))),
                         @ApiResponse(responseCode = "400", description = "Invalid request", content = @Content)
         })
         @PostMapping("/login")
         public ResponseEntity<?> loginV1(
                         @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Login credentials", required = true, content = @Content(schema = @Schema(implementation = AuthDTO.Request.class))) @Valid @RequestBody AuthDTO.Request request) {
                 return responseService.mapping(
-                                () -> new ResponseEntity<>(authService.login(request), HttpStatus.CREATED),
+                                () -> new ResponseEntity<>(authService.login(request), HttpStatus.OK),
                                 LOGIN_PLAN);
         }
 
