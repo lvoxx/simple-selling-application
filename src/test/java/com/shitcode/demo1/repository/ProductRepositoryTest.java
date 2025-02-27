@@ -14,6 +14,8 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Tags;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -22,14 +24,16 @@ import org.springframework.test.context.ActiveProfiles;
 
 import com.shitcode.demo1.entity.Category;
 import com.shitcode.demo1.entity.Product;
+import com.shitcode.demo1.testcontainer.AbstractTestContainer;
 
 @DataJpaTest
+@AutoConfigureTestDatabase(replace = Replace.NONE) //Dont load String datasource autoconfig
 @ActiveProfiles("test")
 @DisplayName("Product Repository Tests")
 @Tags({
-        @Tag("Reporitory"), @Tag("Product"), @Tag("No Mock")
+        @Tag("Reporitory")
 })
-public class ProductRepositoryTest {
+public class ProductRepositoryTest extends AbstractTestContainer {
     @Autowired
     ProductRepository productRepository;
     @Autowired
