@@ -6,6 +6,7 @@ COMMON_COMPOSE := -f docker-compose.yaml
 COMPOSE_CMD := docker-compose --env-file $(ENV) $(COMMON_COMPOSE)
 EMAIL_COMPOSE_CMD := docker-compose --env-file $(EMAIL_ENV) $(COMMON_COMPOSE)
 SERVICES := db app
+NETWORK_FILE := docker-compose.yaml  # Ensure network file is included
 
 # Help Menu
 help:
@@ -17,6 +18,12 @@ help:
 	@echo "  down SERVICE=name Stop a specific service (email, db, app, etc.)"
 	@echo "  logs              View logs of all running services"
 	@echo "  ps                Show running containers"
+
+# Merge Compose Files into a Single File
+merge:
+	@echo "Merging all docker-compose files..."
+	@docker compose $(foreach svc,$(SERVICES),-f docker-compose.$(svc).yaml) -f $(NETWORK_FILE) config > docker-compose.merged.yaml
+	@echo "Merged compose files into docker-compose.merged.yaml successfully!"
 
 # Start Services
 up:

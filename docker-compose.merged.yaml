@@ -1,0 +1,92 @@
+name: simple-selling-application
+services:
+  pgadmin:
+    container_name: pgadmin
+    environment:
+      PGADMIN_CONFIG_SERVER_MODE: "False"
+      PGADMIN_DEFAULT_EMAIL: pgadmin4@pgadmin.org
+      PGADMIN_DEFAULT_PASSWORD: P@Adm1nP4ssW0rD
+    image: dpage/pgadmin4:9.0.0
+    networks:
+      lvoxx-networks: null
+    ports:
+      - mode: ingress
+        target: 80
+        published: "5050"
+        protocol: tcp
+    restart: unless-stopped
+    volumes:
+      - type: volume
+        source: pgadmin
+        target: /var/lib/pgadmin
+        volume: {}
+  postgres:
+    container_name: postgres
+    environment:
+      PGDATA: /data/postgres
+      POSTGRES_DB: mydb
+      POSTGRES_PASSWORD: p0s7GrEs@12*
+      POSTGRES_USER: postgres
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - pg_isready -U postgres
+      timeout: 5s
+      interval: 10s
+      retries: 5
+    image: postgres:17.4
+    networks:
+      lvoxx-networks: null
+    ports:
+      - mode: ingress
+        target: 5432
+        published: "5432"
+        protocol: tcp
+    restart: unless-stopped
+    volumes:
+      - type: volume
+        source: postgres
+        target: /data/postgres
+        volume: {}
+  simple-selling-application:
+    build:
+      context: D:\Lap Trinh\Spring\practise\simple-selling-application
+      dockerfile: Dockerfile
+    container_name: simple-selling-container
+    depends_on:
+      postgres:
+        condition: service_healthy
+        required: true
+    environment:
+      ACCOUNTS_ROOT_EMAIL: lvoxxartist@gmail.com
+      ACCOUNTS_ROOT_PASSWORD: Sup!r3tr@nGP4ssW0r5
+      JAVA_OPTS: |
+        -XX:+UseStringDeduplication -XX:+OptimizeStringConcat -XX:+UnlockDiagnosticVMOptions -XX:+LogCompilation -XX:ErrorFile=/logs/hs_err_pid%p.log -XX:+CrashOnOutOfMemoryError -XX:+AlwaysActAsServerClassMachine -Dlog4j2.formatMsgNoLookups=true
+      JAVA_TOOL_OPTIONS: |
+        -XX:+UseG1GC -Djava.security.egd=file:/dev/./urandom -XX:MinRAMPercentage=60.0 -XX:MaxRAMPercentage=90.0 -XX:+ExitOnOutOfMemoryError -XX:+AlwaysPreTouch -XX:+UnlockExperimentalVMOptions -XX:+ParallelRefProcEnabled -XX:+DisableExplicitGC -XX:+PerfDisableSharedMem -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/heapdump -Duser.timezone=UTC -XX:+UseContainerSupport -XX:MaxHeapFreeRatio=30 -XX:MinHeapFreeRatio=10 -Xms256m -Xmx512m
+      LVOXX-SERVER_PRODUCT-DEPLOY: "false"
+      SPRING_DATASOURCE_PASSWORD: p0s7GrEs@12*
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/mydb
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_MAIL_HOST: smtp.gmail.com
+      SPRING_MAIL_PASSWORD: Yours.P4ssw0rd
+      SPRING_MAIL_PORT: "587"
+      SPRING_MAIL_PROTOCOL: smtp
+      SPRING_MAIL_USERNAME: yours.gmail@gmail.com
+    image: lvoxx/simple-selling-application:1.0.0
+    networks:
+      lvoxx-networks: null
+    ports:
+      - mode: ingress
+        target: 9090
+        published: "9090"
+        protocol: tcp
+networks:
+  lvoxx-networks:
+    name: simple-selling-application_lvoxx-networks
+    driver: bridge
+volumes:
+  pgadmin:
+    name: simple-selling-application_pgadmin
+  postgres:
+    name: simple-selling-application_postgres
