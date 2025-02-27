@@ -8,8 +8,7 @@ services:
     ports:
       - "9090:9090"
     environment:
-      JAVA_TOOL_OPTIONS: -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5050
-      JAVA_OPTS: >
+      JAVA_TOOL_OPTIONS: >
         -XX:+UseG1GC
         -Djava.security.egd=file:/dev/./urandom
         -XX:MinRAMPercentage=60.0
@@ -17,6 +16,26 @@ services:
         -XX:+ExitOnOutOfMemoryError
         -XX:+AlwaysPreTouch
         -XX:+UnlockExperimentalVMOptions
+        -XX:+ParallelRefProcEnabled
+        -XX:+DisableExplicitGC
+        -XX:+PerfDisableSharedMem
+        -XX:+HeapDumpOnOutOfMemoryError
+        -XX:HeapDumpPath=/heapdump
+        -Duser.timezone=UTC
+        -XX:+UseContainerSupport
+        -XX:MaxHeapFreeRatio=30
+        -XX:MinHeapFreeRatio=10
+        -Xms256m
+        -Xmx512m
+      JAVA_OPTS: >
+        -XX:+UseStringDeduplication
+        -XX:+OptimizeStringConcat
+        -XX:+UnlockDiagnosticVMOptions
+        -XX:+LogCompilation
+        -XX:ErrorFile=/logs/hs_err_pid%p.log
+        -XX:+CrashOnOutOfMemoryError
+        -XX:+AlwaysActAsServerClassMachine
+        -Dlog4j2.formatMsgNoLookups=true
       LVOXX-SERVER_PRODUCT-DEPLOY: ${PRODUCT_DEPLOY:-false}
       ACCOUNTS_ROOT_EMAIL: ${ROOT_ACCOUNT_EMAIL:-lvoxxartist@gmail.com}
       ACCOUNTS_ROOT_PASSWORD: ${ROOT_ACCOUNT_PASSWORD:-Sup!r3tr@nGP4ssW0r5}
