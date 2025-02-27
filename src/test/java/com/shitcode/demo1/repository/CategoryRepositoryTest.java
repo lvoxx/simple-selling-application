@@ -28,7 +28,7 @@ import com.shitcode.demo1.testcontainer.AbstractTestContainer;
 @ActiveProfiles("test")
 @DisplayName("Category Repository Tests")
 @Tags({
-        @Tag("Reporitory")
+        @Tag("Reporitory"), @Tag("No Mock")
 })
 public class CategoryRepositoryTest extends AbstractTestContainer {
     @Autowired

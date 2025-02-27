@@ -38,7 +38,7 @@ import com.shitcode.demo1.service.impl.CategoryServiceImpl;
 
 @DisplayName("Category Blocking Service Tests")
 @Tags({
-        @Tag("Service"), @Tag("Category"), @Tag("Mock")
+        @Tag("Service"), @Tag("Mock")
 })
 @ExtendWith(MockitoExtension.class)
 public class CategoryServiceTest {
