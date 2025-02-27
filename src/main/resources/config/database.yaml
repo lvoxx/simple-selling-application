@@ -1,9 +1,9 @@
 spring:
   datasource:
-    # url: jdbc:postgresql://postgres:5432/lvoxx-db <- ! CAUTION: Only using this if not passsing env from docker compose
+    url: jdbc:postgresql://postgres:5432/LvoxxDatabase 
     driver-class-name: org.postgresql.Driver
-    #username: <change-me> <- ! CAUTION: Only using this if not passsing env from docker compose
-    #password: <change-me> <- ! CAUTION: Only using this if not passsing env from docker compose
+    username: <change-me> 
+    password: <change-me> 
     # Keep the connection alive if idle for a long time (needed in production)
     hikari:
       minimum-idle: 5

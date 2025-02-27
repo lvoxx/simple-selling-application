@@ -1,9 +1,9 @@
 spring:
   mail:
-    # host: smtp.gmail.com  <- ! CAUTION: Only using this if not passsing env from docker compose
-    # port: 587             <- ! CAUTION: Only using this if not passsing env from docker compose
-    # username: <change-me> <- ! CAUTION: Only using this if not passsing env from docker compose
-    # password: <change-me> <- ! CAUTION: Only using this if not passsing env from docker compose
+    host: smtp.gmail.com  
+    port: 587             
+    username: <change-me> 
+    password: <change-me> 
     protocol: smtp
     properties:
       mail:

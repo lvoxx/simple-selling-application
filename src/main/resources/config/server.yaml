@@ -19,7 +19,7 @@ lvoxx-server:
   external-documentation:
     description: Full Documentation
     url: https://github.com/lvoxx/SimpleSellingApplication
-  # product-deploy: false <- ! CAUTION: Only using this if not passsing env from docker compose
+  product-deploy: false
 
 client:
   name: simple-selling-application
