@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: C:\ProgramData\chocolatey\lib\kubernetes-kompose\tools\kompose.exe --file docker-compose.merged.yaml convert --chart --out helm
+    kompose.version: 1.35.0 (9532ceef3)
+  labels:
+    io.kompose.service: simple-selling-application
+  name: simple-selling-application
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: simple-selling-application
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: C:\ProgramData\chocolatey\lib\kubernetes-kompose\tools\kompose.exe --file docker-compose.merged.yaml convert --chart --out helm
+        kompose.version: 1.35.0 (9532ceef3)
+      labels:
+        io.kompose.service: simple-selling-application
+    spec:
+      containers:
+        - env:
+            - name: ACCOUNTS_ROOT_EMAIL
+              value: lvoxxartist@gmail.com
+            - name: ACCOUNTS_ROOT_PASSWORD
+              value: Sup!r3tr@nGP4ssW0r5
+            - name: JAVA_OPTS
+              value: |
+                -XX:+UseStringDeduplication -XX:+OptimizeStringConcat -XX:+UnlockDiagnosticVMOptions -XX:+LogCompilation -XX:ErrorFile=/logs/hs_err_pid%p.log -XX:+CrashOnOutOfMemoryError -XX:+AlwaysActAsServerClassMachine -Dlog4j2.formatMsgNoLookups=true
+            - name: JAVA_TOOL_OPTIONS
+              value: |
+                -XX:+UseG1GC -Djava.security.egd=file:/dev/./urandom -XX:MinRAMPercentage=60.0 -XX:MaxRAMPercentage=90.0 -XX:+ExitOnOutOfMemoryError -XX:+AlwaysPreTouch -XX:+UnlockExperimentalVMOptions -XX:+ParallelRefProcEnabled -XX:+DisableExplicitGC -XX:+PerfDisableSharedMem -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/heapdump -Duser.timezone=UTC -XX:+UseContainerSupport -XX:MaxHeapFreeRatio=30 -XX:MinHeapFreeRatio=10 -Xms256m -Xmx512m
+            - name: LVOXX-SERVER_PRODUCT-DEPLOY
+              value: "false"
+            - name: SPRING_DATASOURCE_PASSWORD
+              value: p0s7GrEs@12*
+            - name: SPRING_DATASOURCE_URL
+              value: jdbc:postgresql://postgres:5432/mydb
+            - name: SPRING_DATASOURCE_USERNAME
+              value: postgres
+            - name: SPRING_MAIL_HOST
+              value: smtp.gmail.com
+            - name: SPRING_MAIL_PASSWORD
+              value: Yours.P4ssw0rd
+            - name: SPRING_MAIL_PORT
+              value: "587"
+            - name: SPRING_MAIL_PROTOCOL
+              value: smtp
+            - name: SPRING_MAIL_USERNAME
+              value: yours.gmail@gmail.com
+          image: lvoxx/simple-selling-application:1.0.0
+          name: simple-selling-container
+          ports:
+            - containerPort: 9090
+              protocol: TCP
+      restartPolicy: Always

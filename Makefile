@@ -25,6 +25,13 @@ merge:
 	@docker compose $(foreach svc,$(SERVICES),-f docker-compose.$(svc).yaml) -f $(NETWORK_FILE) config > docker-compose.merged.yaml
 	@echo "Merged compose files into docker-compose.merged.yaml successfully!"
 
+# Convert docker-compose to Helm (Windows Compatible)
+helm-convert:
+	@echo "Converting docker-compose.merged.yaml to Helm charts..."
+	@if not exist helm mkdir helm
+	@kompose --file docker-compose.merged.yaml convert --chart --out helm
+	@echo "Helm charts generated successfully in the helm/ directory."
+
 # Start Services
 up:
 	$(EMAIL_COMPOSE_CMD) -f docker-compose.email.yaml up -d
