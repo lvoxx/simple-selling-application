@@ -1,0 +1,94 @@
+package com.shitcode.demo1.repository;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.Optional;
+import java.util.UUID;
+
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Tags;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.test.context.ActiveProfiles;
+
+import com.shitcode.demo1.entity.RegistrationToken;
+import com.shitcode.demo1.testcontainer.AbstractTestContainer;
+
+@DataJpaTest
+@AutoConfigureTestDatabase(replace = Replace.NONE) // Dont load String datasource autoconfig
+@ActiveProfiles("test")
+@DisplayName("Registration Token Repository Tests")
+@Tags({
+        @Tag("Reporitory"), @Tag("No Mock")
+})
+public class RegistrationTokenRepositoryTest extends AbstractTestContainer {
+
+    @Autowired
+    RegistrationTokenRepository repository;
+
+    private final Instant expTime = Instant.now().plus((long) 15, ChronoUnit.MINUTES);
+    private final String token = UUID.randomUUID().toString();
+    private final Long userId = 1L;
+
+    @BeforeEach
+    void setUp() {
+        RegistrationToken registrationToken = RegistrationToken.builder()
+                .token(token)
+                .expirationTime(expTime)
+                .userId(userId)
+                .build();
+
+        repository.saveAndFlush(registrationToken);
+    }
+
+    @AfterEach
+    void tearDown() {
+        repository.deleteAll();
+    }
+
+    @Test
+    @DisplayName("Should return token when finding by valid token")
+    void shouldReturnTokenWhenFindingByToken() {
+        // When
+        Optional<RegistrationToken> res = repository.findByToken(token);
+        // Then
+        assertThat(res.get()).isNotNull().satisfies(t -> {
+            assertThat(t.getToken()).isEqualTo(token);
+            assertThat(t.getExpirationTime()).isEqualTo(expTime);
+            assertThat(t.getUserId()).isEqualTo(userId);
+        });
+    }
+
+    @Test
+    @DisplayName("Should not return token when finding by non-existent token")
+    void shouldNotReturnTokenWhenFindingByNonExistanceToken() {
+        // When
+
+        // Then
+    }
+
+    @Test
+    @DisplayName("Should return token when finding by valid user ID")
+    void shouldReturnTokenWhenFindingByUserId() {
+        // When
+
+        // Then
+    }
+
+    @Test
+    @DisplayName("Should not return token when finding by non-existent user ID")
+    void shouldNotReturnTokenWhenFindingByNonExistanceUserId() {
+        // When
+
+        // Then
+    }
+
+}
