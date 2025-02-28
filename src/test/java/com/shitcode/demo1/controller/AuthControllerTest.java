@@ -46,6 +46,7 @@ import com.shitcode.demo1.utils.RateLimiterPlan;
 @Tags({
                 @Tag("Controller"), @Tag("Mock")
 })
+@DisplayName("Auth controller tests with mocking")
 // Import needed components
 @Import({ RateLimiterConfigData.class })
 @AutoConfigureMockMvc(addFilters = false)
@@ -66,7 +67,7 @@ public class AuthControllerTest {
         @Autowired
         private WebApplicationContext webApplicationContext;
 
-        @Before()
+        @Before
         public void setup() {
                 mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
         }
