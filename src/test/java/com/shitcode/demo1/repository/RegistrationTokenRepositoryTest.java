@@ -71,24 +71,31 @@ public class RegistrationTokenRepositoryTest extends AbstractTestContainer {
     @DisplayName("Should not return token when finding by non-existent token")
     void shouldNotReturnTokenWhenFindingByNonExistanceToken() {
         // When
-
+        Optional<RegistrationToken> res = repository.findByToken("Dummy Token");
         // Then
+        assertThat(res).isNotPresent();
     }
 
     @Test
     @DisplayName("Should return token when finding by valid user ID")
     void shouldReturnTokenWhenFindingByUserId() {
         // When
-
+        Optional<RegistrationToken> res = repository.findByUserId(userId);
         // Then
+        assertThat(res.get()).isNotNull().satisfies(t -> {
+            assertThat(t.getToken()).isEqualTo(token);
+            assertThat(t.getExpirationTime()).isEqualTo(expTime);
+            assertThat(t.getUserId()).isEqualTo(userId);
+        });
     }
 
     @Test
     @DisplayName("Should not return token when finding by non-existent user ID")
     void shouldNotReturnTokenWhenFindingByNonExistanceUserId() {
         // When
-
+        Optional<RegistrationToken> res = repository.findByUserId(-1L);
         // Then
+        assertThat(res).isNotPresent();
     }
 
 }
