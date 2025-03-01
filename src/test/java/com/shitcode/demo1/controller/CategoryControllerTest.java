@@ -109,7 +109,49 @@ public class CategoryControllerTest {
     // Invalid request version
     @Test
     @DisplayName("Should return bad request when requesting GET with invalid request parameters on findAllWithPagination V1")
-    void shouldReturnBadRequest_whenRequestingGetWithInvalidRequestParam_onFindAllWithPaginationV1() {
+    void shouldReturnBadRequest_whenRequestingGetWithInvalidRequestParam_onFindAllWithPaginationV1() throws Exception {
+        // Given
+        var size = "abc"; // expected (int)
+        var page = "xyz"; // expected (int)
+        var asc = "Not"; // expected (boolean)
+        // When
+        // Then
+        // Invalid - size
+        mockMvc.perform(get("/categories")
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("accept", "application/vnd.lvoxx.app-v1+json")
+                .param("s", size))
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentType("application/vnd.lvoxx.app-v1+json"))
+                .andExpect(jsonPath("$.message").value(
+                        "Method parameter 's': Failed to convert value of type 'java.lang.String' to required type 'int'; For input string: \""
+                                + size + "\""))
+                .andExpect(jsonPath("$.status").value("BAD_REQUEST"));
+        // Invalid - page
+        mockMvc.perform(get("/categories")
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("accept", "application/vnd.lvoxx.app-v1+json")
+                .param("p", page))
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentType("application/vnd.lvoxx.app-v1+json"))
+                .andExpect(jsonPath("$.message").value(
+                        "Method parameter 'p': Failed to convert value of type 'java.lang.String' to required type 'int'; For input string: \""
+                                + page + "\""))
+                .andExpect(jsonPath("$.status").value("BAD_REQUEST"));
+        // Invalid - asc
+        mockMvc.perform(get("/categories")
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("accept", "application/vnd.lvoxx.app-v1+json")
+                .param("a", asc))
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentType("application/vnd.lvoxx.app-v1+json"))
+                .andExpect(jsonPath("$.message").value(
+                        "Method parameter 'a': Failed to convert value of type 'java.lang.String' to required type 'boolean'; Invalid boolean value ["
+                                + asc + "]"))
+                .andExpect(jsonPath("$.status").value("BAD_REQUEST"));
     }
 
     // Single category retrieval
