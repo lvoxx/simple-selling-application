@@ -50,7 +50,8 @@ public class ProductController {
 
                         @Parameter(description = "Field to sort by", example = "id") @RequestParam(defaultValue = "id") String sort,
 
-                        @Parameter(description = "Sort order, true for ascending", example = "false") @RequestParam(defaultValue = "false") boolean asc) {
+                        @Parameter(description = "Sort order, true for ascending", example = "false") @RequestParam(defaultValue = "false") boolean asc)
+                        throws Exception {
                 return responseService.mapping(
                                 () -> ResponseEntity.ok()
                                                 .body(productService.findInSellWithPagination(page, size, sort, asc)),
@@ -70,7 +71,8 @@ public class ProductController {
 
                         @Parameter(description = "Field to sort by", example = "id") @RequestParam(defaultValue = "id") String sort,
 
-                        @Parameter(description = "Sort order, true for ascending", example = "false") @RequestParam(defaultValue = "false") boolean asc) {
+                        @Parameter(description = "Sort order, true for ascending", example = "false") @RequestParam(defaultValue = "false") boolean asc)
+                        throws Exception {
                 return responseService.mapping(
                                 () -> ResponseEntity.ok()
                                                 .body(productService.findAdminWithPagination(page, size, sort, asc)),
@@ -86,7 +88,8 @@ public class ProductController {
         })
         @GetMapping("/admin/{id}")
         public ResponseEntity<?> findAdminProductById(
-                        @Parameter(description = "ID of the admin product", example = "1") @PathVariable Long id) {
+                        @Parameter(description = "ID of the admin product", example = "1") @PathVariable Long id)
+                        throws Exception {
                 return responseService.mapping(
                                 () -> ResponseEntity.ok().body(productService.findAdminProductWithId(id)),
                                 RateLimiterPlan.SOFT);
@@ -101,7 +104,8 @@ public class ProductController {
         })
         @GetMapping("/insell/{id}")
         public ResponseEntity<?> findInSellProductById(
-                        @Parameter(description = "ID of the in-sell product", example = "1") @PathVariable Long id) {
+                        @Parameter(description = "ID of the in-sell product", example = "1") @PathVariable Long id)
+                        throws Exception {
                 return responseService.mapping(
                                 () -> ResponseEntity.ok().body(productService.findInSellProductWithId(id)),
                                 RateLimiterPlan.HEAVY_LOADS);

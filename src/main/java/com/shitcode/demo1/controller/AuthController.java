@@ -58,7 +58,7 @@ public class AuthController {
         })
         @PostMapping("/login")
         public ResponseEntity<?> loginV1(
-                        @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Login credentials", required = true, content = @Content(schema = @Schema(implementation = AuthDTO.Request.class))) @Valid @RequestBody AuthDTO.Request request) {
+                        @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Login credentials", required = true, content = @Content(schema = @Schema(implementation = AuthDTO.Request.class))) @Valid @RequestBody AuthDTO.Request request) throws Exception {
                 return responseService.mapping(
                                 () -> new ResponseEntity<>(authService.login(request), HttpStatus.OK),
                                 LOGIN_PLAN);

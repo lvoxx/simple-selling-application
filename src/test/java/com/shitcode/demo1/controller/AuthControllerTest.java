@@ -8,8 +8,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.util.function.Supplier;
-
 import org.junit.Before;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.MethodOrderer;
@@ -29,6 +27,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.util.function.ThrowingSupplier;
 import org.springframework.web.context.WebApplicationContext;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -87,7 +86,7 @@ public class AuthControllerTest {
                                 .build();
                 // When
                 when(authService.login(any(AuthDTO.Request.class))).thenReturn(response);
-                when(responseService.mapping(any(Supplier.class), any(RateLimiterPlan.class)))
+                when(responseService.mapping(any(ThrowingSupplier.class), any(RateLimiterPlan.class)))
                                 .thenReturn(ResponseEntity.ok().body(ResponseDTO.builder().data(response).build()));
                 // Then
                 mockMvc.perform(post("/auth/login")

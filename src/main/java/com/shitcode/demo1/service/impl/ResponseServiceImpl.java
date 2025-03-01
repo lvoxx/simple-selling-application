@@ -1,12 +1,11 @@
 package com.shitcode.demo1.service.impl;
 
-import java.util.function.Supplier;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
+import org.springframework.util.function.ThrowingSupplier;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
@@ -38,8 +37,8 @@ public class ResponseServiceImpl implements ResponseService {
         }
 
         @Override
-        public ResponseEntity<?> mapping(@NonNull Supplier<ResponseEntity<?>> service,
-                        @NonNull RateLimiterPlan plan) {
+        public ResponseEntity<?> mapping(@NonNull ThrowingSupplier<ResponseEntity<?>> service,
+                        @NonNull RateLimiterPlan plan) throws Exception {
                 // * Ip Address
                 HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder
                                 .currentRequestAttributes()).getRequest();

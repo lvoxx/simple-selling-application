@@ -75,7 +75,8 @@ public class CategoryController {
 
                         @Parameter(description = "Field to sort by", example = "id") @RequestParam(name = "sb", defaultValue = "id") String sort,
 
-                        @Parameter(description = "Sort order, true for ascending", example = "false") @RequestParam(name = "a", defaultValue = "false") boolean asc) {
+                        @Parameter(description = "Sort order, true for ascending", example = "false") @RequestParam(name = "a", defaultValue = "false") boolean asc)
+                        throws Exception {
                 return responseService.mapping(
                                 () -> ResponseEntity.ok().body(
                                                 categoryService.findCategoryWithPagination(page, size, sort, asc)),
@@ -90,7 +91,8 @@ public class CategoryController {
                         @ApiResponse(responseCode = "500", description = "Internal server error")
         })
         public ResponseEntity<?> findByIdV1(
-                        @Parameter(description = "ID of the category to retrieve", required = true) @PathVariable Long id) {
+                        @Parameter(description = "ID of the category to retrieve", required = true) @PathVariable Long id)
+                        throws Exception {
                 return responseService.mapping(() -> ResponseEntity.ok().body(categoryService.findCategoryById(id)),
                                 ID_PLAN);
         }
@@ -107,7 +109,8 @@ public class CategoryController {
                         @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorModel.class)))
         })
         public ResponseEntity<?> createCategoryByBodyV1(
-                        @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Category details to be created", required = true, content = @Content(mediaType = "application/json", schema = @Schema(implementation = CategoryDTO.Request.class))) @Valid @RequestBody CategoryDTO.Request request) {
+                        @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Category details to be created", required = true, content = @Content(mediaType = "application/json", schema = @Schema(implementation = CategoryDTO.Request.class))) @Valid @RequestBody CategoryDTO.Request request)
+                        throws Exception {
 
                 return responseService.mapping(
                                 () -> new ResponseEntity<>(categoryService.createCategory(request), HttpStatus.CREATED),
@@ -130,7 +133,7 @@ public class CategoryController {
         })
         public ResponseEntity<?> updateCategoryByIdAndBodyV1(
                         @Parameter(description = "ID of the category to update", required = true) @PathVariable Long id,
-                        @Valid @RequestBody CategoryDTO.Request request) {
+                        @Valid @RequestBody CategoryDTO.Request request) throws Exception {
 
                 return responseService.mapping(
                                 () -> ResponseEntity.ok(categoryService.updateCategory(request, id)),
@@ -149,7 +152,8 @@ public class CategoryController {
                         @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorModel.class)))
         })
         public ResponseEntity<?> deleteCategoryByIdV1(
-                        @Parameter(description = "ID of the category to delete", required = true) @PathVariable Long id) {
+                        @Parameter(description = "ID of the category to delete", required = true) @PathVariable Long id)
+                        throws Exception {
 
                 return responseService.mapping(
                                 () -> {
