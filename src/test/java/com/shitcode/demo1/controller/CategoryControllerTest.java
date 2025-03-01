@@ -238,8 +238,38 @@ public class CategoryControllerTest {
 
         // Invalid request version
         @Test
+        @SneakyThrows
         @DisplayName("Should return bad request when requesting POST with invalid request body on createCategoryByBody V1")
         void shouldReturnBadRequest_whenRequestingPostWithInvalidRequestBody_onCreateCategoryByBodyV1() {
+                // Given
+                var requestBlank = CategoryDTO.Request.builder().name("").build();
+                var requestOutOfSize = CategoryDTO.Request.builder()
+                                .name("dummydummydummydummydummydummydummydummydummydummydummydummy.").build();
+                // When
+                // Then
+                // Invalid - blank
+                mockMvc.perform(post("/categories")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .header("accept", "application/vnd.lvoxx.app-v1+json")
+                                .content(objectMapper.writeValueAsString(requestBlank)))
+                                .andDo(print())
+                                .andExpect(status().isUnprocessableEntity())
+                                .andExpect(content().contentType("application/vnd.lvoxx.app-v1+json"))
+                                .andExpect(jsonPath("$.errors[0].field").value("name"))
+                                .andExpect(jsonPath("$.errors[0].message").value("Category name cannot be blank"))
+                                .andExpect(jsonPath("$.status").value("UNPROCESSABLE_ENTITY"));
+                // Invalid - Out of size
+                mockMvc.perform(post("/categories")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .header("accept", "application/vnd.lvoxx.app-v1+json")
+                                .content(objectMapper.writeValueAsString(requestOutOfSize)))
+                                .andDo(print())
+                                .andExpect(status().isUnprocessableEntity())
+                                .andExpect(content().contentType("application/vnd.lvoxx.app-v1+json"))
+                                .andExpect(jsonPath("$.errors[0].field").value("name"))
+                                .andExpect(jsonPath("$.errors[0].message")
+                                                .value("Category name must not exceed 60 characters"))
+                                .andExpect(jsonPath("$.status").value("UNPROCESSABLE_ENTITY"));
         }
 
         // Category update
