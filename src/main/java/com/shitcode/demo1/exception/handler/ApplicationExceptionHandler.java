@@ -17,10 +17,22 @@ import com.shitcode.demo1.exception.model.WorkerBusyException;
 @ControllerAdvice
 public class ApplicationExceptionHandler {
 
-    @ExceptionHandler({ EntityExistsException.class, EntityNotFoundException.class, ResourceNotFoundException.class,
-            KeyLockMissedException.class, WorkerBusyException.class, InvalidParameterException.class })
+    @ExceptionHandler({ KeyLockMissedException.class, WorkerBusyException.class, InvalidParameterException.class })
     public ResponseEntity<ErrorModel> handleDataOperationException(RuntimeException ex) {
         ErrorModel errorResponse = ErrorModel.of(HttpStatus.INTERNAL_SERVER_ERROR, ex.getMessage(), null);
         return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @ExceptionHandler({ EntityNotFoundException.class, ResourceNotFoundException.class
+    })
+    public ResponseEntity<ErrorModel> handleDataNotFoundOperationException(RuntimeException ex) {
+        ErrorModel errorResponse = ErrorModel.of(HttpStatus.NOT_FOUND, ex.getMessage(), null);
+        return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler({ EntityExistsException.class })
+    public ResponseEntity<ErrorModel> handleDataExistsOperationException(RuntimeException ex) {
+        ErrorModel errorResponse = ErrorModel.of(HttpStatus.CONFLICT, ex.getMessage(), null);
+        return new ResponseEntity<>(errorResponse, HttpStatus.CONFLICT);
     }
 }
