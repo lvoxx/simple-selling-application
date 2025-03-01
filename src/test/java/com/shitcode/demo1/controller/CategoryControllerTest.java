@@ -7,6 +7,7 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -32,6 +33,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
@@ -210,8 +212,28 @@ public class CategoryControllerTest {
 
         // Category creation
         @Test
+        @SneakyThrows
         @DisplayName("Should return created category when requesting POST with valid request body on createCategoryByBody V1")
         void shouldReturnCreatedCategory_whenRequestingPostWithGivingRequestBody_onCreateCategoryByBodyV1() {
+                // Given
+                CategoryDTO.Request request = CategoryDTO.Request.builder().name("Phone").build();
+                CategoryDTO.Response response = CategoryDTO.Response.builder().id(1L).name("Phone").build();
+                // When
+                when(categoryService.createCategory(any(CategoryDTO.Request.class)))
+                                .thenReturn(response);
+                when(responseService.mapping(any(ThrowingSupplier.class), any(RateLimiterPlan.class)))
+                                .thenReturn(new ResponseEntity<>(ResponseDTO.builder().data(response).build(),
+                                                HttpStatus.CREATED));
+                // Then
+                mockMvc.perform(post("/categories")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .header("accept", "application/vnd.lvoxx.app-v1+json")
+                                .content(objectMapper.writeValueAsString(request)))
+                                .andDo(print())
+                                .andExpect(status().isCreated())
+                                .andExpect(content().contentType("application/vnd.lvoxx.app-v1+json"))
+                                .andExpect(jsonPath("$.data.id").value(1L))
+                                .andExpect(jsonPath("$.data.name").value("Phone"));
         }
 
         // Invalid request version

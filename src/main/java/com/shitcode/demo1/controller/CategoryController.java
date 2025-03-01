@@ -111,11 +111,9 @@ public class CategoryController {
         public ResponseEntity<?> createCategoryByBodyV1(
                         @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Category details to be created", required = true, content = @Content(mediaType = "application/json", schema = @Schema(implementation = CategoryDTO.Request.class))) @Valid @RequestBody CategoryDTO.Request request)
                         throws Exception {
-
                 return responseService.mapping(
                                 () -> new ResponseEntity<>(categoryService.createCategory(request), HttpStatus.CREATED),
                                 MANAGE_PLAN);
-
         }
 
         @PutMapping("/{id}")

@@ -62,7 +62,7 @@ public class ResponseServiceImpl implements ResponseService {
                 // +--------------------------------+
                 // * Start Proceeding Controller Code.
                 // +--------------------------------+
-                ResponseEntity<?> result = service.get();
+                ResponseEntity<?> response = service.get();
                 // +--------------------------------+
                 // * End Proceed Controller Code.
                 // +--------------------------------+
@@ -73,13 +73,11 @@ public class ResponseServiceImpl implements ResponseService {
                                                         null),
                                         HttpStatusCode.valueOf(HttpStatus.TOO_MANY_REQUESTS.value()));
                 }
-                return new ResponseEntity<ResponseDTO>(
-                                builder
-                                                .data(result.getBody())
-                                                .status(result.getStatusCode())
-                                                .build(),
-                                result.getHeaders(),
-                                result.getStatusCode());
+                return ResponseEntity.status(response.getStatusCode())
+                                .headers(response.getHeaders())
+                                .body(builder.data(response.getBody())
+                                                .status(response.getStatusCode())
+                                                .build());
         }
 
         private String getFullRefillTime(Bucket bucket, RateLimiterPlan plan) {
