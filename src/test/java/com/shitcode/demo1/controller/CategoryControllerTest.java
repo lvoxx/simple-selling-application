@@ -3,6 +3,7 @@ package com.shitcode.demo1.controller;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -157,7 +158,23 @@ public class CategoryControllerTest {
     // Single category retrieval
     @Test
     @DisplayName("Should return single category when requesting GET with valid request parameters on findById V1")
-    void shouldReturnSingleCategory_whenRequestingGetWithGivingRequestParam_onFindByIdV1() {
+    void shouldReturnSingleCategory_whenRequestingGetWithGivingRequestParam_onFindByIdV1() throws Exception {
+        // Given
+        Long ctgId = 1L;
+        CategoryDTO.Response response = CategoryDTO.Response.builder().id(ctgId).name("Phone").build();
+        // When
+        when(categoryService.findCategoryById(anyLong())).thenReturn(response);
+        when(responseService.mapping(any(Supplier.class), any(RateLimiterPlan.class)))
+                .thenReturn(ResponseEntity.ok().body(ResponseDTO.builder().data(response).build()));
+        // Then
+        mockMvc.perform(get("/categories/{id}", ctgId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("accept", "application/vnd.lvoxx.app-v1+json"))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(content().contentType("application/vnd.lvoxx.app-v1+json"))
+                .andExpect(jsonPath("$.data.id").value(response.getId()))
+                .andExpect(jsonPath("$.data.name").value(response.getName()));
     }
 
     // Invalid request version
