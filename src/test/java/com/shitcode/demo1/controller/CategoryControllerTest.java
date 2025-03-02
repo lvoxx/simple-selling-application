@@ -297,8 +297,24 @@ public class CategoryControllerTest {
 
         // Invalid request version
         @Test
+        @SneakyThrows
         @DisplayName("Should return not found when requesting PUT with non-existent ID on updateCategoryByIdAndBody V1")
         void shouldReturnNotFound_whenRequestingPutWithNonExistentId_onUpdateCategoryByIdAndBodyV1() {
+                // Given
+                Long ctgId = 1L;
+                CategoryDTO.Request request = CategoryDTO.Request.builder().name("Phone").build();
+                EntityNotFoundException ex = new EntityNotFoundException("Not found category with Id " + ctgId);
+                // When
+                when(categoryService.updateCategory(any(CategoryDTO.Request.class), anyLong()))
+                                .thenThrow(ex);
+                when(responseService.mapping(any(ThrowingSupplier.class), any(RateLimiterPlan.class))).thenThrow(ex);
+                // Then
+                mockMvc.perform(put("/categories/{id}", ctgId)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .header("accept", "application/vnd.lvoxx.app-v1+json")
+                                .content(objectMapper.writeValueAsString(request)))
+                                .andDo(print())
+                                .andExpect(status().isNotFound());
         }
 
         // Category deletion
