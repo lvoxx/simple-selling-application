@@ -8,6 +8,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -46,6 +47,7 @@ import org.springframework.web.context.WebApplicationContext;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.shitcode.demo1.dto.CategoryDTO;
 import com.shitcode.demo1.dto.ResponseDTO;
+import com.shitcode.demo1.entity.Category;
 import com.shitcode.demo1.exception.model.EntityNotFoundException;
 import com.shitcode.demo1.properties.RateLimiterConfigData;
 import com.shitcode.demo1.service.CategoryService;
@@ -79,9 +81,6 @@ public class CategoryControllerTest {
 
         @MockitoBean
         ResponseService responseService;
-
-        @Captor
-        ArgumentCaptor<Long> ctgIdCaptor;
 
         @Autowired
         private WebApplicationContext webApplicationContext;
@@ -274,8 +273,29 @@ public class CategoryControllerTest {
 
         // Category update
         @Test
+        @SneakyThrows
         @DisplayName("Should return updated category when requesting PUT with valid request body on updateCategoryByIdAndBody V1")
         void shouldReturnUpdatedCategory_whenRequestingPutWithGivingRequestBody_onUpdateCategoryByIdAndBodyV1() {
+                // Given
+                Long ctgId = 1L;
+                CategoryDTO.Request request = CategoryDTO.Request.builder().name("Phone").build();
+                CategoryDTO.Response response = CategoryDTO.Response.builder().id(1L).name("Computer").build();
+                // When
+                when(categoryService.updateCategory(any(CategoryDTO.Request.class), anyLong()))
+                                .thenReturn(response);
+                when(responseService.mapping(any(ThrowingSupplier.class), any(RateLimiterPlan.class)))
+                                .thenReturn(new ResponseEntity<>(ResponseDTO.builder().data(response).build(),
+                                                HttpStatus.OK));
+                // Then
+                mockMvc.perform(put("/categories/{id}", ctgId)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .header("accept", "application/vnd.lvoxx.app-v1+json")
+                                .content(objectMapper.writeValueAsString(request)))
+                                .andDo(print())
+                                .andExpect(status().isOk())
+                                .andExpect(content().contentType("application/vnd.lvoxx.app-v1+json"))
+                                .andExpect(jsonPath("$.data.id").value(response.getId()))
+                                .andExpect(jsonPath("$.data.name").value(response.getName()));
         }
 
         // Invalid request version
