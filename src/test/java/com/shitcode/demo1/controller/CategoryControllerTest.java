@@ -5,7 +5,9 @@ import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -319,8 +321,23 @@ public class CategoryControllerTest {
 
         // Category deletion
         @Test
+        @SneakyThrows
         @DisplayName("Should return no content status when requesting DELETE with valid request parameter on deleteCategoryById V1")
         void shouldReturNoContentStatus_whenRequestingDeleteWithGivingRequestParam_onDeleteCategoryByIdV1() {
+                // Given
+                Long ctgId = 1L;
+                // When
+                doNothing().when(categoryService).deleteCategoryById(anyLong());
+                when(responseService.mapping(any(ThrowingSupplier.class), any(RateLimiterPlan.class)))
+                                .thenReturn(new ResponseEntity<>(
+                                                ResponseDTO.builder().data(ResponseEntity.noContent().build()).build(),
+                                                HttpStatus.NO_CONTENT));
+                // Then
+                mockMvc.perform(delete("/categories/{id}", ctgId)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .header("accept", "application/vnd.lvoxx.app-v1+json"))
+                                .andDo(print())
+                                .andExpect(status().isNoContent());
         }
 
         // Invalid request version
