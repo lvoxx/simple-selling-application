@@ -3,6 +3,8 @@ package com.shitcode.demo1.entity;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
+import org.hibernate.validator.constraints.UUID;
+
 import com.shitcode.demo1.utils.InteractionEvent;
 
 import jakarta.persistence.Column;
@@ -28,8 +30,8 @@ import lombok.NoArgsConstructor;
 @Table(name = "product_interaction")
 public class ProductInteraction implements Serializable {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private UUID id;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "event", nullable = false, updatable = false)
