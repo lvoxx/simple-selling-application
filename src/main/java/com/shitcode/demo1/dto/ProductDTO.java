@@ -8,6 +8,7 @@ import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -27,6 +28,12 @@ public abstract class ProductDTO {
         @Size(max = 255, message = "Product name must not exceed 255 characters")
         @Schema(description = "Name of the product", example = "Wireless Headphones", maxLength = 255, required = true)
         private String name;
+
+        @Schema(description = "Currency code in ISO 4217 format (3 uppercase letters)", example = "USD")
+        @NotBlank(message = "Currency cannot be blank")
+        @Size(max = 3, message = "Currency must be exactly 3 characters")
+        @Pattern(regexp = "^[A-Z]{3}$", message = "Currency must be uppercase and follow ISO 4217 format")
+        private String currency;
 
         @NotNull(message = "In-stock quantity cannot be null")
         @Min(value = 0, message = "In-stock quantity must be at least 0")

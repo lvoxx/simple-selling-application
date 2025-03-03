@@ -9,13 +9,13 @@ spring:
   config:
     import:
       - config/accounts.yml
+      - config/auth.yml
       - config/database.yml
       - config/email.yml
-      - config/auth.yml
-      - config/server.yml
-      - config/security.yml
       - config/logging.yml
       - config/rate-limiter.yml
+      - config/security.yml
+      - config/server.yml
 
 ---
 spring:
