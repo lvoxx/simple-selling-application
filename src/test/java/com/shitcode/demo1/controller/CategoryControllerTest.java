@@ -6,6 +6,7 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -342,18 +343,32 @@ public class CategoryControllerTest {
 
         // Invalid request version
         @Test
+        @SneakyThrows
         @DisplayName("Should return not found when requesting DELETE with non-existent ID on deleteCategoryById V1")
         void shouldReturnNotFound_whenRequestingDeleteWithNonExistentId_onDeleteCategoryByIdV1() {
+                /// Given
+                Long ctgId = 1L;
+                EntityNotFoundException ex = new EntityNotFoundException("Entity not found");
+                // When
+                doThrow(ex).when(categoryService).deleteCategoryById(anyLong());
+                when(responseService.mapping(any(ThrowingSupplier.class), any(RateLimiterPlan.class)))
+                                .thenThrow(ex);
+                // Then
+                mockMvc.perform(delete("/categories/{id}", ctgId)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .header("accept", "application/vnd.lvoxx.app-v1+json"))
+                                .andDo(print())
+                                .andExpect(status().isNotFound());
         }
 
         // JPA-related error cases
         @Test
-        @DisplayName("Should throw RuntimeException when creating category with duplicate name")
+        @DisplayName("Should throw EntityExistsException when creating category with duplicate name")
         void shouldRuntimeException_whenCreatingCategoryWithDuplicateName() {
         }
 
         @Test
-        @DisplayName("Should throw RuntimeException when updating category to duplicate name")
+        @DisplayName("Should throw WorkerBusyException when updating category to server busy")
         void shouldRuntimeException_whenUpdatingCategoryToDuplicateName() {
         }
 
