@@ -50,6 +50,7 @@ import com.shitcode.demo1.dto.CategoryDTO;
 import com.shitcode.demo1.dto.ResponseDTO;
 import com.shitcode.demo1.exception.model.EntityExistsException;
 import com.shitcode.demo1.exception.model.EntityNotFoundException;
+import com.shitcode.demo1.exception.model.WorkerBusyException;
 import com.shitcode.demo1.properties.RateLimiterConfigData;
 import com.shitcode.demo1.service.CategoryService;
 import com.shitcode.demo1.service.ResponseService;
@@ -386,8 +387,26 @@ public class CategoryControllerTest {
         }
 
         @Test
+        @SneakyThrows
         @DisplayName("Should throw WorkerBusyException when updating category to server busy")
-        void shouldRuntimeException_whenUpdatingCategoryToDuplicateName() {
+        void shouldWorkerBusyException_whenUpdatingCategoryToServerBusy() {
+                // Given
+                Long ctgId = 1L;
+                CategoryDTO.Request request = CategoryDTO.Request.builder().name("Phone").build();
+                WorkerBusyException ex = new WorkerBusyException();
+                // When
+                when(categoryService.createCategory(any(CategoryDTO.Request.class)))
+                                .thenThrow(ex);
+                when(responseService.mapping(any(ThrowingSupplier.class), any(RateLimiterPlan.class)))
+                                .thenThrow(ex);
+                // Then
+                mockMvc.perform(put("/categories/{id}", ctgId)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .header("accept", "application/vnd.lvoxx.app-v1+json")
+                                .content(objectMapper.writeValueAsString(request)))
+                                .andDo(print())
+                                .andExpect(status().isInternalServerError())
+                                .andExpect(content().contentType("application/vnd.lvoxx.app-v1+json"));
         }
 
 }
