@@ -48,6 +48,7 @@ import org.springframework.web.context.WebApplicationContext;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.shitcode.demo1.dto.CategoryDTO;
 import com.shitcode.demo1.dto.ResponseDTO;
+import com.shitcode.demo1.exception.model.EntityExistsException;
 import com.shitcode.demo1.exception.model.EntityNotFoundException;
 import com.shitcode.demo1.properties.RateLimiterConfigData;
 import com.shitcode.demo1.service.CategoryService;
@@ -363,8 +364,25 @@ public class CategoryControllerTest {
 
         // JPA-related error cases
         @Test
+        @SneakyThrows
         @DisplayName("Should throw EntityExistsException when creating category with duplicate name")
         void shouldRuntimeException_whenCreatingCategoryWithDuplicateName() {
+                // Given
+                CategoryDTO.Request request = CategoryDTO.Request.builder().name("Phone").build();
+                EntityExistsException ex = new EntityExistsException();
+                // When
+                when(categoryService.createCategory(any(CategoryDTO.Request.class)))
+                                .thenThrow(ex);
+                when(responseService.mapping(any(ThrowingSupplier.class), any(RateLimiterPlan.class)))
+                                .thenThrow(ex);
+                // Then
+                mockMvc.perform(post("/categories")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .header("accept", "application/vnd.lvoxx.app-v1+json")
+                                .content(objectMapper.writeValueAsString(request)))
+                                .andDo(print())
+                                .andExpect(status().isConflict())
+                                .andExpect(content().contentType("application/vnd.lvoxx.app-v1+json"));
         }
 
         @Test
