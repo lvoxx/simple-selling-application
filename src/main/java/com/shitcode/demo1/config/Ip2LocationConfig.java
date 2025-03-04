@@ -4,14 +4,12 @@ import java.io.IOException;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Scope;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 
 import com.ip2location.IP2Location;
 
 @Configuration
-@Scope("application")
 public class Ip2LocationConfig {
     private final String DB_FILE = "ip2location/IP2LOCATION-LITE-DB1.bin";
 
