@@ -57,3 +57,9 @@ logs:
 # Show Running Containers
 ps:
 	$(COMPOSE_CMD) ps
+
+# Run Tests and Generate Surefire Report
+report:
+	@echo "Running tests and generating Surefire report..."
+	mvn clean surefire-report:report
+	@echo "Surefire report generated in target/site/surefire-report.html"

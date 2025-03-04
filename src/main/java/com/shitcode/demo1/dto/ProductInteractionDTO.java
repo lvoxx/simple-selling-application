@@ -18,9 +18,6 @@ public abstract class ProductInteractionDTO {
         @Schema(description = "Name of the product being interacted with", example = "Gaming Laptop", nullable = true)
         private String productName;
 
-        @Schema(description = "Name of the category being interacted with", example = "Computer", nullable = true)
-        private String categoryName;
-
         @Schema(description = "Type of interaction event performed on the product or category", example = "view_and_buy", allowableValues = {
                 "pick_category", "search_product", "view_product", "view_and_add_to_cart",
                 "view_and_buy", "cart_to_purchase", "pay_by_card", "pay_by_paypal", "pay_by_cash"

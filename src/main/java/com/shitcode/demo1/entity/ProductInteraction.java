@@ -39,9 +39,6 @@ public class ProductInteraction implements Serializable {
     @Column(name = "product_name", updatable = false, nullable = true)
     private String productName;
 
-    @Column(name = "category_name", updatable = false, nullable = true)
-    private String categoryName;
-
     // Event by user
     @Column(name = "username", nullable = false, updatable = false)
     @Builder.Default

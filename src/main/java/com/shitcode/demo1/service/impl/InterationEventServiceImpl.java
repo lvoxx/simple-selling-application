@@ -34,7 +34,6 @@ public class InterationEventServiceImpl implements InterationEventService {
         ProductInteraction productInteraction = ProductInteraction.builder()
                 .event(interation.getEvent())
                 .productName(interation.getProductName())
-                .categoryName(interation.getCategoryName())
                 .by(AuthServiceImpl.getAuthenticatedUsername())
                 .at(ip2LocationService
                         .getLocation(ipAddressResolver.getClientIp(AuthServiceImpl.getHttpServletRequest())).toString())

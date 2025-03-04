@@ -26,7 +26,7 @@ public abstract class AbstractTestContainer {
     static {
         int containerPort = 5432;
         int localPort = 4321;
-        DockerImageName postgres = DockerImageName.parse("postgres:17.4");
+        DockerImageName postgres = DockerImageName.parse("postgres:16-alpine");
         postgreSQLContainer = new PostgreSQLContainer<>(postgres)
                 .withDatabaseName("test")
                 .withUsername("root")
