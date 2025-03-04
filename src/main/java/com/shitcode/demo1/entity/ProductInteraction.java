@@ -2,8 +2,7 @@ package com.shitcode.demo1.entity;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
-
-import org.hibernate.validator.constraints.UUID;
+import java.util.UUID;
 
 import com.shitcode.demo1.utils.InteractionEvent;
 

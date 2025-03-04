@@ -15,9 +15,6 @@ public abstract class ProductInteractionDTO {
     @Setter(value = AccessLevel.PRIVATE)
     @Schema(name = "Product Interaction Request", description = "Represents a request to interact with a product.")
     public static class Request {
-        @Schema(description = "Username of the user interacting with the product", example = "john_doe")
-        private String username;
-
         @Schema(description = "Name of the product being interacted with", example = "Gaming Laptop", nullable = true)
         private String productName;
 

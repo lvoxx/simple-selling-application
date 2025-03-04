@@ -4,6 +4,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import com.shitcode.demo1.annotation.logging.LogCollector;
@@ -13,7 +14,7 @@ import com.shitcode.demo1.service.AuthService;
 import com.shitcode.demo1.utils.LoggingModel;
 
 @Service
-@LogCollector(loggingModel =  LoggingModel.SERVICE)
+@LogCollector(loggingModel = LoggingModel.SERVICE)
 public class AuthServiceImpl implements AuthService {
 
     private final JwtService jwtService;
@@ -40,6 +41,24 @@ public class AuthServiceImpl implements AuthService {
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
                 .build();
+    }
+
+    public static String getAuthenticatedUsername() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return "Anonymous User";
+        }
+
+        Object principal = authentication.getPrincipal();
+
+        if (principal instanceof UserDetails) {
+            return ((UserDetails) principal).getUsername();
+        } else if (principal instanceof String) {
+            return "anonymousUser".equals(principal) ? "Anonymous User" : (String) principal;
+        }
+
+        return "Anonymous User";
     }
 
 }
