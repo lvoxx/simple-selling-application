@@ -40,6 +40,7 @@ public class Ip2LocationServiceTest {
         ipAddresses.put("159.64.75.43", "United States of America");
         ipAddresses.put("90.30.170.126", "France");
         ipAddresses.put("220.106.189.185", "Japan");
+        ipAddresses.put("127.157.75.3", "-");
     }
 
     @AfterEach
