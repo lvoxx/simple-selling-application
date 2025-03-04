@@ -6,12 +6,16 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 import com.shitcode.demo1.annotation.logging.LogCollector;
 import com.shitcode.demo1.dto.AuthDTO;
 import com.shitcode.demo1.jwt.JwtService;
 import com.shitcode.demo1.service.AuthService;
 import com.shitcode.demo1.utils.LoggingModel;
+
+import jakarta.servlet.http.HttpServletRequest;
 
 @Service
 @LogCollector(loggingModel = LoggingModel.SERVICE)
@@ -59,6 +63,11 @@ public class AuthServiceImpl implements AuthService {
         }
 
         return "Anonymous User";
+    }
+
+    public static HttpServletRequest getHttpServletRequest() {
+        return ((ServletRequestAttributes) RequestContextHolder
+                .currentRequestAttributes()).getRequest();
     }
 
 }

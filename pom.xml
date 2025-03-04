@@ -48,6 +48,7 @@
 		<jjwt.version>0.12.6</jjwt.version>
 		<openapi.version>2.8.4</openapi.version>
 		<bucket4j.version>8.10.1</bucket4j.version>
+		<ip2location.version>8.12.2</ip2location.version>
 
 		<assertj.verion>3.27.3</assertj.verion>
 		<mockito.verion>5.15.2</mockito.verion>
@@ -131,6 +132,12 @@
 			<artifactId>bucket4j-core</artifactId>
 			<version>${bucket4j.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>com.ip2location</groupId>
+			<artifactId>ip2location-java</artifactId>
+			<version>${ip2location.version}</version>
+		</dependency>
+
 
 		<dependency>
 			<groupId>org.springdoc</groupId>
