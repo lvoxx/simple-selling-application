@@ -148,7 +148,7 @@ public class CategoryServiceTest {
                 () -> categoryService.findCategoryById(1L));
         // Then
         assertThat(ex).isInstanceOf(EntityNotFoundException.class);
-        assertThat(ex.getMessage()).isEqualTo(String.format("Can not found category with id %d", 1L));
+        assertThat(ex.getMessage()).isEqualTo("{exception.entity-not-found.category-id}");
     }
 
     @Test
@@ -161,7 +161,7 @@ public class CategoryServiceTest {
                 () -> categoryService.findCategoryByName("Phone"));
         // Then
         assertThat(ex).isInstanceOf(EntityNotFoundException.class);
-        assertThat(ex.getMessage()).isEqualTo(String.format("Can not found category with name: %s", "Phone"));
+        assertThat(ex.getMessage()).isEqualTo("{exception.entity-not-found.category-name}");
     }
 
     @Test
@@ -206,7 +206,7 @@ public class CategoryServiceTest {
         // Then
         EntityExistsException ex = assertThrows(EntityExistsException.class, () -> categoryService.createCategory(req));
         assertThat(ex).isInstanceOf(EntityExistsException.class);
-        assertThat(ex.getMessage()).isEqualTo(String.format("Category with name %s already exists", req.getName()));
+        assertThat(ex.getMessage()).isEqualTo("{exception.entity-exists.category}");
     }
 
     @Test
