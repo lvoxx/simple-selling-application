@@ -5,6 +5,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
@@ -18,11 +20,12 @@ import com.github.dockerjava.api.model.Ports;
 
 @SuppressWarnings("resource")
 @Testcontainers
+@TestInstance(Lifecycle.PER_CLASS)
 public abstract class AbstractTestContainer {
     @Container
     @ServiceConnection
     protected static PostgreSQLContainer<?> postgreSQLContainer;
- 
+
     static {
         int containerPort = 5432;
         int localPort = 4321;
@@ -37,19 +40,19 @@ public abstract class AbstractTestContainer {
                         new HostConfig().withPortBindings(
                                 new PortBinding(Ports.Binding.bindPort(localPort), new ExposedPort(containerPort)))));
     }
- 
+
     @BeforeAll
     static void startContainer() {
         postgreSQLContainer.start();
     }
- 
+
     @AfterAll
     static void stopContainer() {
         if (postgreSQLContainer != null) {
             postgreSQLContainer.close();
         }
     }
- 
+
     @Test
     void canEstablishedPostgreSqlContainer() {
         assertThat(postgreSQLContainer.isCreated()).isTrue();
