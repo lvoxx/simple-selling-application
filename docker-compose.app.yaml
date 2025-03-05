@@ -44,9 +44,11 @@ services:
       SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-p0s7GrEs@12*}
       SPRING_MAIL_HOST: ${MAIL_HOST:-smtp.gmail.com}
       SPRING_MAIL_PORT: ${MAIL_PORT:-587}
-      SPRING_MAIL_USERNAME: ${MAIL_USERNAME:-yours.gmail@gmail.com}
+      SPRING_MAIL_USERNAME: ${MAIL_USERNAME:-yours.email@gmail.com}
       SPRING_MAIL_PASSWORD: ${MAIL_PASSWORD:-Yours.P4ssw0rd}
-      SPRING_MAIL_PROTOCOL: ${MAIL_PROTOCOL:-smtp}
+      SPRING_MAIL_PROTOCOL: # stmp
+      SPRING_MAIL_PROPERTIES_MAIL_STMP_AUTH: false # true
+      SPRING_MAIL_PROPERTIES_MAIL_STMP_AUTH_STARTTLS_ENABLE: false # true
     networks:
       - lvoxx-networks
     depends_on:
