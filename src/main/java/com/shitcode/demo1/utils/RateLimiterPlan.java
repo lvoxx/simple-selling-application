@@ -69,6 +69,15 @@ public enum RateLimiterPlan {
                     .build();
         }
     },
+    SIGNUP {
+        @Override
+        public Bandwidth getLimit() {
+            return Bandwidth.builder()
+                    .capacity(2)
+                    .refillIntervally(2, Duration.ofDays(7))
+                    .build();
+        }
+    },
     REGRANT_AUTH {
         @Override
         public Bandwidth getLimit() {

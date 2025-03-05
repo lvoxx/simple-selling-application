@@ -76,16 +76,16 @@ public class AuthControllerTest {
         @DisplayName("Should return access and refresh token after successful login")
         void shouldReturnAccessAndRefreshTokenAfterLogin() throws Exception {
                 // Given
-                AuthDTO.Request request = AuthDTO.Request.builder()
+                AuthDTO.LoginRequest request = AuthDTO.LoginRequest.builder()
                                 .email("test@email.com")
                                 .password("Abc123@#")
                                 .build();
-                AuthDTO.Response response = AuthDTO.Response.builder()
+                AuthDTO.LoginResponse response = AuthDTO.LoginResponse.builder()
                                 .accessToken("Access Token")
                                 .refreshToken("Refresh Token")
                                 .build();
                 // When
-                when(authService.login(any(AuthDTO.Request.class))).thenReturn(response);
+                when(authService.login(any(AuthDTO.LoginRequest.class))).thenReturn(response);
                 when(responseService.mapping(any(ThrowingSupplier.class), any(RateLimiterPlan.class)))
                                 .thenReturn(ResponseEntity.ok().body(ResponseDTO.builder().data(response).build()));
                 // Then

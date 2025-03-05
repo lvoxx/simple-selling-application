@@ -5,6 +5,7 @@
 # MEDIUM - 25 / 5 minutes
 # HARD - 12 / 10 minutes
 # AUTH - 5 / 30 minutes
+# SIGNUP - 2 / 7 days
 # REGRANT_AUTH - 3 / 45 minutes
 # RENEW_TOKEN - 5 / 30 days
 rate-limiter:
@@ -24,5 +25,6 @@ rate-limiter:
     manage: MEDIUM
   auth:
     login: AUTH
+    signup: SIGNUP
     renew-token: RENEW_TOKEN
     forgot-password: REGRANT_AUTH

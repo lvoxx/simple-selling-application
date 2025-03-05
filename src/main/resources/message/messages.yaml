@@ -1,7 +1,11 @@
 validation:
   auth:
-    email: Invalid email format. Check its again.
+    email: Invalid email format.
     password: Password must meet the required criteria.
+  new-user:
+    email: Invalid email format.
+    password: Password must be between {minSize} and {maxSize} characters and contain at least one special character.
+    phone: Invalid phone number format. Expected format +<country code>-<number>
 
 mailing:
   register-email:

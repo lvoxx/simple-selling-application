@@ -46,6 +46,9 @@ public class SpringUser extends AbstractAuditableEntity {
     @Column(name = "last_name", length = 60, nullable = false)
     private String lastName;
 
+    @Column(name = "phone_number", length = 60, unique = true, nullable = false)
+    private String phoneNumber; // +84-<numbers>
+
     @Column(name = "locked", nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
     @Builder.Default
     private boolean locked = false;

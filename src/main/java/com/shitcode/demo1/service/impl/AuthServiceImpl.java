@@ -24,14 +24,13 @@ public class AuthServiceImpl implements AuthService {
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
 
-    public AuthServiceImpl(JwtService jwtService,
-            AuthenticationManager authenticationManager) {
+    public AuthServiceImpl(JwtService jwtService, AuthenticationManager authenticationManager) {
         this.jwtService = jwtService;
         this.authenticationManager = authenticationManager;
     }
 
     @Override
-    public AuthDTO.Response login(AuthDTO.Request request) {
+    public AuthDTO.LoginResponse login(AuthDTO.LoginRequest request) {
         Authentication authentication = authenticationManager
                 .authenticate(new UsernamePasswordAuthenticationToken(
                         request.getEmail(),
@@ -41,7 +40,7 @@ public class AuthServiceImpl implements AuthService {
         String accessToken = jwtService.generateAccessToken(authentication);
         String refreshToken = jwtService.generateRefreshToken(authentication);
 
-        return AuthDTO.Response.builder()
+        return AuthDTO.LoginResponse.builder()
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
                 .build();

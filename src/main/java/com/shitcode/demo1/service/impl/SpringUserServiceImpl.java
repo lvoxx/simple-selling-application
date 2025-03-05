@@ -1,5 +1,10 @@
 package com.shitcode.demo1.service.impl;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.List;
+
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,7 +21,8 @@ import com.shitcode.demo1.repository.SpringUserRepository;
 import com.shitcode.demo1.service.MailService;
 import com.shitcode.demo1.service.RegistrationTokenService;
 import com.shitcode.demo1.service.SpringUserService;
-
+import com.shitcode.demo1.utils.ApplicationRoles;
+import com.shitcode.demo1.utils.LogPrinter;
 
 @Service
 @Transactional
@@ -26,13 +32,16 @@ public class SpringUserServiceImpl implements SpringUserService {
     private final SpringUserRepository springUserRepository;
     private final RegistrationTokenService tokenService;
     private final MailService mailService;
+    private final BCryptPasswordEncoder passwordEncoder;
     private SpringUserMapper mapper;
 
     public SpringUserServiceImpl(SpringUserRepository springUserRepository, RegistrationTokenService tokenService,
-            MailService mailService) {
+            MailService mailService, BCryptPasswordEncoder passwordEncoder, SpringUserMapper mapper) {
         this.springUserRepository = springUserRepository;
         this.tokenService = tokenService;
         this.mailService = mailService;
+        this.passwordEncoder = passwordEncoder;
+        this.mapper = mapper;
     }
 
     private SpringUserMapper springUserMapper = SpringUserMapper.INSTANCE;
@@ -40,6 +49,12 @@ public class SpringUserServiceImpl implements SpringUserService {
     @Override
     public SpringUserDTO.Response publicCreateUser(SpringUserDTO.UserRequest request) {
         SpringUser user = springUserMapper.toSpringUser(request);
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
+        user.setLocked(true);
+        user.setEnabled(true);
+        user.setPoints(BigDecimal.valueOf(0));
+        user.setRoles(List.of(ApplicationRoles.USER.getRole()));
+
         return createUser(user, true);
     }
 
@@ -92,7 +107,14 @@ public class SpringUserServiceImpl implements SpringUserService {
             // Flush registration token data
             RegistrationToken token = tokenService.createToken(result.getId());
             // Send activation email
-            mailService.sendActivationEmail(result.getEmail(), token.getToken(), result.getEmail());
+            try {
+                mailService.sendActivationEmail(result.getEmail(), token.getToken(),
+                        String.format("%s %s", result.getFirstName(), result.getLastName()));
+            } catch (Exception e) {
+                LogPrinter.printServiceLog(LogPrinter.Type.ERROR, "AuthServiceImpl", "signUp",
+                        LocalDateTime.now().toString(),
+                        e.getMessage());
+            }
         }
 
         return mapper.toSpringUserResponse(result);

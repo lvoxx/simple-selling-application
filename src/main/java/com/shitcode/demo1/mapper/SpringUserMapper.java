@@ -11,20 +11,21 @@ import com.shitcode.demo1.entity.SpringUser;
 
 @Mapper(componentModel = "spring", builder = @Builder(disableBuilder = false))
 public interface SpringUserMapper {
-    SpringUserMapper INSTANCE = Mappers.getMapper(SpringUserMapper.class);
+        SpringUserMapper INSTANCE = Mappers.getMapper(SpringUserMapper.class);
 
-    // Map SpringUserRegisterRequest to SpringUser
-    @Mappings({
-            @Mapping(target = "id", ignore = true)
-    })
-    SpringUser toSpringUser(SpringUserDTO.UserRequest request);
+        // Map SpringUserRegisterRequest to SpringUser
+        @Mappings({
+                        @Mapping(target = "id", ignore = true)
+        })
+        SpringUser toSpringUser(SpringUserDTO.UserRequest request);
 
-    // Map SpringUserAdminequest to SpringUser
-    @Mappings({
-            @Mapping(target = "id", ignore = true)
-    })
-    SpringUser toSpringUser(SpringUserDTO.AdminRequest request);
+        // Map SpringUserAdminequest to SpringUser
+        @Mappings({
+                        @Mapping(target = "id", ignore = true)
+        })
+        SpringUser toSpringUser(SpringUserDTO.AdminRequest request);
 
-    // Map SpringUser to CustomerResponse
-    SpringUserDTO.Response toSpringUserResponse(SpringUser user);
+        // Map SpringUser to CustomerResponse
+        SpringUserDTO.Response toSpringUserResponse(SpringUser user);
+
 }
