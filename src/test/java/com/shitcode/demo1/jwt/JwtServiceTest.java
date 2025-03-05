@@ -12,21 +12,34 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Tags;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.autoconfigure.data.jpa.JpaRepositoriesAutoConfiguration;
+import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
+import org.springframework.test.context.ActiveProfiles;
 
+import com.shitcode.demo1.config.JwtConfig;
 import com.shitcode.demo1.entity.SpringUser;
 import com.shitcode.demo1.properties.ClientConfigData;
+import com.shitcode.demo1.properties.JwtConfigData;
+import com.shitcode.demo1.properties.RsaKeyConfigData;
 import com.shitcode.demo1.security.SpringUserDetails;
 
 @DisplayName("Jwt Service Tests")
-@SpringBootTest
 @Tags({
                 @Tag("Service"), @Tag("No Mock")
 })
+@SpringBootTest(classes = { JwtService.class, JwtConfig.class,
+                RsaKeyConfigData.class, JwtConfigData.class,
+                ClientConfigData.class }, webEnvironment = WebEnvironment.DEFINED_PORT)
+@EnableAutoConfiguration(exclude = { JpaRepositoriesAutoConfiguration.class,
+                DataSourceAutoConfiguration.class })
+@ActiveProfiles("test")
 public class JwtServiceTest {
         @Autowired
         JwtService jwtService;
