@@ -33,24 +33,24 @@ public class ProductInteraction implements Serializable {
     private UUID id;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "event", nullable = false, updatable = false)
-    private InteractionEvent event;
+    @Column(name = "event_stage", nullable = false, updatable = false)
+    private InteractionEvent eventStage;
 
     @Column(name = "product_name", updatable = false, nullable = true)
     private String productName;
 
     // Event by user
-    @Column(name = "username", nullable = false, updatable = false)
+    @Column(name = "user_stage", nullable = false, updatable = false)
     @Builder.Default
-    private String by = "Anonymous User";
+    private String userStage = "Anonymous User";
 
     // Event time
-    @Column(name = "on", nullable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
+    @Column(name = "on_time", nullable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     @Builder.Default
-    private LocalDateTime on = LocalDateTime.now();
+    private LocalDateTime onTime = LocalDateTime.now();
 
     // Time event occurs
-    @Column(name = "at", nullable = false)
+    @Column(name = "locate_at", nullable = false)
     @Builder.Default
-    private String at = "Unknown";
+    private String locateAt = "Unknown";
 }

@@ -32,12 +32,12 @@ public class InterationEventServiceImpl implements InterationEventService {
     @Override
     public boolean recordNewEvent(Request interation) {
         ProductInteraction productInteraction = ProductInteraction.builder()
-                .event(interation.getEvent())
+                .eventStage(interation.getEvent())
                 .productName(interation.getProductName())
-                .by(AuthServiceImpl.getAuthenticatedUsername())
-                .at(ip2LocationService
+                .userStage(AuthServiceImpl.getAuthenticatedUsername())
+                .locateAt(ip2LocationService
                         .getLocation(ipAddressResolver.getClientIp(AuthServiceImpl.getHttpServletRequest())).toString())
-                .on(LocalDateTime.now())
+                .onTime(LocalDateTime.now())
                 .build();
         try {
             interactionRepository.saveAndFlush(productInteraction);
