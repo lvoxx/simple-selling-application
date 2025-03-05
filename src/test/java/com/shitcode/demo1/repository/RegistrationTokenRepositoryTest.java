@@ -16,20 +16,18 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.ActiveProfiles;
 
 import com.shitcode.demo1.entity.RegistrationToken;
-import com.shitcode.demo1.testcontainer.AbstractTestContainer;
+import com.shitcode.demo1.testcontainer.AbstractRepositoryTest;
 
-@DataJpaTest
 @AutoConfigureTestDatabase(replace = Replace.NONE) // Dont load String datasource autoconfig
 @ActiveProfiles("test")
 @DisplayName("Registration Token Repository Tests")
 @Tags({
         @Tag("Reporitory"), @Tag("No Mock")
 })
-public class RegistrationTokenRepositoryTest extends AbstractTestContainer {
+public class RegistrationTokenRepositoryTest extends AbstractRepositoryTest {
 
     @Autowired
     RegistrationTokenRepository repository;
@@ -46,7 +44,7 @@ public class RegistrationTokenRepositoryTest extends AbstractTestContainer {
                 .userId(userId)
                 .build();
 
-        repository.saveAndFlush(registrationToken);
+        repository.save(registrationToken);
     }
 
     @AfterEach

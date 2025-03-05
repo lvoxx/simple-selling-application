@@ -14,23 +14,21 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ActiveProfiles;
 
 import com.shitcode.demo1.entity.Category;
-import com.shitcode.demo1.testcontainer.AbstractTestContainer;
+import com.shitcode.demo1.testcontainer.AbstractRepositoryTest;
 
-@DataJpaTest
-@AutoConfigureTestDatabase(replace = Replace.NONE) //Dont load String datasource autoconfig
+@AutoConfigureTestDatabase(replace = Replace.NONE) // Dont load String datasource autoconfig
 @ActiveProfiles("test")
 @DisplayName("Category Repository Tests")
 @Tags({
         @Tag("Reporitory"), @Tag("No Mock")
 })
-public class CategoryRepositoryTest extends AbstractTestContainer {
+public class CategoryRepositoryTest extends AbstractRepositoryTest {
     @Autowired
     CategoryRepository categoryRepository;
 
@@ -41,7 +39,7 @@ public class CategoryRepositoryTest extends AbstractTestContainer {
                 Category.builder().name("Fashion").build(),
                 Category.builder().name("Computer").build());
 
-        categoryRepository.saveAllAndFlush(categories);
+        categoryRepository.saveAll(categories);
     }
 
     @AfterEach

@@ -16,7 +16,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -24,16 +23,15 @@ import org.springframework.test.context.ActiveProfiles;
 
 import com.shitcode.demo1.entity.Category;
 import com.shitcode.demo1.entity.Product;
-import com.shitcode.demo1.testcontainer.AbstractTestContainer;
+import com.shitcode.demo1.testcontainer.AbstractRepositoryTest;
 
-@DataJpaTest
-@AutoConfigureTestDatabase(replace = Replace.NONE) //Dont load String datasource autoconfig
+@AutoConfigureTestDatabase(replace = Replace.NONE) // Dont load String datasource autoconfig
 @ActiveProfiles("test")
 @DisplayName("Product Repository Tests")
 @Tags({
         @Tag("Reporitory"), @Tag("No Mock")
 })
-public class ProductRepositoryTest extends AbstractTestContainer {
+public class ProductRepositoryTest extends AbstractRepositoryTest {
     @Autowired
     ProductRepository productRepository;
     @Autowired
@@ -41,7 +39,7 @@ public class ProductRepositoryTest extends AbstractTestContainer {
 
     @BeforeEach
     void setUp() {
-        List<Category> categories = categoryRepository.saveAllAndFlush(List.of(
+        List<Category> categories = categoryRepository.saveAll(List.of(
                 Category.builder().name("Phone").build(),
                 Category.builder().name("Fashion").build(),
                 Category.builder().name("Computer").build()));
@@ -70,7 +68,7 @@ public class ProductRepositoryTest extends AbstractTestContainer {
                         .price(BigDecimal.valueOf(999.99))
                         .category(categories.get(2))
                         .build());
-        productRepository.saveAllAndFlush(products);
+        productRepository.saveAll(products);
     }
 
     @AfterEach

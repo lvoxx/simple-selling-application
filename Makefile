@@ -62,4 +62,4 @@ ps:
 report:
 	@echo "Running tests and generating Surefire report..."
 	mvn clean surefire-report:report
-	@echo "Surefire report generated in target/site/surefire-report.html"
+	@echo "Surefire report generated in target/reports/surefire.html"

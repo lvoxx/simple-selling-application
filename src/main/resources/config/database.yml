@@ -16,7 +16,7 @@ spring:
     hibernate:
       # Hibernate ddl auto (create, create-drop, update): with "create-drop" the database
       # schema will be automatically created afresh for every start of application
-      ddl-auto: create-drop
+      ddl-auto: create
     open-in-view: false
     properties:
       hibernate:
