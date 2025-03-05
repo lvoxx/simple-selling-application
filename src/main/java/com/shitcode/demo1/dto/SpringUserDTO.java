@@ -78,6 +78,11 @@ public abstract class SpringUserDTO {
         @Size(max = 60, message = "Last name must not exceed 60 characters")
         private String lastName;
 
+        @Phone(message = "{validation.new-user.phone}")
+        @Size(min = 4, max = 14)
+        @Schema(description = "User's phone number", example = "+1-5551234567", required = true)
+        private final String phoneNumber;
+
         @NotEmpty(message = "Roles are not specified")
         private List<String> roles;
 

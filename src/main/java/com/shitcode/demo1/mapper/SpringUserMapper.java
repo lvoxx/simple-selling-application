@@ -15,7 +15,11 @@ public interface SpringUserMapper {
 
         // Map SpringUserRegisterRequest to SpringUser
         @Mappings({
-                        @Mapping(target = "id", ignore = true)
+                        @Mapping(target = "id", ignore = true),
+                        @Mapping(target = "enabled", ignore = true),
+                        @Mapping(target = "locked", ignore = true),
+                        @Mapping(target = "points", ignore = true),
+                        @Mapping(target = "roles", ignore = true)
         })
         SpringUser toSpringUser(SpringUserDTO.UserRequest request);
 

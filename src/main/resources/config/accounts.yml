@@ -2,6 +2,7 @@ accounts:
   root:
     first-name: Lvoxx
     last-name: Aegg Srtist
+    phone: +84-069696969
     email: <change-me>    
     password: <change-me> 
     locked: false

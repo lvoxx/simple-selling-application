@@ -38,6 +38,7 @@ public class ApplicationInitializer implements CommandLineRunner {
                 .password(passwordEncoder.encode(account.getPassword()))
                 .firstName(account.getFirstName())
                 .lastName(account.getLastName())
+                .phoneNumber(account.getPhone())
                 .locked(account.isLocked())
                 .enabled(account.isEnabled())
                 .points(account.getPoints())
