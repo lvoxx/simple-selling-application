@@ -36,7 +36,7 @@ import com.shitcode.demo1.security.SpringUserDetails;
 })
 @SpringBootTest(classes = { JwtService.class, JwtConfig.class,
                 RsaKeyConfigData.class, JwtConfigData.class,
-                ClientConfigData.class }, webEnvironment = WebEnvironment.DEFINED_PORT)
+                ClientConfigData.class }, webEnvironment = WebEnvironment.RANDOM_PORT)
 @EnableAutoConfiguration(exclude = { JpaRepositoriesAutoConfiguration.class,
                 DataSourceAutoConfiguration.class })
 @ActiveProfiles("test")
