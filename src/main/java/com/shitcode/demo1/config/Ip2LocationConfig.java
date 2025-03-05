@@ -11,7 +11,7 @@ import com.ip2location.IP2Location;
 
 @Configuration
 public class Ip2LocationConfig {
-    private final String DB_FILE = "ip2location/IP2LOCATION-LITE-DB1.bin";
+    private final String DB_FILE = "ip2location/IP2LOCATION-LITE-DB1.BIN";
 
     private final ResourceLoader resourceLoader;
 
