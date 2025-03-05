@@ -12,7 +12,7 @@ WORKDIR /build
 RUN mvn package -DskipTests
 
 # ------------ layers_build ------------
-FROM eclipse-temurin:3.9.9-jre-alpine-3.21 as layers_build
+FROM eclipse-temurin:21-jre-alpine-3.21 AS layers_build
 WORKDIR /application
 ARG JAR_FILE=/build/target/*.jar
 
