@@ -34,21 +34,28 @@ helm-convert:
 
 # Start Services
 up:
-	$(EMAIL_COMPOSE_CMD) -f docker-compose.email.yaml up -d
 	$(COMPOSE_CMD) $(foreach svc,$(SERVICES),-f docker-compose.$(svc).yaml) up -d
 
 # Stop Services
 down:
-	$(EMAIL_COMPOSE_CMD) -f docker-compose.email.yaml down
 	$(COMPOSE_CMD) $(foreach svc,$(SERVICES),-f docker-compose.$(svc).yaml) down
 
 # Start a Specific Service
 up-%:
+ifeq ($*,email)
+	$(EMAIL_COMPOSE_CMD) -f docker-compose.email.yaml up -d
+else
 	$(COMPOSE_CMD) -f docker-compose.$*.yaml up -d
+endif
 
 # Stop a Specific Service
 down-%:
+ifeq ($*,email)
+	$(EMAIL_COMPOSE_CMD) -f docker-compose.email.yaml down
+else
 	$(COMPOSE_CMD) -f docker-compose.$*.yaml down
+endif
+
 
 # View Logs
 logs:
