@@ -1,10 +1,9 @@
 # Environment Configuration
 DEV ?= true
 ENV := $(if $(filter true,$(DEV)),.env.dev,.env.prod)
-EMAIL_ENV := mailserver.env
 COMMON_COMPOSE := -f docker-compose.yaml
 COMPOSE_CMD := docker-compose --env-file $(ENV) $(COMMON_COMPOSE)
-EMAIL_COMPOSE_CMD := docker-compose --env-file $(EMAIL_ENV) $(COMMON_COMPOSE)
+EMAIL_COMPOSE_CMD := docker-compose $(COMMON_COMPOSE)
 SERVICES := db app
 NETWORK_FILE := docker-compose.yaml  # Ensure network file is included
 
