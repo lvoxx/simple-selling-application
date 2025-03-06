@@ -46,7 +46,7 @@ public class MailServiceImpl implements MailService {
         String subject = mailingConfigData.getRegisterEmail().getSubject();
 
         // Load and replace content
-        String htmlContent = loadHtmlTemplate("mail/activation.html");
+        String htmlContent = loadHtmlTemplate(mailingConfigData.getRegisterEmail().getTemplateUrl());
         htmlContent = htmlContent.replace("${ActivationUrl}", activationLink);
         htmlContent = htmlContent.replace("${LoginUrl}", serverConfigData.getFeLoginUrl());
 
