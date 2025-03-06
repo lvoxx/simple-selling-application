@@ -78,6 +78,8 @@ public class AuthController {
         @ApiResponses(value = {
                         @ApiResponse(responseCode = "200", description = "Login successful", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseDTO.class))),
                         @ApiResponse(responseCode = "400", description = "Invalid request", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorModel.class))),
+                        @ApiResponse(responseCode = "409", description = "Registration token conflicts", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorModel.class))),
+                        @ApiResponse(responseCode = "418", description = "Registration token already inuse", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorModel.class))),
                         @ApiResponse(responseCode = "429", description = "Too many request", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorModel.class)))
         })
         @PostMapping(path = "/signup", produces = "application/vnd.lvoxx.app-v1+json")
