@@ -91,26 +91,34 @@ public class SpringUserServiceImpl implements SpringUserService {
 
     @Override
     public Response lockOrNotUser(Long userId, boolean isLocked) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'lockUser'");
+        SpringUser user = findById(userId);
+        user.setLocked(isLocked);
+        SpringUser res = springUserRepository.saveAndFlush(user);
+        return mapper.toSpringUserResponse(res);
     }
 
     @Override
     public Response lockOrNotUser(String email, boolean isLocked) {
-        // TODO Auto-generated method stub
-        return null;
+        SpringUser user = findByEmail(email);
+        user.setLocked(isLocked);
+        SpringUser res = springUserRepository.saveAndFlush(user);
+        return mapper.toSpringUserResponse(res);
     }
 
     @Override
     public Response disableOrNotUser(Long userId, boolean isDisabled) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'disableUser'");
+        SpringUser user = findById(userId);
+        user.setEnabled(!isDisabled);
+        SpringUser res = springUserRepository.saveAndFlush(user);
+        return mapper.toSpringUserResponse(res);
     }
 
     @Override
     public Response disableOrNotUser(String email, boolean isDisabled) {
-        // TODO Auto-generated method stub
-        return null;
+        SpringUser user = findByEmail(email);
+        user.setEnabled(!isDisabled);
+        SpringUser res = springUserRepository.saveAndFlush(user);
+        return mapper.toSpringUserResponse(res);
     }
 
     private SpringUserDTO.Response createUser(SpringUser user, boolean isValidEmail) {

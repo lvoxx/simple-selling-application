@@ -7,11 +7,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import com.shitcode.demo1.exception.model.ConflictRegistrationTokenException;
 import com.shitcode.demo1.exception.model.EntityExistsException;
 import com.shitcode.demo1.exception.model.EntityNotFoundException;
 import com.shitcode.demo1.exception.model.ErrorModel;
 import com.shitcode.demo1.exception.model.KeyLockMissedException;
 import com.shitcode.demo1.exception.model.ResourceNotFoundException;
+import com.shitcode.demo1.exception.model.RevokeRegistrationTokenException;
 import com.shitcode.demo1.exception.model.SendingMailException;
 import com.shitcode.demo1.exception.model.WorkerBusyException;
 
@@ -26,6 +28,12 @@ public class ApplicationExceptionHandler {
         return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
+    @ExceptionHandler({ RevokeRegistrationTokenException.class })
+    public ResponseEntity<ErrorModel> handleOtherOffer(RuntimeException ex) {
+        ErrorModel errorResponse = ErrorModel.of(HttpStatus.I_AM_A_TEAPOT, ex.getMessage(), null);
+        return new ResponseEntity<>(errorResponse, HttpStatus.I_AM_A_TEAPOT);
+    }
+
     @ExceptionHandler({ EntityNotFoundException.class, ResourceNotFoundException.class
     })
     public ResponseEntity<ErrorModel> handleDataNotFoundOperationException(RuntimeException ex) {
@@ -33,7 +41,7 @@ public class ApplicationExceptionHandler {
         return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
     }
 
-    @ExceptionHandler({ EntityExistsException.class })
+    @ExceptionHandler({ EntityExistsException.class, ConflictRegistrationTokenException.class })
     public ResponseEntity<ErrorModel> handleDataExistsOperationException(RuntimeException ex) {
         ErrorModel errorResponse = ErrorModel.of(HttpStatus.CONFLICT, ex.getMessage(), null);
         return new ResponseEntity<>(errorResponse, HttpStatus.CONFLICT);

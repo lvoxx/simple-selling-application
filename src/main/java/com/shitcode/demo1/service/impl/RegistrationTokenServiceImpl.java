@@ -1,6 +1,7 @@
 package com.shitcode.demo1.service.impl;
 
 import java.time.Instant;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
@@ -8,7 +9,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.shitcode.demo1.annotation.logging.LogCollector;
 import com.shitcode.demo1.entity.RegistrationToken;
+import com.shitcode.demo1.exception.model.ConflictRegistrationTokenException;
 import com.shitcode.demo1.exception.model.EntityNotFoundException;
+import com.shitcode.demo1.exception.model.RevokeRegistrationTokenException;
 import com.shitcode.demo1.helper.DateFormatConverter;
 import com.shitcode.demo1.properties.AuthTokenConfigData;
 import com.shitcode.demo1.repository.RegistrationTokenRepository;
@@ -17,7 +20,7 @@ import com.shitcode.demo1.utils.LoggingModel;
 
 @Service
 @Transactional
-@LogCollector(loggingModel =  LoggingModel.SERVICE)
+@LogCollector(loggingModel = LoggingModel.SERVICE)
 public class RegistrationTokenServiceImpl implements RegistrationTokenService {
 
     private final RegistrationTokenRepository repository;
@@ -31,6 +34,15 @@ public class RegistrationTokenServiceImpl implements RegistrationTokenService {
 
     @Override
     public RegistrationToken createToken(Long userId) {
+        Optional.ofNullable(findByUserId(userId)).ifPresent(t -> {
+            // Link is expried, revoke token
+            if (t.getExpirationTime().compareTo(Instant.now()) >= 0) {
+                revokeToken(userId);
+                throw new RevokeRegistrationTokenException("{exception.registration.revoke}");
+            }
+            // Signup email is on date, don't resend
+            throw new ConflictRegistrationTokenException("{exception.registration.conflict}");
+        });
         String token = UUID.randomUUID().toString();
         Instant expirationTime = DateFormatConverter.generateExpirationDate(authTokenConfigData.getRegisterExpDate(),
                 authTokenConfigData.getRegisterExpDateFormat());
@@ -45,8 +57,7 @@ public class RegistrationTokenServiceImpl implements RegistrationTokenService {
 
     @Override
     public RegistrationToken revokeToken(Long userId) {
-        RegistrationToken registrationToken = repository.findByUserId(userId)
-                .orElseThrow(() -> new EntityNotFoundException("User is not found"));
+        RegistrationToken registrationToken = findByUserId(userId);
 
         String token = UUID.randomUUID().toString();
         Instant expirationTime = DateFormatConverter.generateExpirationDate(authTokenConfigData.getRegisterExpDate(),
@@ -55,6 +66,12 @@ public class RegistrationTokenServiceImpl implements RegistrationTokenService {
         registrationToken.setToken(token);
 
         return repository.save(registrationToken);
+    }
+
+    private RegistrationToken findByUserId(Long userId) {
+        RegistrationToken registrationToken = repository.findByUserId(userId)
+                .orElseThrow(() -> new EntityNotFoundException("User is not found"));
+        return registrationToken;
     }
 
     @Override

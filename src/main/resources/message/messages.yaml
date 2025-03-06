@@ -8,6 +8,9 @@ validation:
     phone: Invalid phone number format. Expected format +<country code>-<number>
 
 exception:
+  registration:
+    revoke: Resend signup email.
+    conflict: Signup email has been sent.
   resource-not-found:
     default: Resource {} Not Found.
     rate-limit: Limit Resources not found.
