@@ -1,7 +1,7 @@
 auth-token:
-  register-exp-date: 2
-  register-exp-date-format: H
-  register-revoke-exp-date: 30
+  register-exp-date: 30
+  register-exp-date-format: M
+  register-revoke-exp-date: 15
   register-revoke-exp-date-format: M
 
 security-path:
