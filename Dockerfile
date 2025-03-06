@@ -21,7 +21,7 @@ COPY --from=build_layer ${JAR_FILE} application.jar
 RUN java -Djarmode=layertools -jar application.jar extract
 
 # ------------ BUILD IMAGE ------------
-FROM eclipse-temurin:21-jre-alpine-3.21
+FROM gcr.io/distroless/java21-debian12
 
 # Copy extracted layers
 WORKDIR /application
