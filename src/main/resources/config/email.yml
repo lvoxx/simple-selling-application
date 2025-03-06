@@ -11,3 +11,9 @@ spring:
           auth: false
           starttls:
             enable: false
+
+mailing:
+  register-email:
+    subject: Activate Your Account
+    path: /activate
+    template-url: html/activation.htm

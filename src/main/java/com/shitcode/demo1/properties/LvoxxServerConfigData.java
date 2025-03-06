@@ -11,11 +11,13 @@ import lombok.Data;
 public class LvoxxServerConfigData {
     private ServerConfig devServer;
     private ServerConfig prodServer;
+    private ServerConfig fontendServer;
     private ContactConfig contact;
     private LicenseConfig license;
     private InfoConfig info;
     private ExternalDocumentationConfig externalDocumentation;
     private boolean productDeploy;
+    private String feLoginUrl;
 
     @Data
     public static class ServerConfig {

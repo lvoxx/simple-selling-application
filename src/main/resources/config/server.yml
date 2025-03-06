@@ -3,8 +3,11 @@ lvoxx-server:
     base-url: http://localhost:9090
     description: Dev BE Server
   prod-server:
-    base-url: http://www.lvoxxapplication.com
+    base-url: http://api.lvoxxapplication.com
     description: Product BE Server
+  fontend-server:
+    base-url: http://lvoxxapplication.com
+    description: Product FE Server
   contact:
     name: Lvoxx
     email: lvoxxartist@gmail.com
@@ -20,6 +23,7 @@ lvoxx-server:
     description: Full Documentation
     url: https://github.com/lvoxx/SimpleSellingApplication
   product-deploy: false
+  fe-login-url: "{lvoxx-server.fontend-server.base-url/login}"
 
 client:
   name: simple-selling-application

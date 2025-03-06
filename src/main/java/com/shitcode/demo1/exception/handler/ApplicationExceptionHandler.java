@@ -4,20 +4,23 @@ import java.security.InvalidParameterException;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import com.shitcode.demo1.exception.model.EntityExistsException;
 import com.shitcode.demo1.exception.model.EntityNotFoundException;
 import com.shitcode.demo1.exception.model.ErrorModel;
 import com.shitcode.demo1.exception.model.KeyLockMissedException;
 import com.shitcode.demo1.exception.model.ResourceNotFoundException;
+import com.shitcode.demo1.exception.model.SendingMailException;
 import com.shitcode.demo1.exception.model.WorkerBusyException;
 
-@ControllerAdvice
+@RestControllerAdvice
 public class ApplicationExceptionHandler {
 
-    @ExceptionHandler({ KeyLockMissedException.class, WorkerBusyException.class, InvalidParameterException.class })
+    @ExceptionHandler({ KeyLockMissedException.class, WorkerBusyException.class, InvalidParameterException.class,
+            SendingMailException.class
+    })
     public ResponseEntity<ErrorModel> handleDataOperationException(RuntimeException ex) {
         ErrorModel errorResponse = ErrorModel.of(HttpStatus.INTERNAL_SERVER_ERROR, ex.getMessage(), null);
         return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);

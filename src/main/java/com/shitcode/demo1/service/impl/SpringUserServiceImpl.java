@@ -16,6 +16,7 @@ import com.shitcode.demo1.dto.SpringUserDTO.UserRequest;
 import com.shitcode.demo1.entity.RegistrationToken;
 import com.shitcode.demo1.entity.SpringUser;
 import com.shitcode.demo1.exception.model.EntityExistsException;
+import com.shitcode.demo1.exception.model.SendingMailException;
 import com.shitcode.demo1.mapper.SpringUserMapper;
 import com.shitcode.demo1.repository.SpringUserRepository;
 import com.shitcode.demo1.service.MailService;
@@ -89,15 +90,27 @@ public class SpringUserServiceImpl implements SpringUserService {
     }
 
     @Override
-    public Response lockUser(Long userId) {
+    public Response lockOrNotUser(Long userId, boolean isLocked) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'lockUser'");
     }
 
     @Override
-    public Response disableUser(Long userId) {
+    public Response lockOrNotUser(String email, boolean isLocked) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Response disableOrNotUser(Long userId, boolean isDisabled) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'disableUser'");
+    }
+
+    @Override
+    public Response disableOrNotUser(String email, boolean isDisabled) {
+        // TODO Auto-generated method stub
+        return null;
     }
 
     private SpringUserDTO.Response createUser(SpringUser user, boolean isValidEmail) {
@@ -108,12 +121,12 @@ public class SpringUserServiceImpl implements SpringUserService {
             RegistrationToken token = tokenService.createToken(result.getId());
             // Send activation email
             try {
-                mailService.sendActivationEmail(result.getEmail(), token.getToken(),
-                        String.format("%s %s", result.getFirstName(), result.getLastName()));
+                mailService.sendActivationEmail(result.getEmail(), token.getToken());
             } catch (Exception e) {
                 LogPrinter.printServiceLog(LogPrinter.Type.ERROR, "AuthServiceImpl", "signUp",
                         LocalDateTime.now().toString(),
                         e.getMessage());
+                throw new SendingMailException(e.getMessage(), e.getCause());
             }
         }
 
@@ -122,7 +135,12 @@ public class SpringUserServiceImpl implements SpringUserService {
 
     private SpringUser findByEmail(String username) {
         return springUserRepository.findByEmail(username).orElseThrow(
-                () -> new EntityExistsException(String.format("User with email %s doesn't exist", username)));
+                () -> new EntityExistsException(String.format("{exception.entity-not-found.user-email}", username)));
+    }
+
+    private SpringUser findById(Long id) {
+        return springUserRepository.findById(id).orElseThrow(
+                () -> new EntityExistsException(String.format("{exception.entity-not-found.user-id}", id)));
     }
 
 }

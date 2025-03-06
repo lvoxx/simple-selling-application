@@ -36,7 +36,7 @@ import lombok.Data;
 @Data
 @RestController
 @LogCollector
-@RequestMapping(path = "/categories", produces = "application/vnd.lvoxx.app-v1+json")
+@RequestMapping("/categories")
 @Tag(name = "Category Controller", description = "APIs for managing categories")
 public class CategoryController {
 
@@ -62,7 +62,7 @@ public class CategoryController {
                 MANAGE_PLAN = rateLimiterConfigData.getRateLimiterPlan("category", "manage");
         }
 
-        @GetMapping
+        @GetMapping(produces = "application/vnd.lvoxx.app-v1+json")
         @Operation(summary = "Get all categories with pagination", description = "Retrieves a paginated list of categories. Supports sorting and ordering.", responses = {
                         @ApiResponse(responseCode = "200", description = "Successfully retrieved categories"),
                         @ApiResponse(responseCode = "400", description = "Invalid request parameters"),
@@ -83,7 +83,7 @@ public class CategoryController {
                                 FIND_ALL_PLAN);
         }
 
-        @GetMapping("/{id}")
+        @GetMapping(path = "/{id}", produces = "application/vnd.lvoxx.app-v1+json")
         @Operation(summary = "Get category by ID", description = "Retrieves details of a category by its ID.")
         @ApiResponses(value = {
                         @ApiResponse(responseCode = "200", description = "Successfully retrieved the category"),
@@ -97,7 +97,7 @@ public class CategoryController {
                                 ID_PLAN);
         }
 
-        @PostMapping
+        @PostMapping(produces = "application/vnd.lvoxx.app-v1+json")
         @Operation(summary = "Create a new category", description = "Adds a new category to the system. Requires a valid JWT token for authentication.", security = @SecurityRequirement(name = "bearerAuth"))
         @ApiResponses(value = {
                         @ApiResponse(responseCode = "201", description = "Category created successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseDTO.class))),
@@ -116,7 +116,7 @@ public class CategoryController {
                                 MANAGE_PLAN);
         }
 
-        @PutMapping("/{id}")
+        @PutMapping(path = "/{id}", produces = "application/vnd.lvoxx.app-v1+json")
         @Operation(summary = "Update an existing category", description = "Updates the details of an existing category by its ID. Requires a valid JWT token for authentication.", security = @SecurityRequirement(name = "bearerAuth"))
         @ApiResponses(value = {
                         @ApiResponse(responseCode = "200", description = "Category updated successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseDTO.class))),
@@ -138,7 +138,7 @@ public class CategoryController {
                                 MANAGE_PLAN);
         }
 
-        @DeleteMapping("/{id}")
+        @DeleteMapping(path = "/{id}", produces = "application/vnd.lvoxx.app-v1+json")
         @Operation(summary = "Delete a category", description = "Deletes a category by its ID. Requires a valid JWT token for authentication.", security = @SecurityRequirement(name = "bearerAuth"))
         @ApiResponses(value = {
                         @ApiResponse(responseCode = "204", description = "Category deleted successfully"),

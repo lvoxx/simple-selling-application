@@ -1,8 +1,8 @@
 auth-token:
   register-exp-date: 2
-  register-exp-date-format: hour
+  register-exp-date-format: H
   register-revoke-exp-date: 30
-  register-revoke-exp-date-format: minute
+  register-revoke-exp-date-format: M
 
 security-path:
   everyone: [

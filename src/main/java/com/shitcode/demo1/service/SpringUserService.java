@@ -16,7 +16,11 @@ public interface SpringUserService {
 
     SpringUserDTO.Response privateUpdateUser(SpringUserDTO.AdminRequest request, Long userId);
 
-    SpringUserDTO.Response lockUser(Long userId);
+    SpringUserDTO.Response lockOrNotUser(Long userId, boolean isLocked);
 
-    SpringUserDTO.Response disableUser(Long userId);
+    SpringUserDTO.Response disableOrNotUser(Long userId, boolean isDisabled);
+
+    SpringUserDTO.Response lockOrNotUser(String email, boolean isLocked);
+
+    SpringUserDTO.Response disableOrNotUser(String email, boolean isDisabled);
 }

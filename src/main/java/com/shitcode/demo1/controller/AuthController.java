@@ -30,7 +30,7 @@ import lombok.Data;
 
 @Data
 @RestController
-@RequestMapping(path = "/auth", produces = "application/vnd.lvoxx.app-v1+json")
+@RequestMapping("/auth")
 @Tag(name = "Authentication", description = "APIs for user authentication")
 @LogCollector
 public class AuthController {
@@ -64,7 +64,7 @@ public class AuthController {
                         @ApiResponse(responseCode = "400", description = "Invalid request", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorModel.class))),
                         @ApiResponse(responseCode = "429", description = "Too many request", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorModel.class)))
         })
-        @PostMapping("/login")
+        @PostMapping(path = "/login", produces = "application/vnd.lvoxx.app-v1+json")
         public ResponseEntity<?> loginV1(
                         @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Login credentials", required = true, content = @Content(schema = @Schema(implementation = AuthDTO.LoginRequest.class))) @Valid @RequestBody AuthDTO.LoginRequest request)
                         throws Exception {
@@ -80,7 +80,7 @@ public class AuthController {
                         @ApiResponse(responseCode = "400", description = "Invalid request", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorModel.class))),
                         @ApiResponse(responseCode = "429", description = "Too many request", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorModel.class)))
         })
-        @PostMapping("/signup")
+        @PostMapping(path = "/signup", produces = "application/vnd.lvoxx.app-v1+json")
         public ResponseEntity<?> signUpV1(
                         @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Login credentials", required = true, content = @Content(schema = @Schema(implementation = SpringUserDTO.UserRequest.class))) @Valid @RequestBody SpringUserDTO.UserRequest request)
                         throws Exception {

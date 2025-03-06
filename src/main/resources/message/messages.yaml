@@ -7,12 +7,6 @@ validation:
     password: Password must be between {minSize} and {maxSize} characters and contain at least one special character.
     phone: Invalid phone number format. Expected format +<country code>-<number>
 
-mailing:
-  register-email:
-    subject: "Activate Your Account"
-    path: "/activate"
-    content: "Hi %s,\n\nWelcome to our service! Please click the link below to activate your account:\n\n%s\n\nIf you didn't sign up, please ignore this email.\n\nBest regards,\nYour Team"
-
 exception:
   resource-not-found:
     default: Resource {} Not Found.
@@ -22,6 +16,8 @@ exception:
   entity-not-found:
     category-name: Can not found category with name [%s]
     category-id: Can not found category with id [%d]
+    user-email: Can not found user with email [%s]
+    user-id: Can not found user with id [%d]
     product-name: Can not found product with name [%s]
     product-id: Can not found product with id [%d]
   entity-exists:
