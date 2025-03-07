@@ -15,6 +15,7 @@ import com.shitcode.demo1.exception.model.KeyLockMissedException;
 import com.shitcode.demo1.exception.model.ResourceNotFoundException;
 import com.shitcode.demo1.exception.model.RevokeTokenException;
 import com.shitcode.demo1.exception.model.SendingMailException;
+import com.shitcode.demo1.exception.model.TokenExpiredException;
 import com.shitcode.demo1.exception.model.WorkerBusyException;
 
 @RestControllerAdvice
@@ -32,6 +33,12 @@ public class ApplicationExceptionHandler {
     public ResponseEntity<ErrorModel> handleOtherOffer(RuntimeException ex) {
         ErrorModel errorResponse = ErrorModel.of(HttpStatus.I_AM_A_TEAPOT, ex.getMessage(), null);
         return new ResponseEntity<>(errorResponse, HttpStatus.I_AM_A_TEAPOT);
+    }
+
+    @ExceptionHandler({ TokenExpiredException.class })
+    public ResponseEntity<ErrorModel> handleExpire(RuntimeException ex) {
+        ErrorModel errorResponse = ErrorModel.of(HttpStatus.GONE, ex.getMessage(), null);
+        return new ResponseEntity<>(errorResponse, HttpStatus.GONE);
     }
 
     @ExceptionHandler({ EntityNotFoundException.class, ResourceNotFoundException.class

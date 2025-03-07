@@ -100,17 +100,16 @@ public class AuthController {
         @Operation(summary = "Active user account", description = "Active user account that registered", tags = {
                         "Authentication" })
         @ApiResponses(value = {
-                        @ApiResponse(responseCode = "200", description = "Login successful", content = @Content(mediaType = "application/vnd.lvoxx.app-v1+json", schema = @Schema(implementation = ResponseDTO.class))),
-                        @ApiResponse(responseCode = "400", description = "Invalid request", content = @Content(mediaType = "application/vnd.lvoxx.app-v1+json", schema = @Schema(implementation = ErrorModel.class))),
-                        @ApiResponse(responseCode = "409", description = "Registration token conflicts", content = @Content(mediaType = "application/vnd.lvoxx.app-v1+json", schema = @Schema(implementation = ErrorModel.class))),
-                        @ApiResponse(responseCode = "418", description = "Registration token already inuse", content = @Content(mediaType = "application/vnd.lvoxx.app-v1+json", schema = @Schema(implementation = ErrorModel.class))),
+                        @ApiResponse(responseCode = "200", description = "Active user successfully", content = @Content(mediaType = "application/vnd.lvoxx.app-v1+json", schema = @Schema(implementation = ResponseDTO.class))),
+                        @ApiResponse(responseCode = "400", description = "Registration token not found", content = @Content(mediaType = "application/vnd.lvoxx.app-v1+json", schema = @Schema(implementation = ErrorModel.class))),
+                        @ApiResponse(responseCode = "410", description = "Registration token is expired", content = @Content(mediaType = "application/vnd.lvoxx.app-v1+json", schema = @Schema(implementation = ErrorModel.class))),
                         @ApiResponse(responseCode = "429", description = "Too many request", content = @Content(mediaType = "application/vnd.lvoxx.app-v1+json", schema = @Schema(implementation = ErrorModel.class)))
         })
         @GetMapping(path = "#{@mailingConfigData.getRegisterEmail().getPath()}", produces = "application/vnd.lvoxx.app-v1+json")
         public ResponseEntity<?> activeUserV1(@RequestParam String token) throws Exception {
                 return responseService.mapping(
                                 () -> new ResponseEntity<>(springUserService.activeUserAccount(token),
-                                                HttpStatus.CREATED),
+                                                HttpStatus.OK),
                                 COMPLETE_SIGNUP);
         }
 
