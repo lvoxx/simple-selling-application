@@ -35,9 +35,10 @@ public class RegistrationTokenServiceImpl implements RegistrationTokenService {
 
     @Override
     public RegistrationToken createToken(Long userId) {
-        Optional.ofNullable(repository.findByUserId(userId).get()).ifPresent(t -> {
+        Optional.ofNullable(repository.findByUserId(userId)).ifPresent(t -> {
+            RegistrationToken oldToken = t.get();
             // Link is expried, revoke token
-            if (t.getExpirationTime().compareTo(Instant.now()) >= 0) {
+            if (oldToken.getExpirationTime().compareTo(Instant.now()) >= 0) {
                 revokeToken(userId);
                 throw new RevokeTokenException("{exception.registration.revoke}");
             }
