@@ -24,7 +24,7 @@ RUN java -Djarmode=layertools -jar application.jar extract
 FROM gcr.io/distroless/java21-debian12
 
 # Copy extracted layers
-WORKDIR /application
+WORKDIR /deploy
 COPY --from=layers_build application/dependencies/ ./
 COPY --from=layers_build application/spring-boot-loader/ ./
 COPY --from=layers_build application/snapshot-dependencies/ ./
