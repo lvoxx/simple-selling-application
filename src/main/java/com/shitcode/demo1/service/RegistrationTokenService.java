@@ -7,5 +7,9 @@ public interface RegistrationTokenService {
 
     RegistrationToken revokeToken(Long userId);
 
+    RegistrationToken findByToken(String token);
+
+    RegistrationToken validToken(String token);
+
     void deleteToken(String token);
 }

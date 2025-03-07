@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.shitcode.demo1.annotation.logging.LogCollector;
+import com.shitcode.demo1.dto.GenericDTO;
 import com.shitcode.demo1.dto.SpringUserDTO;
 import com.shitcode.demo1.dto.SpringUserDTO.AdminRequest;
 import com.shitcode.demo1.dto.SpringUserDTO.Response;
@@ -87,6 +88,13 @@ public class SpringUserServiceImpl implements SpringUserService {
     public Response privateUpdateUser(AdminRequest request, Long userId) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'privateUpdateUser'");
+    }
+
+    @Override
+    public GenericDTO.Response activeUserAccount(String token) {
+        RegistrationToken registrationToken = tokenService.findByToken(token);
+        lockOrNotUser(registrationToken.getUserId(), false);
+        return GenericDTO.Response.builder().message("{success.user.active}").build();
     }
 
     @Override

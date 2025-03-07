@@ -6,6 +6,7 @@
 # HARD - 12 / 10 minutes
 # AUTH - 5 / 30 minutes
 # SIGNUP - 2 / 7 days
+# COMPLETE_SIGNUP - 5 / 7 days
 # REGRANT_AUTH - 3 / 45 minutes
 # RENEW_TOKEN - 5 / 30 days
 rate-limiter:
@@ -26,5 +27,6 @@ rate-limiter:
   auth:
     login: AUTH
     signup: SIGNUP
+    complete_signup: COMPLETE_SIGNUP
     renew-token: RENEW_TOKEN
     forgot-password: REGRANT_AUTH

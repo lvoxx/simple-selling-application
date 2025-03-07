@@ -27,6 +27,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.PostConstruct;
 import jakarta.validation.Valid;
 import lombok.Data;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @Data
 @RestController
@@ -50,19 +52,21 @@ public class AuthController {
 
         private RateLimiterPlan LOGIN_PLAN;
         private RateLimiterPlan SIGNUP_PLAN;
+        private RateLimiterPlan COMPLETE_SIGNUP;
 
         @PostConstruct
         public void setup() {
                 LOGIN_PLAN = rateLimiterConfigData.getRateLimiterPlan("auth", "login");
                 SIGNUP_PLAN = rateLimiterConfigData.getRateLimiterPlan("auth", "signup");
+                COMPLETE_SIGNUP = rateLimiterConfigData.getRateLimiterPlan("auth", "complete_signup");
         }
 
         @Operation(summary = "User login", description = "Authenticate a user and return JWT tokens.", tags = {
                         "Authentication" })
         @ApiResponses(value = {
-                        @ApiResponse(responseCode = "200", description = "Login successful", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseDTO.class))),
-                        @ApiResponse(responseCode = "400", description = "Invalid request", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorModel.class))),
-                        @ApiResponse(responseCode = "429", description = "Too many request", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorModel.class)))
+                        @ApiResponse(responseCode = "200", description = "Login successful", content = @Content(mediaType = "application/vnd.lvoxx.app-v1+json", schema = @Schema(implementation = ResponseDTO.class))),
+                        @ApiResponse(responseCode = "400", description = "Invalid request", content = @Content(mediaType = "application/vnd.lvoxx.app-v1+json", schema = @Schema(implementation = ErrorModel.class))),
+                        @ApiResponse(responseCode = "429", description = "Too many request", content = @Content(mediaType = "application/vnd.lvoxx.app-v1+json", schema = @Schema(implementation = ErrorModel.class)))
         })
         @PostMapping(path = "/login", produces = "application/vnd.lvoxx.app-v1+json")
         public ResponseEntity<?> loginV1(
@@ -73,14 +77,14 @@ public class AuthController {
                                 LOGIN_PLAN);
         }
 
-        @Operation(summary = "User signup", description = "User signup and send a registration email..", tags = {
+        @Operation(summary = "User signup", description = "User signup and send a registration email.", tags = {
                         "Authentication" })
         @ApiResponses(value = {
-                        @ApiResponse(responseCode = "200", description = "Login successful", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseDTO.class))),
-                        @ApiResponse(responseCode = "400", description = "Invalid request", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorModel.class))),
-                        @ApiResponse(responseCode = "409", description = "Registration token conflicts", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorModel.class))),
-                        @ApiResponse(responseCode = "418", description = "Registration token already inuse", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorModel.class))),
-                        @ApiResponse(responseCode = "429", description = "Too many request", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorModel.class)))
+                        @ApiResponse(responseCode = "200", description = "Login successful", content = @Content(mediaType = "application/vnd.lvoxx.app-v1+json", schema = @Schema(implementation = ResponseDTO.class))),
+                        @ApiResponse(responseCode = "400", description = "Invalid request", content = @Content(mediaType = "application/vnd.lvoxx.app-v1+json", schema = @Schema(implementation = ErrorModel.class))),
+                        @ApiResponse(responseCode = "409", description = "Registration token conflicts", content = @Content(mediaType = "application/vnd.lvoxx.app-v1+json", schema = @Schema(implementation = ErrorModel.class))),
+                        @ApiResponse(responseCode = "418", description = "Registration token already inuse", content = @Content(mediaType = "application/vnd.lvoxx.app-v1+json", schema = @Schema(implementation = ErrorModel.class))),
+                        @ApiResponse(responseCode = "429", description = "Too many request", content = @Content(mediaType = "application/vnd.lvoxx.app-v1+json", schema = @Schema(implementation = ErrorModel.class)))
         })
         @PostMapping(path = "/signup", produces = "application/vnd.lvoxx.app-v1+json")
         public ResponseEntity<?> signUpV1(
@@ -90,6 +94,24 @@ public class AuthController {
                                 () -> new ResponseEntity<>(springUserService.publicCreateUser(request),
                                                 HttpStatus.CREATED),
                                 SIGNUP_PLAN);
+        }
+
+        // /auth/activate?token=...
+        @Operation(summary = "Active user account", description = "Active user account that registered", tags = {
+                        "Authentication" })
+        @ApiResponses(value = {
+                        @ApiResponse(responseCode = "200", description = "Login successful", content = @Content(mediaType = "application/vnd.lvoxx.app-v1+json", schema = @Schema(implementation = ResponseDTO.class))),
+                        @ApiResponse(responseCode = "400", description = "Invalid request", content = @Content(mediaType = "application/vnd.lvoxx.app-v1+json", schema = @Schema(implementation = ErrorModel.class))),
+                        @ApiResponse(responseCode = "409", description = "Registration token conflicts", content = @Content(mediaType = "application/vnd.lvoxx.app-v1+json", schema = @Schema(implementation = ErrorModel.class))),
+                        @ApiResponse(responseCode = "418", description = "Registration token already inuse", content = @Content(mediaType = "application/vnd.lvoxx.app-v1+json", schema = @Schema(implementation = ErrorModel.class))),
+                        @ApiResponse(responseCode = "429", description = "Too many request", content = @Content(mediaType = "application/vnd.lvoxx.app-v1+json", schema = @Schema(implementation = ErrorModel.class)))
+        })
+        @GetMapping(path = "#{@mailingConfigData.getRegisterEmail().getPath()}", produces = "application/vnd.lvoxx.app-v1+json")
+        public ResponseEntity<?> activeUserV1(@RequestParam String token) throws Exception {
+                return responseService.mapping(
+                                () -> new ResponseEntity<>(springUserService.activeUserAccount(token),
+                                                HttpStatus.CREATED),
+                                COMPLETE_SIGNUP);
         }
 
 }

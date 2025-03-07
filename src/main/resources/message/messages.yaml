@@ -7,10 +7,15 @@ validation:
     password: Password must be between {minSize} and {maxSize} characters and contain at least one special character.
     phone: Invalid phone number format. Expected format +<country code>-<number>
 
+success:
+  user:
+    active: User with id [%d] is actived.
+
 exception:
   registration:
     revoke: Resend signup email.
     conflict: Signup email has been sent.
+    expired: Token has been expired.
   resource-not-found:
     default: Resource {} Not Found.
     rate-limit: Limit Resources not found.
@@ -23,6 +28,8 @@ exception:
     user-id: Can not found user with id [%d]
     product-name: Can not found product with name [%s]
     product-id: Can not found product with id [%d]
+    registration-name: Can not found registration token with name [%s]
+    registration-token: Can not found registration token with token [%d]
   entity-exists:
     category: Category with name [%s] already exist.
     product: Product with name [%s] already exists.

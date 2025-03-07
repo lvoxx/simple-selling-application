@@ -9,9 +9,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.shitcode.demo1.annotation.logging.LogCollector;
 import com.shitcode.demo1.entity.RegistrationToken;
-import com.shitcode.demo1.exception.model.ConflictRegistrationTokenException;
+import com.shitcode.demo1.exception.model.ConflictTokenException;
 import com.shitcode.demo1.exception.model.EntityNotFoundException;
-import com.shitcode.demo1.exception.model.RevokeRegistrationTokenException;
+import com.shitcode.demo1.exception.model.RevokeTokenException;
+import com.shitcode.demo1.exception.model.TokenExpiredException;
 import com.shitcode.demo1.helper.DateFormatConverter;
 import com.shitcode.demo1.properties.AuthTokenConfigData;
 import com.shitcode.demo1.repository.RegistrationTokenRepository;
@@ -38,10 +39,10 @@ public class RegistrationTokenServiceImpl implements RegistrationTokenService {
             // Link is expried, revoke token
             if (t.getExpirationTime().compareTo(Instant.now()) >= 0) {
                 revokeToken(userId);
-                throw new RevokeRegistrationTokenException("{exception.registration.revoke}");
+                throw new RevokeTokenException("{exception.registration.revoke}");
             }
             // Signup email is on date, don't resend
-            throw new ConflictRegistrationTokenException("{exception.registration.conflict}");
+            throw new ConflictTokenException("{exception.registration.conflict}");
         });
         String token = UUID.randomUUID().toString();
         Instant expirationTime = DateFormatConverter.generateExpirationDate(authTokenConfigData.getRegisterExpDate(),
@@ -70,13 +71,29 @@ public class RegistrationTokenServiceImpl implements RegistrationTokenService {
 
     private RegistrationToken findByUserId(Long userId) {
         RegistrationToken registrationToken = repository.findByUserId(userId)
-                .orElseThrow(() -> new EntityNotFoundException("User is not found"));
+                .orElseThrow(() -> new EntityNotFoundException("{exception.entity-not-found.registration-id}"));
         return registrationToken;
     }
 
     @Override
     public void deleteToken(String token) {
         repository.deleteByToken(token);
+    }
+
+    @Override
+    public RegistrationToken findByToken(String token) {
+        RegistrationToken registrationToken = repository.findByToken(token)
+                .orElseThrow(() -> new EntityNotFoundException("{exception.entity-not-found.registration-token}"));
+        return registrationToken;
+    }
+
+    @Override
+    public RegistrationToken validToken(String token) {
+        RegistrationToken registrationToken = findByToken(token);
+        if (registrationToken.getExpirationTime().compareTo(Instant.now()) >= 0) {
+            throw new TokenExpiredException("{exception.registration.expired}");
+        }
+        return registrationToken;
     }
 
 }

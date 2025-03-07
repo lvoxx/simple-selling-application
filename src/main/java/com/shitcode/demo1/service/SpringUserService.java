@@ -1,10 +1,13 @@
 package com.shitcode.demo1.service;
 
+import com.shitcode.demo1.dto.GenericDTO;
 import com.shitcode.demo1.dto.SpringUserDTO;
 import com.shitcode.demo1.entity.SpringUser;
 
 public interface SpringUserService {
     SpringUserDTO.Response publicCreateUser(SpringUserDTO.UserRequest request);
+
+    GenericDTO.Response activeUserAccount(String token);
 
     SpringUserDTO.Response privateCreateUser(SpringUserDTO.AdminRequest request);
 
