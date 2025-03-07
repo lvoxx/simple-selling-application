@@ -19,11 +19,11 @@ import com.shitcode.demo1.entity.SpringUser;
 import com.shitcode.demo1.exception.model.EntityExistsException;
 import com.shitcode.demo1.exception.model.SendingMailException;
 import com.shitcode.demo1.mapper.SpringUserMapper;
+import com.shitcode.demo1.properties.ClientConfigData;
 import com.shitcode.demo1.repository.SpringUserRepository;
 import com.shitcode.demo1.service.MailService;
 import com.shitcode.demo1.service.RegistrationTokenService;
 import com.shitcode.demo1.service.SpringUserService;
-import com.shitcode.demo1.utils.ApplicationRoles;
 import com.shitcode.demo1.utils.LogPrinter;
 
 @Service
@@ -36,14 +36,17 @@ public class SpringUserServiceImpl implements SpringUserService {
     private final MailService mailService;
     private final BCryptPasswordEncoder passwordEncoder;
     private SpringUserMapper mapper;
+    private final ClientConfigData clientConfigData;
 
     public SpringUserServiceImpl(SpringUserRepository springUserRepository, RegistrationTokenService tokenService,
-            MailService mailService, BCryptPasswordEncoder passwordEncoder, SpringUserMapper mapper) {
+            MailService mailService, BCryptPasswordEncoder passwordEncoder, SpringUserMapper mapper,
+            ClientConfigData clientConfigData) {
         this.springUserRepository = springUserRepository;
         this.tokenService = tokenService;
         this.mailService = mailService;
         this.passwordEncoder = passwordEncoder;
         this.mapper = mapper;
+        this.clientConfigData = clientConfigData;
     }
 
     private SpringUserMapper springUserMapper = SpringUserMapper.INSTANCE;
@@ -55,7 +58,7 @@ public class SpringUserServiceImpl implements SpringUserService {
         user.setLocked(true);
         user.setEnabled(true);
         user.setPoints(BigDecimal.valueOf(0));
-        user.setRoles(List.of(ApplicationRoles.USER.getRole()));
+        user.setRoles(List.of(clientConfigData.getRoles().getUser()));
 
         return createUser(user, true);
     }

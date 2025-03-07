@@ -21,7 +21,6 @@ import org.springframework.security.web.SecurityFilterChain;
 import com.shitcode.demo1.properties.ClientConfigData;
 import com.shitcode.demo1.properties.SecurityPathsConfigData;
 import com.shitcode.demo1.security.JWTAuthenticationEntryPoint;
-import com.shitcode.demo1.utils.ApplicationRoles;
 
 @Configuration
 @EnableWebSecurity
@@ -52,13 +51,13 @@ public class SecurityConfig {
                             .requestMatchers(securityPathsConfigData.getEveryone()).permitAll()
                             // Users paths
                             .requestMatchers(securityPathsConfigData.getUser())
-                            .hasRole(clientConfigData.getRoles().get(ApplicationRoles.USER.getRole()))
+                            .hasRole(clientConfigData.getRoles().getUser())
                             // Super user paths
                             .requestMatchers(securityPathsConfigData.getSuperUser())
-                            .hasRole(clientConfigData.getRoles().get(ApplicationRoles.SUPER_USER.getRole()))
+                            .hasRole(clientConfigData.getRoles().getSuperUser())
                             // Admin paths
                             .requestMatchers(securityPathsConfigData.getAdmin())
-                            .hasRole(clientConfigData.getRoles().get(ApplicationRoles.ADMIN.getRole()))
+                            .hasRole(clientConfigData.getRoles().getAdmin())
                             .anyRequest().authenticated();
                 })
                 .exceptionHandling(exception -> exception

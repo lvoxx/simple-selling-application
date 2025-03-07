@@ -28,6 +28,6 @@ lvoxx-server:
 client:
   name: simple-selling-application
   roles:
-    user: user
-    super-user: super-user
-    admin: admin
+    user: USER
+    super-user: SUPER-USER
+    admin: ADMIN

@@ -1,7 +1,5 @@
 package com.shitcode.demo1.properties;
 
-import java.util.Map;
-
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
@@ -12,5 +10,12 @@ import lombok.Data;
 @ConfigurationProperties(prefix = "client")
 public class ClientConfigData {
     private String name;
-    private Map<String, String> roles;
+    private RoleConfig roles;
+    
+    @Data
+    public static class RoleConfig {
+        private String user;
+        private String superUser;
+        private String admin;
+    }
 }
