@@ -1,7 +1,6 @@
 package com.shitcode.demo1.service.impl;
 
 import java.time.Instant;
-import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
@@ -35,12 +34,11 @@ public class RegistrationTokenServiceImpl implements RegistrationTokenService {
 
     @Override
     public RegistrationToken createToken(Long userId) {
-        Optional.ofNullable(repository.findByUserId(userId)).ifPresent(t -> {
-            RegistrationToken oldToken = t.get();
+        repository.findByUserId(userId).ifPresent(t -> {
             // Link is expried, revoke token
-            if (oldToken.getExpirationTime().compareTo(Instant.now()) >= 0) {
-                revokeToken(userId);
-                throw new RevokeTokenException("{exception.registration.revoke}");
+            if (t.getExpirationTime().compareTo(Instant.now()) >= 0) {
+                resentToken(userId);
+                throw new RevokeTokenException("{exception.registration.resent}");
             }
             // Signup email is on date, don't resend
             throw new ConflictTokenException("{exception.registration.conflict}");
@@ -58,7 +56,7 @@ public class RegistrationTokenServiceImpl implements RegistrationTokenService {
     }
 
     @Override
-    public RegistrationToken revokeToken(Long userId) {
+    public RegistrationToken resentToken(Long userId) {
         RegistrationToken registrationToken = findByUserId(userId);
 
         String token = UUID.randomUUID().toString();

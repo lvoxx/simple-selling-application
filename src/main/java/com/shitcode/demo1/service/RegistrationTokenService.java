@@ -5,7 +5,7 @@ import com.shitcode.demo1.entity.RegistrationToken;
 public interface RegistrationTokenService {
     RegistrationToken createToken(Long userId);
 
-    RegistrationToken revokeToken(Long userId);
+    RegistrationToken resentToken(Long userId);
 
     RegistrationToken findByToken(String token);
 

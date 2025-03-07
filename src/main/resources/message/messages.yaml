@@ -13,7 +13,7 @@ success:
 
 exception:
   registration:
-    revoke: Resend signup email.
+    resent: Resend signup email.
     conflict: Signup email has been sent. Check your's mailbox.
     expired: Token has been expired. Please request a new one.
   resource-not-found:
