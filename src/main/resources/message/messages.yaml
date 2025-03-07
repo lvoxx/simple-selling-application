@@ -14,8 +14,8 @@ success:
 exception:
   registration:
     revoke: Resend signup email.
-    conflict: Signup email has been sent.
-    expired: Token has been expired.
+    conflict: Signup email has been sent. Check your's mailbox.
+    expired: Token has been expired. Please request a new one.
   resource-not-found:
     default: Resource {} Not Found.
     rate-limit: Limit Resources not found.
@@ -29,7 +29,7 @@ exception:
     product-name: Can not found product with name [%s]
     product-id: Can not found product with id [%d]
     registration-name: Can not found registration token with name [%s]
-    registration-token: Can not found registration token with token [%d]
+    registration-token: Can not found registration token with token [%s]
   entity-exists:
     category: Category with name [%s] already exist.
     product: Product with name [%s] already exists.
