@@ -15,8 +15,8 @@ public abstract class CategoryDTO {
     @Setter(value = AccessLevel.PRIVATE)
     @Schema(name = "Category Request", description = "Request payload for category management")
     public static class Request {
-        @NotBlank(message = "Category name cannot be blank")
-        @Size(max = 60, message = "Category name must not exceed 60 characters")
+        @NotBlank(message = "{validation.category.name.blank}")
+        @Size(max = 60, message = "{validation.category.name.size")
         @Schema(description = "Name of the category", requiredMode = Schema.RequiredMode.REQUIRED)
         private String name;
     }

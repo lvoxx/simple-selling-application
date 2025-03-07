@@ -1,7 +1,7 @@
 package com.shitcode.demo1.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -16,7 +16,7 @@ public abstract class GenericDTO {
     @AllArgsConstructor
     @Schema(name = "GenericRequest", description = "Request containing Generic Data")
     public static class Request {
-        @NotNull(message = "Request cannot be null")
+        @NotBlank(message = "{validation.generic.request.blank}")
         @Schema(description = "The request payload", example = "{request: {some-thing: 1, some-data: \"Yae Milo\"}}")
         private Object request;
     }

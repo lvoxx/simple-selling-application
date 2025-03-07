@@ -3,7 +3,10 @@ package com.shitcode.demo1.service.impl;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Locale;
+import java.util.Optional;
 
+import org.springframework.context.MessageSource;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,24 +38,30 @@ public class SpringUserServiceImpl implements SpringUserService {
     private final RegistrationTokenService tokenService;
     private final MailService mailService;
     private final BCryptPasswordEncoder passwordEncoder;
-    private SpringUserMapper mapper;
+    private final MessageSource messageSource;
     private final ClientConfigData clientConfigData;
 
     public SpringUserServiceImpl(SpringUserRepository springUserRepository, RegistrationTokenService tokenService,
-            MailService mailService, BCryptPasswordEncoder passwordEncoder, SpringUserMapper mapper,
+            MailService mailService, BCryptPasswordEncoder passwordEncoder, MessageSource messageSource,
             ClientConfigData clientConfigData) {
         this.springUserRepository = springUserRepository;
         this.tokenService = tokenService;
         this.mailService = mailService;
         this.passwordEncoder = passwordEncoder;
-        this.mapper = mapper;
+        this.messageSource = messageSource;
         this.clientConfigData = clientConfigData;
     }
+
+    private SpringUserMapper mapper;
 
     private SpringUserMapper springUserMapper = SpringUserMapper.INSTANCE;
 
     @Override
     public SpringUserDTO.Response publicCreateUser(SpringUserDTO.UserRequest request) {
+        Optional.ofNullable(springUserRepository.findByEmail(request.getEmail())).ifPresent(u -> {
+            throw new EntityExistsException("{exception.entity-exists.user}");
+        });
+        ;
         SpringUser user = springUserMapper.toSpringUser(request);
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setLocked(true);
@@ -97,7 +106,8 @@ public class SpringUserServiceImpl implements SpringUserService {
     public GenericDTO.Response activeUserAccount(String token) {
         RegistrationToken registrationToken = tokenService.findByToken(token);
         lockOrNotUser(registrationToken.getUserId(), false);
-        return GenericDTO.Response.builder().message("{success.user.active}").build();
+        return GenericDTO.Response.builder()
+                .message(messageSource.getMessage("success.user.active", null, Locale.getDefault())).build();
     }
 
     @Override
@@ -152,9 +162,9 @@ public class SpringUserServiceImpl implements SpringUserService {
         return mapper.toSpringUserResponse(result);
     }
 
-    private SpringUser findByEmail(String username) {
-        return springUserRepository.findByEmail(username).orElseThrow(
-                () -> new EntityExistsException(String.format("{exception.entity-not-found.user-email}", username)));
+    private SpringUser findByEmail(String email) {
+        return springUserRepository.findByEmail(email).orElseThrow(
+                () -> new EntityExistsException(String.format("{exception.entity-not-found.user-email}", email)));
     }
 
     private SpringUser findById(Long id) {

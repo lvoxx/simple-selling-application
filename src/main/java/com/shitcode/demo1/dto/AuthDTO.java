@@ -4,6 +4,7 @@ import com.shitcode.demo1.annotation.validation.Email;
 import com.shitcode.demo1.annotation.validation.Password;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotBlank;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Data;
@@ -15,11 +16,13 @@ public abstract class AuthDTO {
     @Builder
     @Schema(name = "AuthLoginRequest", description = "Request payload for user login")
     public static class LoginRequest {
-        @Email(message = "{validation.auth.email}")
+        @Email(message = "{validation.auth.email.email}")
+        @NotBlank(message = "{validation.auth.email.blank}")
         @Schema(description = "User email address", example = "user@example.com", required = true)
         private final String email;
 
-        @Password(message = "{validation.auth.password}", minSize = 6, maxSize = 30, containsSpecialChar = false)
+        @NotBlank(message = "{validation.auth.password.blank}")
+        @Password(message = "{validation.auth.password.password}", minSize = 6, maxSize = 30, containsSpecialChar = false)
         @Schema(description = "User password", example = "P@ssw0rd!", required = true)
         private final String password;
     }

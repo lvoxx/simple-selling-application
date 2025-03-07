@@ -1,11 +1,67 @@
 validation:
   auth:
-    email: Invalid email format.
-    password: Password must meet the required criteria.
-  new-user:
-    email: Invalid email format.
-    password: Password must be between {minSize} and {maxSize} characters and contain at least one special character.
-    phone: Invalid phone number format. Expected format +<country code>-<number>
+    email:
+      email: Invalid email format.
+      blank: Email cannot be blank.
+    password:
+      password: Password must meet the required criteria.
+      blank: Password cannot be blank.
+  category:
+    name:
+      blank: Category name cannot be blank.
+      size: Category name must not exceed 60 characters.
+  generic:
+    request:
+      blank: Request cannot be blank.
+  product:
+    name:
+      blank: Product name cannot be blank.
+      size: Product name must not exceed 255 characters.
+    currency:
+      blank: Currency cannot be blank.
+      size: Currency must be exactly 3 characters.
+      pattern: Currency must be uppercase and follow ISO 4217 format.
+    in-stock-quantity:
+      blank: In-stock quantity cannot be blank.
+      min: In-stock quantity must be at least 0.
+    in-sell-quantity:
+      blank: In-sell quantity cannot be blank.
+      min: In-sell quantity must be at least 0.
+    price:
+      blank: Price cannot be blank.
+      min: Price must be greater than 0.
+      digits: Price must be a valid monetary value with up to 99 digits and 2 decimal places.
+    category-id:
+      blank: Category ID cannot be blank.
+      min: Category ID must be greater than 0.
+  spring-user:
+    email:
+      email: Invalid email format.
+      blank: Email cannot be blank.
+      size: Email must be between 6 and 255 characters.
+    password:
+      blank: Password cannot be blank.
+      password: Password must be between {min} and {max} characters and contain at least one special character.
+    first-name:
+      blank: First name cannot be blank.
+      size: First name must not exceed 60 characters
+    last-name:
+      blank: Last name cannot be blank.
+      size: Last name must not exceed 60 characters.
+    phone-number:
+      phone: Invalid phone number format. Expected format +<country code>-<number>
+      size: Last name must between 4 and 14 characters.
+    roles:
+      empty: Roles should be included.
+    points:
+      min: Points must be a positive number.
+      digits: Points must be a valid number with up to 10 digits and 2 decimal places.
+    locked:
+      null: Locked cannot be null.
+    enabled:
+      null: Enabled cannot be null.
+    is-valid-email:
+      null: IsValidEmail cannot be null.
 
 success:
   user:
@@ -33,6 +89,7 @@ exception:
   entity-exists:
     category: Category with name [%s] already exist.
     product: Product with name [%s] already exists.
+    user: User with email [%s] already exists.
   worker-busy:
     thread: Server is not responding correctly. Try again later.
     db-lock: Service is busy at the moment. Try again later.

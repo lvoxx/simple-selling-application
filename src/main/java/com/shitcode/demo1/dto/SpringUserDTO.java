@@ -13,7 +13,6 @@ import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -28,29 +27,29 @@ public abstract class SpringUserDTO {
     @Getter
     @Schema(name = "SpringUserDTORequest", description = "Request payload for user signup")
     public static class UserRequest {
-        @NotBlank(message = "Email cannot be blank")
-        @Size(min = 6, max = 255, message = "Email must be between 6 and 255 characters")
-        @Email(message = "{validation.new-user.email}")
+        @NotBlank(message = "{validation.spring-user.email.blank}")
+        @Size(min = 6, max = 255, message = "{validation.spring-user.email.size}")
+        @Email(message = "{validation.spring-user.email.email}")
         @Schema(description = "User email address", example = "user@example.com", required = true)
         private final String email;
 
-        @NotBlank(message = "Password cannot be blank")
-        @Password(message = "{validation.new-user.password}", minSize = 6, maxSize = 30, containsSpecialChar = true)
+        @NotBlank(message = "{validation.spring-user.password.blank}")
+        @Password(message = "{validation.spring-user.password.password}", minSize = 6, maxSize = 30, containsSpecialChar = true)
         @Schema(description = "User password", example = "P@ssw0rd!", required = true)
         private final String password;
 
-        @NotBlank(message = "First name cannot be blank")
-        @Size(max = 60, message = "First name must not exceed 60 characters")
+        @NotBlank(message = "{validation.spring-user.first-name.blank}")
+        @Size(max = 60, message = "{validation.spring-user.first-name.size}")
         @Schema(description = "User's first name", example = "Yae", required = true)
         private final String firstName;
 
-        @NotBlank(message = "Last name cannot be blank")
-        @Size(max = 60, message = "Last name must not exceed 60 characters")
+        @NotBlank(message = "{validation.spring-user.last-name.blank}")
+        @Size(max = 60, message = "{validation.spring-user.last-name.size}")
         @Schema(description = "User's last name", example = "Miiko", required = true)
         private final String lastName;
 
-        @Phone(message = "{validation.new-user.phone}")
-        @Size(min = 4, max = 14)
+        @Phone(message = "{validation.spring-user.phone-number.phone}")
+        @Size(min = 4, max = 14,message = "{validation.spring-user.phone-number.size}")
         @Schema(description = "User's phone number", example = "+1-5551234567", required = true)
         private final String phoneNumber;
     }
@@ -60,44 +59,47 @@ public abstract class SpringUserDTO {
     @Setter(value = AccessLevel.PRIVATE)
     @Getter
     public static class AdminRequest {
-        @NotBlank(message = "Email cannot be blank")
-        @Size(min = 6, max = 255, message = "Email must be between 6 and 255 characters")
-        @Pattern(regexp = "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,6}$", message = "Invalid email format")
+        @NotBlank(message = "{validation.spring-user.email.blank}")
+        @Size(min = 6, max = 255, message = "{validation.spring-user.email.size}")
+        @Email(message = "{validation.spring-user.email.email}")
+        @Schema(description = "User email address", example = "user@example.com", required = true)
         private String email;
 
-        @NotBlank(message = "Password cannot be blank")
-        @Size(min = 8, max = 20, message = "Password must be between 8 and 20 characters")
-        @Pattern(regexp = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=]).*$", message = "Password must contain at least one digit, one lowercase letter, one uppercase letter, and one special character (@#$%^&+=)")
+        @NotBlank(message = "{validation.spring-user.password.blank}")
+        @Password(message = "{validation.spring-user.password.password}", minSize = 6, maxSize = 30, containsSpecialChar = true)
+        @Schema(description = "User password", example = "P@ssw0rd!", required = true)
         private String password;
 
-        @NotBlank(message = "First name cannot be blank")
-        @Size(max = 60, message = "First name must not exceed 60 characters")
+        @NotBlank(message = "{validation.spring-user.first-name.password.blank}")
+        @Size(max = 60, message = "{validation.spring-user.first-name.password.size}")
+        @Schema(description = "User's first name", example = "Yae", required = true)
         private String firstName;
 
-        @NotBlank(message = "Last name cannot be blank")
-        @Size(max = 60, message = "Last name must not exceed 60 characters")
+        @NotBlank(message = "{validation.spring-user.last-name.blank}")
+        @Size(max = 60, message = "{validation.spring-user.last-name.size}")
+        @Schema(description = "User's last name", example = "Miiko", required = true)
         private String lastName;
 
-        @Phone(message = "{validation.new-user.phone}")
-        @Size(min = 4, max = 14)
+        @Phone(message = "{validation.spring-user.phone-number.phone}")
+        @Size(min = 4, max = 14,message = "{validation.spring-user.phone-number.size}")
         @Schema(description = "User's phone number", example = "+1-5551234567", required = true)
         private final String phoneNumber;
 
-        @NotEmpty(message = "Roles are not specified")
+        @NotEmpty(message = "{validation.spring-user.roles.empty}")
         private List<String> roles;
 
-        @DecimalMin(value = "0.0", inclusive = true, message = "Points must be a positive number")
-        @Digits(integer = 10, fraction = 2, message = "Points must be a valid number with up to 10 digits and 2 decimal places")
+        @DecimalMin(value = "0.0", inclusive = true, message = "{validation.spring-user.points.min}")
+        @Digits(integer = 10, fraction = 2, message = "{validation.spring-user.points.digits}")
         @Builder.Default
         private BigDecimal points = BigDecimal.valueOf(0l);
 
-        @NotNull(message = "Is Locked cannot be null")
+        @NotNull(message = "{validation.spring-user.locked.null}")
         private Boolean locked;
 
-        @NotNull(message = "is Enabled cannot be null")
+        @NotNull(message = "{validation.spring-user.enabled.null}")
         private Boolean enabled;
 
-        @NotNull(message = "IsValidEmail cannot be null")
+        @NotNull(message = "{validation.spring-user.is-valid-email.null}")
         private Boolean isValidEmail;
     }
 
