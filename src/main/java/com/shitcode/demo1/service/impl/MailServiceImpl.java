@@ -37,10 +37,10 @@ public class MailServiceImpl implements MailService {
     public void sendActivationEmail(String toEmail, String token) throws Exception {
         // ${ActivationUrl} - active account link
         // ${LoginUrl} - login FE link
-
-        String activationLink = String.format("%s%s?token=%s",
+        String activationLink = String.format("%s%s%s?token=%s",
                 serverConfigData.isProductDeploy() ? serverConfigData.getProdServer().getBaseUrl()
                         : serverConfigData.getDevServer().getBaseUrl(),
+                        AuthServiceImpl.getHttpServletRequest().getContextPath().concat("/auth"),
                 mailingConfigData.getRegisterEmail().getPath(),
                 token);
         String subject = mailingConfigData.getRegisterEmail().getSubject();
