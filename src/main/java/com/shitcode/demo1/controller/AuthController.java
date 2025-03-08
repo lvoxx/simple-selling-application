@@ -2,6 +2,7 @@ package com.shitcode.demo1.controller;
 
 import java.time.LocalDateTime;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -24,8 +25,8 @@ import com.shitcode.demo1.service.AuthService;
 import com.shitcode.demo1.service.ResponseService;
 import com.shitcode.demo1.service.SpringUserService;
 import com.shitcode.demo1.utils.LogPrinter;
-import com.shitcode.demo1.utils.RateLimiterPlan;
 import com.shitcode.demo1.utils.LogPrinter.Type;
+import com.shitcode.demo1.utils.RateLimiterPlan;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -45,6 +46,9 @@ import lombok.Data;
 @Tag(name = "Authentication", description = "APIs for user authentication")
 @LogCollector
 public class AuthController {
+
+        @Value("#{ @mailingConfigData.getRegisterEmail().getPath() }")
+        private String registerEmailPath;
 
         private final AuthService authService;
         private final SpringUserService springUserService;
@@ -103,7 +107,7 @@ public class AuthController {
                         @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Login credentials", required = true, content = @Content(schema = @Schema(implementation = SpringUserDTO.UserRequest.class))) @Valid @RequestBody SpringUserDTO.UserRequest request)
                         throws Exception {
                 return responseService.mapping(
-                                () -> new ResponseEntity<>(springUserService.publicCreateUser(request),
+                                () -> new ResponseEntity<>(authService.signUp(request),
                                                 HttpStatus.CREATED),
                                 SIGNUP_PLAN);
         }
@@ -123,7 +127,7 @@ public class AuthController {
                         throws Exception {
                 try {
                         responseService.mapping(
-                                        () -> new ResponseEntity<>(springUserService.activeUserAccount(token),
+                                        () -> new ResponseEntity<>(authService.activeUserAccount(token),
                                                         HttpStatus.OK),
                                         COMPLETE_SIGNUP);
                 } catch (UserDisabledException | TokenExpiredException e) {
@@ -132,9 +136,10 @@ public class AuthController {
                         } else if (e instanceof TokenExpiredException) {
                                 response.sendRedirect(fontendServerConfigData.getActive().get("expired"));
                         }
+                } catch (Exception e) {
                         LogPrinter.printControllerLog(Type.ERROR, request.getContextPath(), "AuthController",
                                         "activeUserV1", LocalDateTime.now().toString(), e.getMessage());
-                        response.sendRedirect(fontendServerConfigData.getUnknown().concat(e.getMessage()));
+                        response.sendRedirect(String.format(fontendServerConfigData.getUnknown(), e.getMessage()));
                 }
                 response.sendRedirect(fontendServerConfigData.getActive().get("success"));
         }

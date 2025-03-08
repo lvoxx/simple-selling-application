@@ -31,8 +31,8 @@ fontend-server:
   active:
     success: "{fontend-server.base}/activate?code=success"
     disabled: "{fontend-server.base}/activate?code=disabled-user"
-    expired: "{fontend-server.base}/activate?code=exprired"
-  unknown: "{fontend-server.base}/error?reason=%d"
+    expired: "{fontend-server.base}/activate?code=expired"
+  unknown: "{fontend-server.base}/error?reason=%s"
 
 client:
   name: simple-selling-application

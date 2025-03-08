@@ -1,18 +1,11 @@
 package com.shitcode.demo1.service.impl;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Locale;
-import java.util.Optional;
 
-import org.springframework.context.MessageSource;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.shitcode.demo1.annotation.logging.LogCollector;
-import com.shitcode.demo1.dto.GenericDTO;
 import com.shitcode.demo1.dto.SpringUserDTO;
 import com.shitcode.demo1.dto.SpringUserDTO.AdminRequest;
 import com.shitcode.demo1.dto.SpringUserDTO.Response;
@@ -24,7 +17,6 @@ import com.shitcode.demo1.exception.model.EntityNotChangedException;
 import com.shitcode.demo1.exception.model.SendingMailException;
 import com.shitcode.demo1.exception.model.UserDisabledException;
 import com.shitcode.demo1.mapper.SpringUserMapper;
-import com.shitcode.demo1.properties.ClientConfigData;
 import com.shitcode.demo1.repository.SpringUserRepository;
 import com.shitcode.demo1.service.MailService;
 import com.shitcode.demo1.service.RegistrationTokenService;
@@ -39,45 +31,35 @@ public class SpringUserServiceImpl implements SpringUserService {
     private final SpringUserRepository springUserRepository;
     private final RegistrationTokenService tokenService;
     private final MailService mailService;
-    private final BCryptPasswordEncoder passwordEncoder;
-    private final MessageSource messageSource;
-    private final ClientConfigData clientConfigData;
 
     public SpringUserServiceImpl(SpringUserRepository springUserRepository, RegistrationTokenService tokenService,
-            MailService mailService, BCryptPasswordEncoder passwordEncoder, MessageSource messageSource,
-            ClientConfigData clientConfigData) {
+            MailService mailService) {
         this.springUserRepository = springUserRepository;
         this.tokenService = tokenService;
         this.mailService = mailService;
-        this.passwordEncoder = passwordEncoder;
-        this.messageSource = messageSource;
-        this.clientConfigData = clientConfigData;
     }
 
-    private SpringUserMapper mapper;
-
-    private SpringUserMapper springUserMapper = SpringUserMapper.INSTANCE;
+    private SpringUserMapper mapper = SpringUserMapper.INSTANCE;
 
     @Override
-    public SpringUserDTO.Response publicCreateUser(SpringUserDTO.UserRequest request) {
-        Optional.ofNullable(springUserRepository.findByEmail(request.getEmail())).ifPresent(u -> {
-            throw new EntityExistsException("{exception.entity-exists.user}");
-        });
+    public SpringUserDTO.Response createUser(SpringUser request, boolean isValidEmail) {
+        SpringUser result = springUserRepository.saveAndFlush(request);
+        // If requesting validation email
+        if (isValidEmail) {
+            // Flush registration token data
+            RegistrationToken token = tokenService.createToken(result.getId());
+            // Send activation email
+            try {
+                mailService.sendActivationEmail(result.getEmail(), token.getToken());
+            } catch (Exception e) {
+                LogPrinter.printServiceLog(LogPrinter.Type.ERROR, "AuthServiceImpl", "signUp",
+                        LocalDateTime.now().toString(),
+                        e.getMessage());
+                throw new SendingMailException(e.getMessage(), e.getCause());
+            }
+        }
 
-        SpringUser user = springUserMapper.toSpringUser(request);
-        user.setPassword(passwordEncoder.encode(request.getPassword()));
-        user.setLocked(true);
-        user.setEnabled(true);
-        user.setPoints(BigDecimal.valueOf(0));
-        user.setRoles(List.of(clientConfigData.getRoles().getUser()));
-
-        return createUser(user, true);
-    }
-
-    @Override
-    public SpringUserDTO.Response privateCreateUser(SpringUserDTO.AdminRequest request) {
-        SpringUser user = springUserMapper.toSpringUser(request);
-        return createUser(user, request.getIsValidEmail());
+        return mapper.toSpringUserResponse(result);
     }
 
     @Override
@@ -102,14 +84,6 @@ public class SpringUserServiceImpl implements SpringUserService {
     public Response privateUpdateUser(AdminRequest request, Long userId) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'privateUpdateUser'");
-    }
-
-    @Override
-    public GenericDTO.Response activeUserAccount(String token) {
-        RegistrationToken registrationToken = tokenService.findByToken(token);
-        lockOrNotUser(registrationToken.getUserId(), false);
-        return GenericDTO.Response.builder()
-                .message(messageSource.getMessage("success.user.active", null, Locale.getDefault())).build();
     }
 
     @Override
@@ -163,26 +137,6 @@ public class SpringUserServiceImpl implements SpringUserService {
         user.setEnabled(isDisabled);
         SpringUser res = springUserRepository.saveAndFlush(user);
         return mapper.toSpringUserResponse(res);
-    }
-
-    private SpringUserDTO.Response createUser(SpringUser user, boolean isValidEmail) {
-        SpringUser result = springUserRepository.saveAndFlush(user);
-        // If requesting validation email
-        if (isValidEmail) {
-            // Flush registration token data
-            RegistrationToken token = tokenService.createToken(result.getId());
-            // Send activation email
-            try {
-                mailService.sendActivationEmail(result.getEmail(), token.getToken());
-            } catch (Exception e) {
-                LogPrinter.printServiceLog(LogPrinter.Type.ERROR, "AuthServiceImpl", "signUp",
-                        LocalDateTime.now().toString(),
-                        e.getMessage());
-                throw new SendingMailException(e.getMessage(), e.getCause());
-            }
-        }
-
-        return mapper.toSpringUserResponse(result);
     }
 
     private SpringUser findByEmail(String email) {
