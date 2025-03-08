@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import com.shitcode.demo1.exception.model.ConflictTokenException;
 import com.shitcode.demo1.exception.model.EntityExistsException;
+import com.shitcode.demo1.exception.model.EntityNotChangedException;
 import com.shitcode.demo1.exception.model.EntityNotFoundException;
 import com.shitcode.demo1.exception.model.ErrorModel;
 import com.shitcode.demo1.exception.model.KeyLockMissedException;
@@ -27,6 +28,12 @@ public class ApplicationExceptionHandler {
     public ResponseEntity<ErrorModel> handleDataOperationException(RuntimeException ex) {
         ErrorModel errorResponse = ErrorModel.of(HttpStatus.INTERNAL_SERVER_ERROR, ex.getMessage(), null);
         return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @ExceptionHandler({ EntityNotChangedException.class })
+    public ResponseEntity<ErrorModel> handleUnchangedDataOperationException(RuntimeException ex) {
+        ErrorModel errorResponse = ErrorModel.of(HttpStatus.UNPROCESSABLE_ENTITY, ex.getMessage(), null);
+        return new ResponseEntity<>(errorResponse, HttpStatus.UNPROCESSABLE_ENTITY);
     }
 
     @ExceptionHandler({ RevokeTokenException.class })
