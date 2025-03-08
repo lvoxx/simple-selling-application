@@ -20,6 +20,7 @@ import com.shitcode.demo1.dto.SpringUserDTO.UserRequest;
 import com.shitcode.demo1.entity.RegistrationToken;
 import com.shitcode.demo1.entity.SpringUser;
 import com.shitcode.demo1.exception.model.EntityExistsException;
+import com.shitcode.demo1.exception.model.EntityNotChangedException;
 import com.shitcode.demo1.exception.model.SendingMailException;
 import com.shitcode.demo1.mapper.SpringUserMapper;
 import com.shitcode.demo1.properties.ClientConfigData;
@@ -113,14 +114,22 @@ public class SpringUserServiceImpl implements SpringUserService {
     @Override
     public Response lockOrNotUser(Long userId, boolean isLocked) {
         SpringUser user = findById(userId);
-        user.setLocked(isLocked);
-        SpringUser res = springUserRepository.saveAndFlush(user);
-        return mapper.toSpringUserResponse(res);
+        return setLockOrNot(isLocked, user);
     }
 
     @Override
     public Response lockOrNotUser(String email, boolean isLocked) {
         SpringUser user = findByEmail(email);
+        return setLockOrNot(isLocked, user);
+    }
+
+    private Response setLockOrNot(boolean isLocked, SpringUser user) {
+        if (user.isLocked() == isLocked) {
+            if (user.isLocked()) {
+                throw new EntityNotChangedException("{exception.entity-not-changed.user.locked}");
+            }
+            throw new EntityNotChangedException("{exception.entity-not-changed.user.non-locked}");
+        }
         user.setLocked(isLocked);
         SpringUser res = springUserRepository.saveAndFlush(user);
         return mapper.toSpringUserResponse(res);
@@ -129,15 +138,24 @@ public class SpringUserServiceImpl implements SpringUserService {
     @Override
     public Response disableOrNotUser(Long userId, boolean isDisabled) {
         SpringUser user = findById(userId);
-        user.setEnabled(!isDisabled);
-        SpringUser res = springUserRepository.saveAndFlush(user);
-        return mapper.toSpringUserResponse(res);
+        return setEnabledOrNot(isDisabled, user);
     }
 
     @Override
     public Response disableOrNotUser(String email, boolean isDisabled) {
         SpringUser user = findByEmail(email);
-        user.setEnabled(!isDisabled);
+        return setEnabledOrNot(isDisabled, user);
+    }
+
+    private Response setEnabledOrNot(boolean isDisabled, SpringUser user) {
+        isDisabled = !isDisabled;
+        if (user.isEnabled() == isDisabled) {
+            if (user.isLocked()) {
+                throw new EntityNotChangedException("{exception.entity-not-changed.user.enabled}");
+            }
+            throw new EntityNotChangedException("{exception.entity-not-changed.user.non-enabled}");
+        }
+        user.setEnabled(isDisabled);
         SpringUser res = springUserRepository.saveAndFlush(user);
         return mapper.toSpringUserResponse(res);
     }

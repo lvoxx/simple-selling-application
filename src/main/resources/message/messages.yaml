@@ -86,6 +86,12 @@ exception:
     product-id: Can not found product with id [%d]
     registration-name: Can not found registration token with name [%s]
     registration-token: Can not found registration token with token [%s]
+  entity-not-changed:
+    user:
+      locked: The user has been locked.
+      non-locked: The user has not been locked.
+      enabled: The user has been enabled.
+      non-enabled: The user has not been enabled.
   entity-exists:
     category: Category with name [%s] already exist.
     product: Product with name [%s] already exists.
