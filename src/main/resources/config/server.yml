@@ -6,8 +6,7 @@ lvoxx-server:
     base-url: http://api.lvoxxapplication.com
     description: Product BE Server
   fontend-server:
-    base-url: http://lvoxxapplication.com
-    description: Product FE Server
+    base-url:
   contact:
     name: Lvoxx
     email: lvoxxartist@gmail.com
@@ -24,6 +23,16 @@ lvoxx-server:
     url: https://github.com/lvoxx/SimpleSellingApplication
   product-deploy: false
   fe-login-url: "{lvoxx-server.fontend-server.base-url/login}"
+
+fontend-server:
+  base: http://localhost:5000
+  login:
+    base: "{fontend-server.base}/login"
+  active:
+    success: "{fontend-server.base}/activate?code=success"
+    disabled: "{fontend-server.base}/activate?code=disabled-user"
+    expired: "{fontend-server.base}/activate?code=exprired"
+  unknown: "{fontend-server.base}/error?reason=%d"
 
 client:
   name: simple-selling-application
