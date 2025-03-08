@@ -72,6 +72,8 @@ exception:
     resent: Resend signup email.
     conflict: Signup email has been sent. Check your's mailbox.
     expired: Token has been expired. Please request a new one.
+  account:
+    disabled: Account name [%s] is disabled.
   resource-not-found:
     default: Resource {} Not Found.
     rate-limit: Limit Resources not found.

@@ -22,6 +22,7 @@ import com.shitcode.demo1.entity.SpringUser;
 import com.shitcode.demo1.exception.model.EntityExistsException;
 import com.shitcode.demo1.exception.model.EntityNotChangedException;
 import com.shitcode.demo1.exception.model.SendingMailException;
+import com.shitcode.demo1.exception.model.UserDisabledException;
 import com.shitcode.demo1.mapper.SpringUserMapper;
 import com.shitcode.demo1.properties.ClientConfigData;
 import com.shitcode.demo1.repository.SpringUserRepository;
@@ -62,7 +63,7 @@ public class SpringUserServiceImpl implements SpringUserService {
         Optional.ofNullable(springUserRepository.findByEmail(request.getEmail())).ifPresent(u -> {
             throw new EntityExistsException("{exception.entity-exists.user}");
         });
-        ;
+
         SpringUser user = springUserMapper.toSpringUser(request);
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setLocked(true);
@@ -124,6 +125,10 @@ public class SpringUserServiceImpl implements SpringUserService {
     }
 
     private Response setLockOrNot(boolean isLocked, SpringUser user) {
+        if (!user.isEnabled()) {
+            throw new UserDisabledException(
+                    String.format("{exception.account.disabled}", user.getFirstName() + " " + user.getLastName()));
+        }
         if (user.isLocked() == isLocked) {
             if (user.isLocked()) {
                 throw new EntityNotChangedException("{exception.entity-not-changed.user.locked}");
