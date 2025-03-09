@@ -29,6 +29,7 @@ import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Import;
@@ -46,6 +47,7 @@ import org.springframework.util.function.ThrowingSupplier;
 import org.springframework.web.context.WebApplicationContext;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.shitcode.demo1.config.MessagesConfig;
 import com.shitcode.demo1.dto.CategoryDTO;
 import com.shitcode.demo1.dto.ResponseDTO;
 import com.shitcode.demo1.exception.model.EntityExistsException;
@@ -69,6 +71,7 @@ import lombok.SneakyThrows;
 @DisplayName("Category controller tests with mocking")
 // Import needed components
 @Import({ RateLimiterConfigData.class })
+@ImportAutoConfiguration(classes = { MessagesConfig.class })
 @AutoConfigureMockMvc(addFilters = false)
 public class CategoryControllerTest {
 
@@ -257,7 +260,7 @@ public class CategoryControllerTest {
                                 .andExpect(status().isUnprocessableEntity())
                                 .andExpect(content().contentType("application/vnd.lvoxx.app-v1+json"))
                                 .andExpect(jsonPath("$.errors[0].field").value("name"))
-                                .andExpect(jsonPath("$.errors[0].message").value("Category name cannot be blank"))
+                                .andExpect(jsonPath("$.errors[0].message").value("Category name cannot be blank."))
                                 .andExpect(jsonPath("$.status").value("UNPROCESSABLE_ENTITY"));
                 // Invalid - Out of size
                 mockMvc.perform(post("/categories")
@@ -269,7 +272,7 @@ public class CategoryControllerTest {
                                 .andExpect(content().contentType("application/vnd.lvoxx.app-v1+json"))
                                 .andExpect(jsonPath("$.errors[0].field").value("name"))
                                 .andExpect(jsonPath("$.errors[0].message")
-                                                .value("Category name must not exceed 60 characters"))
+                                                .value("Category name must not exceed 60 characters."))
                                 .andExpect(jsonPath("$.status").value("UNPROCESSABLE_ENTITY"));
         }
 

@@ -16,7 +16,7 @@ public abstract class CategoryDTO {
     @Schema(name = "Category Request", description = "Request payload for category management")
     public static class Request {
         @NotBlank(message = "{validation.category.name.blank}")
-        @Size(max = 60, message = "{validation.category.name.size")
+        @Size(max = 60, message = "{validation.category.name.size}")
         @Schema(description = "Name of the category", requiredMode = Schema.RequiredMode.REQUIRED)
         private String name;
     }
