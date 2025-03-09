@@ -19,7 +19,7 @@ public class GlobalExceptionHandler {
         // Handle validation exceptions (for validation errors)
         @ExceptionHandler(MethodArgumentNotValidException.class)
         public ResponseEntity<ErrorModel> handleMethodArgumentNotValidException(MethodArgumentNotValidException ex) {
-                HttpStatus status = HttpStatus.UNPROCESSABLE_ENTITY;
+                HttpStatus status = HttpStatus.BAD_REQUEST;
 
                 List<ErrorModel.FieldError> errors = ex.getBindingResult().getFieldErrors()
                                 .stream()

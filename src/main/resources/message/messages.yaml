@@ -2,10 +2,9 @@ validation:
   auth:
     email:
       email: Invalid email format.
-      blank: Email cannot be blank.
+      size: "Email must not between 6 and 320 characters, include @."
     password:
       password: Password must meet the required criteria.
-      blank: Password cannot be blank.
   category:
     name:
       blank: Category name cannot be blank.
