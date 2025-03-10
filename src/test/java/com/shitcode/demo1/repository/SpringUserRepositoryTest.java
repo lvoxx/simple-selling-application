@@ -38,28 +38,28 @@ public class SpringUserRepositoryTest extends AbstractRepositoryTest {
                         .password("securePassword123")
                         .firstName("John")
                         .lastName("Doe")
-                        .phoneNumber("+84-09999")
+                        .phoneNumber("+84-09991")
                         .build(),
                 SpringUser.builder()
                         .email("jane.smith@example.com")
                         .password("anotherPassword456")
                         .firstName("Jane")
                         .lastName("Smith")
-                        .phoneNumber("+84-09999")
+                        .phoneNumber("+84-09992")
                         .build(),
                 SpringUser.builder()
                         .email("bob.johnson@example.com")
                         .password("password789")
                         .firstName("Bob")
                         .lastName("Johnson")
-                        .phoneNumber("+84-09999")
+                        .phoneNumber("+84-09993")
                         .build());
         customerRepository.saveAll(customers);
     }
 
     @AfterEach
     void tearDown() {
-        customerRepository.deleteAllInBatch();
+        customerRepository.deleteAll();
     }
 
     @Test
