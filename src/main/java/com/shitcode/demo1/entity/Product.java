@@ -58,9 +58,13 @@ public class Product extends AbstractAuditableEntity {
     @JoinColumn(name = "category_id", nullable = false, foreignKey = @ForeignKey(name = "fk_product_category"))
     private Category category;
 
+    @ManyToOne
+    @JoinColumn(name = "discount_id", foreignKey = @ForeignKey(name = "fk_product_discount"))
+    private Discount discount;
+
     @PrePersist
     public void prePersist() {
-        if(currency == null){
+        if (currency == null) {
             currency = "USD";
         }
         if (inStockQuantity == null) {
