@@ -179,8 +179,91 @@ public class AuthControllerTest {
         @SneakyThrows
         @Test
         @DisplayName("Should return Bad Request when login request has an invalid password field")
-        void shouldReturnBadRequest_whenRequestingLoginWithInvalidRequestBody_onFieldPassword() {
-
+        void shouldReturnBadRequest_whenRequestingLoginWithInvalidRequestBody_onPasswordFields() {
+                // Given
+                var reqPasswordFormatUppercase = AuthDTO.LoginRequest.builder().email("example@mail.com")
+                                .password("abcxyz")
+                                .build();
+                var reqPasswordFormatLowercase = AuthDTO.LoginRequest.builder().email("example@mail.com")
+                                .password("ABCXYZ")
+                                .build();
+                var reqPasswordFormatDigits = AuthDTO.LoginRequest.builder().email("example@mail.com")
+                                .password("Abcxyz")
+                                .build();
+                var reqPasswordFormatMinimumSize = AuthDTO.LoginRequest.builder().email("example@mail.com")
+                                .password("Abc0@")
+                                .build();
+                var reqPasswordFormatMaximumSize = AuthDTO.LoginRequest.builder().email("example@mail.com")
+                                .password("Abc0@".concat(IntStream.range(0, 60).mapToObj(c -> "a")
+                                                .collect(Collectors.joining())))
+                                .build();
+                // When
+                // Then
+                // -- Invalid Password Format Uppercase --
+                mockMvc.perform(post("/auth/login")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .header("accept", "application/vnd.lvoxx.app-v1+json")
+                                .content(objectMapper.writeValueAsString(reqPasswordFormatUppercase)))
+                                .andDo(print())
+                                .andExpect(status().isBadRequest())
+                                .andExpect(content().contentType("application/vnd.lvoxx.app-v1+json"))
+                                .andExpect(jsonPath("$.errors[0].field").value("password"))
+                                .andExpect(jsonPath("$.errors[0].message")
+                                                .value("Password must contain at least one uppercase letter."))
+                                .andExpect(jsonPath("$.message").value("Validation failed"))
+                                .andExpect(jsonPath("$.status").value("BAD_REQUEST"));
+                // -- Invalid Password Format Lowercase --
+                mockMvc.perform(post("/auth/login")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .header("accept", "application/vnd.lvoxx.app-v1+json")
+                                .content(objectMapper.writeValueAsString(reqPasswordFormatLowercase)))
+                                .andDo(print())
+                                .andExpect(status().isBadRequest())
+                                .andExpect(content().contentType("application/vnd.lvoxx.app-v1+json"))
+                                .andExpect(jsonPath("$.errors[0].field").value("password"))
+                                .andExpect(jsonPath("$.errors[0].message")
+                                                .value("Password must contain at least one lowercase letter."))
+                                .andExpect(jsonPath("$.message").value("Validation failed"))
+                                .andExpect(jsonPath("$.status").value("BAD_REQUEST"));
+                // -- Invalid Password Format Digits --
+                mockMvc.perform(post("/auth/login")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .header("accept", "application/vnd.lvoxx.app-v1+json")
+                                .content(objectMapper.writeValueAsString(reqPasswordFormatDigits)))
+                                .andDo(print())
+                                .andExpect(status().isBadRequest())
+                                .andExpect(content().contentType("application/vnd.lvoxx.app-v1+json"))
+                                .andExpect(jsonPath("$.errors[0].field").value("password"))
+                                .andExpect(jsonPath("$.errors[0].message")
+                                                .value("Password must contain at least one digit."))
+                                .andExpect(jsonPath("$.message").value("Validation failed"))
+                                .andExpect(jsonPath("$.status").value("BAD_REQUEST"));
+                // -- Invalid Password Format Minimum Size --
+                mockMvc.perform(post("/auth/login")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .header("accept", "application/vnd.lvoxx.app-v1+json")
+                                .content(objectMapper.writeValueAsString(reqPasswordFormatMinimumSize)))
+                                .andDo(print())
+                                .andExpect(status().isBadRequest())
+                                .andExpect(content().contentType("application/vnd.lvoxx.app-v1+json"))
+                                .andExpect(jsonPath("$.errors[0].field").value("password"))
+                                .andExpect(jsonPath("$.errors[0].message")
+                                                .value("Password length must be between 6 and 30 characters."))
+                                .andExpect(jsonPath("$.message").value("Validation failed"))
+                                .andExpect(jsonPath("$.status").value("BAD_REQUEST"));
+                // -- Invalid Password Format Maximum Size --
+                mockMvc.perform(post("/auth/login")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .header("accept", "application/vnd.lvoxx.app-v1+json")
+                                .content(objectMapper.writeValueAsString(reqPasswordFormatMaximumSize)))
+                                .andDo(print())
+                                .andExpect(status().isBadRequest())
+                                .andExpect(content().contentType("application/vnd.lvoxx.app-v1+json"))
+                                .andExpect(jsonPath("$.errors[0].field").value("password"))
+                                .andExpect(jsonPath("$.errors[0].message")
+                                                .value("Password length must be between 6 and 30 characters."))
+                                .andExpect(jsonPath("$.message").value("Validation failed"))
+                                .andExpect(jsonPath("$.status").value("BAD_REQUEST"));
         }
 
         @SuppressWarnings("unchecked")
