@@ -15,6 +15,7 @@ public interface ProductMapper {
         // Map ProductRequest to Product
         @Mappings({
                         @Mapping(target = "id", ignore = true), // Ignore ID during request-to-entity mapping
+                        @Mapping(target = "discount", ignore = true), // Ignore ID during request-to-entity mapping
                         @Mapping(target = "category.id", ignore = true) // Map categoryId to Category.id
         })
         Product toProduct(ProductDTO.Request request);
