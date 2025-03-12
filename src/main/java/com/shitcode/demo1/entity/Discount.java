@@ -1,6 +1,5 @@
 package com.shitcode.demo1.entity;
 
-import java.io.Serializable;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -23,15 +22,17 @@ import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
-@AllArgsConstructor
-@NoArgsConstructor
-@Builder
 @Data
+@Builder
+@EqualsAndHashCode(callSuper = false)
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity
 @Table(name = "promotion", indexes = @Index(name = "idx_discount_title", columnList = "title"))
-public class Discount implements Serializable {
+public class Discount extends AbstractAuditableEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID id;
