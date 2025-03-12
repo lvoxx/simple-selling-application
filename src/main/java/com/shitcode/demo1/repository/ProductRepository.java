@@ -2,6 +2,7 @@ package com.shitcode.demo1.repository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -26,4 +27,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 
     @Query("SELECT p FROM Product p LEFT JOIN FETCH p.category")
     Page<Product> findPagedAllProductsWithCategory(Pageable pageable);
+
+    @Query("UPDATE Product p SET p.discount = :discountId WHERE p.id = :productId")
+    Product updateDiscountByProductId(@Param("productId") Long productId, @Param("discountId") UUID discountId);
 }

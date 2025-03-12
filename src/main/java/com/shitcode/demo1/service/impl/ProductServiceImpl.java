@@ -16,6 +16,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.shitcode.demo1.annotation.logging.LogCollector;
 import com.shitcode.demo1.component.DatabaseLock;
+import com.shitcode.demo1.dto.DiscountDTO.ApplyToProductsRequest;
+import com.shitcode.demo1.dto.DiscountDTO.ApplyToProductsResponse;
 import com.shitcode.demo1.dto.ProductDTO.AdminResponse;
 import com.shitcode.demo1.dto.ProductDTO.InSellResponse;
 import com.shitcode.demo1.dto.ProductDTO.Request;
@@ -130,6 +132,14 @@ public class ProductServiceImpl implements ProductService {
 
         log.debug("Updated product successfully: {}", response);
         return response;
+    }
+
+    
+
+    @Override
+    public ApplyToProductsResponse putDiscountToProducts(ApplyToProductsRequest requests) {
+        // TODO Auto-generated method stub
+        return null;
     }
 
     @Override

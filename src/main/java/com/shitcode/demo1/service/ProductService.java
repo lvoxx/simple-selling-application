@@ -5,6 +5,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.lang.Nullable;
 
 import com.shitcode.demo1.annotation.validation.GreaterOrEquals;
+import com.shitcode.demo1.dto.DiscountDTO;
 import com.shitcode.demo1.dto.ProductDTO;
 import com.shitcode.demo1.entity.Product;
 import com.shitcode.demo1.exception.model.EntityNotFoundException;
@@ -36,6 +37,8 @@ public interface ProductService {
         ProductDTO.AdminResponse create(ProductDTO.Request request);
 
         ProductDTO.AdminResponse update(ProductDTO.Request request, Long id);
+
+        DiscountDTO.ApplyToProductsResponse putDiscountToProducts(DiscountDTO.ApplyToProductsRequest requests);
 
         ProductDTO.InSellResponse sellWith(Integer quantity, Long id);
 
