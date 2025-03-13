@@ -21,7 +21,7 @@ public interface DiscountService {
 
     void delete(UUID id);
 
-    void removeExpiredDiscountsFromProducts();
+    void removeExpiredDiscountsFromProducts(UUID id);
 
     Page<DiscountDTO.ManageResponse> findByTitleAndExpDateBetween(
             @GreaterOrEquals(value = 1, message = "Page index must be greater than or equal to 1") int page,

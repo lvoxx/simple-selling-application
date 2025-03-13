@@ -37,8 +37,7 @@ public interface DiscountRepository extends JpaRepository<Discount, UUID> {
 
         // Remove relationship with products where expDate is past
         @Modifying
-        @Query("UPDATE Product p SET p.discount = NULL WHERE p.discount IN " +
-                        "(SELECT d FROM Discount d WHERE d.expDate < CURRENT_TIMESTAMP)")
-        void removeExpiredDiscountsFromProducts();
+        @Query("UPDATE Product p SET p.discount = NULL WHERE p.discount = :discountId")
+        void removeExpiredDiscountsFromProducts(@Param("discountId") UUID discountId);
 
 }
