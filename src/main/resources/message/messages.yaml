@@ -85,6 +85,8 @@ exception:
     user-id: Can not found user with id [%d]
     product-name: Can not found product with name [%s]
     product-id: Can not found product with id [%d]
+    discount-title: Can not found discount with title [%s]
+    discount-id: Can not found discount with id [%d]
     registration-name: Can not found registration token with name [%s]
     registration-token: Can not found registration token with token [%s]
   entity-not-changed:
@@ -95,6 +97,7 @@ exception:
       non-enabled: The user has not been enabled.
   entity-exists:
     category: Category with name [%s] already exist.
+    discount: Discount with title [%s] already exist.
     product: Product with name [%s] already exists.
     user: User with email [%s] already exists.
   worker-busy:

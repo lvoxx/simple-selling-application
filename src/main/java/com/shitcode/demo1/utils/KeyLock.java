@@ -3,6 +3,7 @@ package com.shitcode.demo1.utils;
 public enum KeyLock {
     CATEGORY("category"),
     PRODUCT("product"),
+    DISCOUNT("discount"),
     USER("user");
 
     private final String key;
