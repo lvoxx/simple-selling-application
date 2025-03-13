@@ -1,11 +1,11 @@
 package com.shitcode.demo1.component;
 
 import java.util.concurrent.TimeUnit;
-import java.util.function.Supplier;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.util.function.ThrowingSupplier;
 
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
@@ -48,7 +48,7 @@ public class DatabaseLock {
 
     // Generic method for Supplier<T>
     @Async
-    public <T> T doAndLock(KeyLock key, Supplier<T> task) {
+    public <T> T doAndLock(KeyLock key, ThrowingSupplier<T> task) {
         int retriesLeft = TRY_TIMES;
         String keyName = key.getKey();
         while (!tryLock(keyName)) {
