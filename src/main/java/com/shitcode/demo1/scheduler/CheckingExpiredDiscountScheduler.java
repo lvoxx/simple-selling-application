@@ -1,10 +1,12 @@
 package com.shitcode.demo1.scheduler;
 
+import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.caffeine.CaffeineCache;
@@ -12,6 +14,8 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import com.shitcode.demo1.service.DiscountService;
+import com.shitcode.demo1.utils.LogPrinter;
+import com.shitcode.demo1.utils.LogPrinter.Type;
 
 import jakarta.annotation.PostConstruct;
 
@@ -45,6 +49,7 @@ public class CheckingExpiredDiscountScheduler {
      */
     @Scheduled(cron = "0 * * * * *") // Runs at 00 seconds of every minute
     void removeExpiredDiscounts() {
+        AtomicInteger numberOfExpiringDiscounts = new AtomicInteger(0);
         OffsetDateTime timeNow = OffsetDateTime.now();
         discountIds.forEach(id -> {
             Optional<Object> idValue = Optional.ofNullable(cache.get(id));
@@ -55,7 +60,12 @@ public class CheckingExpiredDiscountScheduler {
             OffsetDateTime expDatetime = OffsetDateTime.parse(idValue.get().toString(), formatter);
             if (timeNow.compareTo(expDatetime) >= 0) {
                 discountService.removeExpiredDiscountsFromProducts(UUID.fromString(id.toString()));
+                numberOfExpiringDiscounts.incrementAndGet();
             }
         });
+        LogPrinter.printSchedulerLog(Type.SCHEDULER, "CheckingExpiredDiscountScheduler", "removeExpiredDiscounts",
+                Instant.now().toString(),
+                "Run scheduler job to remove expired discount from products with "
+                        .concat(String.valueOf(numberOfExpiringDiscounts.get())).concat(" times."));
     }
 }

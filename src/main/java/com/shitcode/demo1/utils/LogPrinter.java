@@ -16,6 +16,7 @@ public class LogPrinter {
                 public static final String REPOSITORY_FLAG = "REPOSITORY";
                 public static final String ASPECT_FLAG = "ASPECT";
                 public static final String UTILS_FLAG = "UTILS";
+                public static final String SCHEDULER_FLAG = "SCHEDULER";
                 public static final String START_UP = "START-UP";
         }
 
@@ -26,10 +27,11 @@ public class LogPrinter {
                 private static final String REPOSITORY_LOG = "Accessing %s.%s() at %s. %s";
                 private static final String ASPECT_LOG = "Triggering %s.%s() at %s. %s";
                 private static final String UTILS_LOG = "Utilizing %s.%s() at %s. %s";
+                private static final String SCHEDULER_LOG = "Utilizing %s.%s() at %s. %s";
         }
 
         public static enum Type {
-                INFO, DEBUG, WARM, ERROR
+                INFO, DEBUG, WARM, ERROR, SCHEDULER
         }
 
         public static void printControllerLog(Type type, String requestPath, String className, String methodName,
@@ -74,6 +76,13 @@ public class LogPrinter {
                                                 methodName, time, extraMessage));
         }
 
+        public static void printSchedulerLog(Type type, String className, String methodName, String time,
+                        String extraMessage) {
+                printLog(type, Flag.SCHEDULER_FLAG,
+                                String.format(Log.SCHEDULER_LOG, className,
+                                                methodName, time, extraMessage));
+        }
+
         public static void printLog(Type type, String flag, String message) {
                 flag = Optional.ofNullable(flag).orElse("INFO");
                 type = Optional.ofNullable(type).orElse(LogPrinter.Type.INFO);
@@ -93,6 +102,7 @@ public class LogPrinter {
                                 logger.warn(logMessage);
                                 return;
                         case LogPrinter.Type.INFO:
+                        case LogPrinter.Type.SCHEDULER:
                         default:
                                 logger.info(logMessage);
                 }
