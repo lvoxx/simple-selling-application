@@ -54,11 +54,11 @@ public class Product extends AbstractAuditableEntity {
     @Builder.Default
     private String currency = "USD";
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(optional = false, fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id", nullable = false, foreignKey = @ForeignKey(name = "fk_product_category"))
     private Category category;
 
-    @ManyToOne
+    @ManyToOne(optional = true, fetch = FetchType.LAZY)
     @JoinColumn(name = "discount_id", foreignKey = @ForeignKey(name = "fk_product_discount"))
     private Discount discount;
 

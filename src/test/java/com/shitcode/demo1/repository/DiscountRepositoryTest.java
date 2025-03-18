@@ -1,0 +1,148 @@
+package com.shitcode.demo1.repository;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.math.BigDecimal;
+import java.time.OffsetDateTime;
+import java.util.List;
+import java.util.UUID;
+
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Tags;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
+import org.springframework.test.context.ActiveProfiles;
+
+import com.shitcode.demo1.entity.Category;
+import com.shitcode.demo1.entity.Discount;
+import com.shitcode.demo1.entity.Product;
+import com.shitcode.demo1.helper.DiscountDateTimeConverter;
+import com.shitcode.demo1.testcontainer.AbstractRepositoryTest;
+import com.shitcode.demo1.utils.DiscountType;
+
+@AutoConfigureTestDatabase(replace = Replace.NONE) // Dont load String datasource autoconfig
+@ActiveProfiles("test")
+@DisplayName("Discount Repository Tests")
+@Tags({
+        @Tag("Reporitory"), @Tag("No Mock")
+})
+public class DiscountRepositoryTest extends AbstractRepositoryTest {
+    @Autowired
+    DiscountRepository discountRepository;
+
+    @Autowired
+    ProductRepository productRepository;
+
+    @Autowired
+    CategoryRepository categoryRepository;
+
+    OffsetDateTime time = OffsetDateTime.now();
+    UUID id1 = UUID.randomUUID();
+    UUID id2 = UUID.randomUUID();
+
+    @BeforeEach
+    void setUp() {
+        List<Category> categories = categoryRepository.saveAllAndFlush(List.of(
+                Category.builder().name("Phone").build(),
+                Category.builder().name("Fashion").build(),
+                Category.builder().name("Computer").build()));
+
+        List<Discount> discounts = discountRepository.saveAllAndFlush(List.of(
+                // Example 1: FLASH_SALES Discount
+                Discount.builder()
+                        // .id(id1)
+                        .title("Flash Sales Discount")
+                        .types(List.of(DiscountType.FLASH_SALES))
+                        .salesPercentAmount(20.0)
+                        .expDate(DiscountDateTimeConverter.convert(DiscountType.FLASH_SALES, time)) // Expires in 2
+                        // hours
+                        .build(),
+                // Example 2: DAILY_SALES Discount
+                Discount.builder()
+                        // .id(id2)
+                        .title("Daily Sales Discount")
+                        .types(List.of(DiscountType.DAILY_SALES))
+                        .salesPercentAmount(10.0)
+                        .expDate(DiscountDateTimeConverter.convert(DiscountType.DAILY_SALES, time)) // Expires in 12
+                        // hours
+                        .build()));
+
+        productRepository.saveAllAndFlush(List.of(
+                Product.builder()
+                        .name("Smartphone")
+                        .inStockQuantity(50)
+                        .inSellQuantity(30)
+                        .price(BigDecimal.valueOf(499.99))
+                        .category(categories.get(0))
+                        .discount(discounts.get(0))
+                        .build(),
+
+                Product.builder()
+                        .name("T-Shirt")
+                        .inStockQuantity(100)
+                        .inSellQuantity(70)
+                        .price(BigDecimal.valueOf(19.99))
+                        .category(categories.get(1))
+                        .discount(discounts.get(0))
+                        .build(),
+
+                Product.builder()
+                        .name("Laptop")
+                        .inStockQuantity(20)
+                        .inSellQuantity(5)
+                        .price(BigDecimal.valueOf(999.99))
+                        .category(categories.get(2))
+                        .discount(discounts.get(1))
+                        .build()));
+    }
+
+    @AfterEach
+    void tearDown() {
+        productRepository.deleteAll();
+        discountRepository.deleteAll();
+        categoryRepository.deleteAll();
+    }
+
+    @Test
+    @DisplayName("Should return entities when finding by title")
+    void shouldReturnEntitiesWhenFindingByTitle() {
+        // When
+        List<Discount> discounts = discountRepository.findEntitiesByTitle("Sales Discount");
+        // Then
+        assertThat(discounts)
+                .isNotEmpty()
+                .hasSize(2)
+                .extracting(Discount::getTitle)
+                .containsExactlyInAnyOrder("Flash Sales Discount", "Daily Sales Discount");
+    }
+
+    @Test
+    @DisplayName("Should return a single entity when finding by title")
+    void shouldReturnEntityWhenFindingByTitle() {
+
+    }
+
+    @Test
+    @DisplayName("Should return a list of entities when finding by expiration date between a range")
+    void shouldReturnListOfEntities_whenFindingByExpDateBetween() {
+
+    }
+
+    @Test
+    @DisplayName("Should return paging when finding by title and expiration date between a range")
+    void shouldReturnPaging_whenFindingByTitleAndExpDateBetween() {
+
+    }
+
+    @Test
+    @DisplayName("Should remove expired discounts from products when revoking by discount ID")
+    void shouldremoveExpiredDiscountsFromProductsWhenRevingByDiscountId() {
+
+    }
+
+}

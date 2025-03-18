@@ -13,6 +13,7 @@ import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -31,7 +32,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "promotion", indexes = @Index(name = "idx_discount_title", columnList = "title"))
+@Table(name = "discount", indexes = @Index(name = "idx_discount_title", columnList = "title"))
 public class Discount extends AbstractAuditableEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -50,6 +51,7 @@ public class Discount extends AbstractAuditableEntity {
     @Column(name = "exp-date", nullable = false, columnDefinition = "TIMESTAMP WITH TIME ZONE")
     private OffsetDateTime expDate;
 
-    @OneToMany(mappedBy = "discount", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "discount", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Product> products;
+
 }
