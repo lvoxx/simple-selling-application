@@ -19,7 +19,7 @@ public interface DiscountRepository extends JpaRepository<Discount, UUID> {
         @Query("SELECT d FROM Discount d WHERE LOWER(d.title) LIKE LOWER(CONCAT('%', :title, '%'))")
         List<Discount> findEntitiesByTitle(String title);
 
-        @Query("SELECT d FROM Discount d WHERE d.title = :title")
+        @Query("SELECT d FROM Discount d WHERE LOWER(d.title) = LOWER(:title)")
         Optional<Discount> findEntityByTitle(String title);
 
         List<Discount> findByExpDateBetween(OffsetDateTime startDate, OffsetDateTime endDate);

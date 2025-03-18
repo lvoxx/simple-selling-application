@@ -5,7 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.List;
-import java.util.UUID;
+import java.util.Optional;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -42,8 +42,6 @@ public class DiscountRepositoryTest extends AbstractRepositoryTest {
     CategoryRepository categoryRepository;
 
     OffsetDateTime time = OffsetDateTime.now();
-    UUID id1 = UUID.randomUUID();
-    UUID id2 = UUID.randomUUID();
 
     @BeforeEach
     void setUp() {
@@ -55,7 +53,6 @@ public class DiscountRepositoryTest extends AbstractRepositoryTest {
         List<Discount> discounts = discountRepository.saveAllAndFlush(List.of(
                 // Example 1: FLASH_SALES Discount
                 Discount.builder()
-                        // .id(id1)
                         .title("Flash Sales Discount")
                         .types(List.of(DiscountType.FLASH_SALES))
                         .salesPercentAmount(20.0)
@@ -64,7 +61,6 @@ public class DiscountRepositoryTest extends AbstractRepositoryTest {
                         .build(),
                 // Example 2: DAILY_SALES Discount
                 Discount.builder()
-                        // .id(id2)
                         .title("Daily Sales Discount")
                         .types(List.of(DiscountType.DAILY_SALES))
                         .salesPercentAmount(10.0)
@@ -124,7 +120,15 @@ public class DiscountRepositoryTest extends AbstractRepositoryTest {
     @Test
     @DisplayName("Should return a single entity when finding by title")
     void shouldReturnEntityWhenFindingByTitle() {
-
+        // When
+        Optional<Discount> discount = discountRepository.findEntityByTitle("Flash Sales Discount");
+        // Then
+        assertThat(discount).isPresent().hasValueSatisfying(d -> {
+            assertThat(d.getTitle()).isEqualTo("Flash Sales Discount");
+            assertThat(d.getTypes()).isEqualTo(List.of(DiscountType.FLASH_SALES));
+            assertThat(d.getExpDate()).isAfterOrEqualTo(time.plusHours(2));
+        })
+        .withFailMessage("Expected not null discount with title \"Flash Sales Discount\" but null");
     }
 
     @Test
