@@ -36,8 +36,8 @@ public interface DiscountRepository extends JpaRepository<Discount, UUID> {
                         Pageable pageable);
 
         // Remove relationship with products where expDate is past
-        @Modifying
-        @Query("UPDATE Product p SET p.discount = NULL WHERE p.discount = :discountId")
+        @Modifying(clearAutomatically = true, flushAutomatically = true)
+        @Query("UPDATE Product p SET p.discount = NULL WHERE p.discount.id = :discountId")
         void removeExpiredDiscountsFromProducts(@Param("discountId") UUID discountId);
 
 }

@@ -6,6 +6,8 @@ import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -28,6 +30,8 @@ import com.shitcode.demo1.helper.PaginationProvider;
 import com.shitcode.demo1.testcontainer.AbstractRepositoryTest;
 import com.shitcode.demo1.utils.DiscountType;
 
+import jakarta.persistence.EntityManager;
+
 @AutoConfigureTestDatabase(replace = Replace.NONE) // Dont load String datasource autoconfig
 @ActiveProfiles("test")
 @DisplayName("Discount Repository Tests")
@@ -43,6 +47,9 @@ public class DiscountRepositoryTest extends AbstractRepositoryTest {
 
     @Autowired
     CategoryRepository categoryRepository;
+
+    @Autowired
+    EntityManager entityManager;
 
     OffsetDateTime time = OffsetDateTime.now();
 
@@ -177,7 +184,22 @@ public class DiscountRepositoryTest extends AbstractRepositoryTest {
     @Test
     @DisplayName("Should remove expired discounts from products when revoking by discount ID")
     void shouldremoveExpiredDiscountsFromProductsWhenRevingByDiscountId() {
+        // Given
+        UUID id = discountRepository.findEntityByTitle("Flash Sales Discount").get().getId();
+        List<Long> productIdNeedToRemoveDiscount = productRepository.findAll()
+                .stream()
+                .filter(p -> p.getDiscount() != null && p.getDiscount().getId().equals(id))
+                .map(Product::getId)
+                .collect(Collectors.toList());
+        // When
+        discountRepository.removeExpiredDiscountsFromProducts(id);
 
+        // Then
+        List<Product> products = productRepository.findAllById(productIdNeedToRemoveDiscount);
+        assertThat(products)
+                .isNotEmpty()
+                .extracting(Product::getDiscount)
+                .containsOnlyNulls();
     }
 
 }
