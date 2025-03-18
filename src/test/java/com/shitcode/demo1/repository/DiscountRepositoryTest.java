@@ -16,12 +16,15 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ActiveProfiles;
 
 import com.shitcode.demo1.entity.Category;
 import com.shitcode.demo1.entity.Discount;
 import com.shitcode.demo1.entity.Product;
 import com.shitcode.demo1.helper.DiscountDateTimeConverter;
+import com.shitcode.demo1.helper.PaginationProvider;
 import com.shitcode.demo1.testcontainer.AbstractRepositoryTest;
 import com.shitcode.demo1.utils.DiscountType;
 
@@ -152,7 +155,23 @@ public class DiscountRepositoryTest extends AbstractRepositoryTest {
     @Test
     @DisplayName("Should return paging when finding by title and expiration date between a range")
     void shouldReturnPaging_whenFindingByTitleAndExpDateBetween() {
-
+        // Given
+        OffsetDateTime now = OffsetDateTime.now();
+        OffsetDateTime beforeTime = now.minusHours(1);
+        OffsetDateTime afterTime = now.plusDays(1);
+        Pageable pageable = PaginationProvider.build(1, 10, "title", false);
+        // When
+        Page<Discount> page = discountRepository.findByTitleAndExpDateBetween("", beforeTime, afterTime, pageable);
+        // Then
+        assertThat(page).isNotNull();
+        assertThat(page.getTotalElements()).isGreaterThanOrEqualTo(2);
+        assertThat(page.getTotalPages()).isGreaterThanOrEqualTo(1);
+        assertThat(page.getNumber()).isEqualTo(0);
+        assertThat(page.getSize()).isEqualTo(10);
+        assertThat(page.getContent())
+                .isNotEmpty()
+                .extracting(Discount::getTitle)
+                .containsExactlyInAnyOrder("Flash Sales Discount", "Daily Sales Discount");
     }
 
     @Test
