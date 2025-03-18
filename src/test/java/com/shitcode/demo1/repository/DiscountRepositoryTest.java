@@ -128,12 +128,24 @@ public class DiscountRepositoryTest extends AbstractRepositoryTest {
             assertThat(d.getTypes()).isEqualTo(List.of(DiscountType.FLASH_SALES));
             assertThat(d.getExpDate()).isAfterOrEqualTo(time.plusHours(2));
         })
-        .withFailMessage("Expected not null discount with title \"Flash Sales Discount\" but null");
+                .withFailMessage("Expected not null discount with title \"Flash Sales Discount\" but null");
     }
 
     @Test
     @DisplayName("Should return a list of entities when finding by expiration date between a range")
     void shouldReturnListOfEntities_whenFindingByExpDateBetween() {
+        // Given
+        OffsetDateTime now = OffsetDateTime.now();
+        OffsetDateTime beforeTime = now.minusHours(1);
+        OffsetDateTime afterTime = now.plusHours(6);
+        // When
+        List<Discount> discounts = discountRepository.findByExpDateBetween(beforeTime, afterTime);
+        // Then
+        assertThat(discounts)
+                .isNotEmpty()
+                .hasSize(1)
+                .extracting(Discount::getTitle)
+                .containsExactlyInAnyOrder("Flash Sales Discount");
 
     }
 
