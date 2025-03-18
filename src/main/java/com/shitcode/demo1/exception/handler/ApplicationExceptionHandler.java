@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import com.shitcode.demo1.exception.model.ConflictTokenException;
+import com.shitcode.demo1.exception.model.DiscountOverTimeException;
 import com.shitcode.demo1.exception.model.EntityExistsException;
 import com.shitcode.demo1.exception.model.EntityNotChangedException;
 import com.shitcode.demo1.exception.model.EntityNotFoundException;
@@ -30,7 +31,7 @@ public class ApplicationExceptionHandler {
         return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
-    @ExceptionHandler({ EntityNotChangedException.class })
+    @ExceptionHandler({ EntityNotChangedException.class, DiscountOverTimeException.class })
     public ResponseEntity<ErrorModel> handleUnchangedDataOperationException(RuntimeException ex) {
         ErrorModel errorResponse = ErrorModel.of(HttpStatus.UNPROCESSABLE_ENTITY, ex.getMessage(), null);
         return new ResponseEntity<>(errorResponse, HttpStatus.UNPROCESSABLE_ENTITY);
