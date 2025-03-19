@@ -1,5 +1,6 @@
 package com.shitcode.demo1.mapper;
 
+import org.mapstruct.InjectionStrategy;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Mappings;
@@ -8,7 +9,7 @@ import org.mapstruct.factory.Mappers;
 import com.shitcode.demo1.dto.CategoryDTO;
 import com.shitcode.demo1.entity.Category;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", injectionStrategy = InjectionStrategy.CONSTRUCTOR)
 public interface CategoryMapper {
         CategoryMapper INSTANCE = Mappers.getMapper(CategoryMapper.class);
 

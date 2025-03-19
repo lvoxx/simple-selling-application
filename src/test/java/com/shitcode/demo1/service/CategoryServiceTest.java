@@ -20,10 +20,14 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Tags;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.runner.RunWith;
+import org.mapstruct.factory.Mappers;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -33,6 +37,7 @@ import com.shitcode.demo1.dto.CategoryDTO;
 import com.shitcode.demo1.entity.Category;
 import com.shitcode.demo1.exception.model.EntityExistsException;
 import com.shitcode.demo1.exception.model.EntityNotFoundException;
+import com.shitcode.demo1.mapper.CategoryMapper;
 import com.shitcode.demo1.repository.CategoryRepository;
 import com.shitcode.demo1.service.impl.CategoryServiceImpl;
 
@@ -40,7 +45,8 @@ import com.shitcode.demo1.service.impl.CategoryServiceImpl;
 @Tags({
         @Tag("Service"), @Tag("Mock")
 })
-@ExtendWith(MockitoExtension.class)
+@RunWith(MockitoJUnitRunner.class)
+@ExtendWith({ MockitoExtension.class })
 public class CategoryServiceTest {
 
     @InjectMocks
@@ -48,6 +54,9 @@ public class CategoryServiceTest {
 
     @Mock
     CategoryRepository categoryRepository;
+
+    @Spy
+    CategoryMapper categoryMapper = Mappers.getMapper(CategoryMapper.class);
 
     @Captor
     ArgumentCaptor<Pageable> pagableCaptor;
