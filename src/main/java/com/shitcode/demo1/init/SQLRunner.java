@@ -47,6 +47,7 @@ public class SQLRunner implements CommandLineRunner {
                                     "Database connection established successfully.");
                             sqlMap.add("database/categories.sql");
                             sqlMap.add("database/products.sql");
+                            sqlMap.add("database/discounts.sql");
                         } else {
                             LogPrinter.printLog(LogPrinter.Type.ERROR, LogPrinter.Flag.START_UP,
                                     "Database connection is not valid.");
