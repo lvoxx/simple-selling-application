@@ -25,6 +25,7 @@ import com.shitcode.demo1.mapper.DiscountMapper;
 import com.shitcode.demo1.repository.DiscountRepository;
 import com.shitcode.demo1.service.DiscountService;
 import com.shitcode.demo1.utils.KeyLock;
+import com.shitcode.demo1.utils.cache.DiscountCacheType;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.transaction.Transactional;
@@ -49,18 +50,18 @@ public class DiscountServiceImpl implements DiscountService {
 
     @PostConstruct
     void setUp() {
-        cacheManager.getCache("expired-discount");
+        cacheManager.getCache(DiscountCacheType.Fields.EXPIRED_DISCOUNTS);
     }
 
     @Override
-    @Cacheable(value = "discount-id", key = "#id")
+    @Cacheable(value = DiscountCacheType.Fields.DISCOUNT_ID, key = "#id")
     public ManageResponse findById(UUID id) {
         return discountMapper.toManageResponse(findEntityById(id));
     }
 
     @Override
     @Caching(evict = {
-            @CacheEvict(value = "discounts-title-expdate", allEntries = true),
+            @CacheEvict(value = DiscountCacheType.Fields.DISCOUNTS_TITLE_EXPDATE, allEntries = true),
     })
     public ManageResponse create(ManageRequest request) {
         Discount discount = discountMapper.toEntity(request);
@@ -74,8 +75,8 @@ public class DiscountServiceImpl implements DiscountService {
 
     @Override
     @Caching(evict = {
-            @CacheEvict(value = "discount-id", key = "#id"),
-            @CacheEvict(value = "discounts-title-expdate", allEntries = true),
+            @CacheEvict(value = DiscountCacheType.Fields.DISCOUNT_ID, key = "#id"),
+            @CacheEvict(value = DiscountCacheType.Fields.DISCOUNTS_TITLE_EXPDATE, allEntries = true),
     })
     public ManageResponse update(ManageRequest request, UUID id) {
         Discount discount = findEntityById(id);
@@ -95,8 +96,8 @@ public class DiscountServiceImpl implements DiscountService {
 
     @Override
     @Caching(evict = {
-            @CacheEvict(value = "discount-id", key = "#id"),
-            @CacheEvict(value = "discounts-title-expdate", allEntries = true),
+            @CacheEvict(value = DiscountCacheType.Fields.DISCOUNT_ID, key = "#id"),
+            @CacheEvict(value = DiscountCacheType.Fields.DISCOUNTS_TITLE_EXPDATE, allEntries = true),
     })
     public void delete(UUID id) {
         findEntityById(id);
@@ -110,7 +111,7 @@ public class DiscountServiceImpl implements DiscountService {
     }
 
     @Override
-    @Cacheable(value = "discounts-title-expdate", key = "T(String).valueOf(#page) + '-' + T(String).valueOf(#size) + '-' + (#sort ?: 'default') + '-' + T(String).valueOf(#asc)")
+    @Cacheable(value = DiscountCacheType.Fields.DISCOUNTS_TITLE_EXPDATE, key = "T(String).valueOf(#page) + '-' + T(String).valueOf(#size) + '-' + (#sort ?: 'default') + '-' + T(String).valueOf(#asc)")
     public Page<ManageResponse> findByTitleAndExpDateBetween(int page, int size, @Nullable String sort, boolean asc,
             String title, OffsetDateTime startDate, OffsetDateTime endDate) {
         Pageable pageable = PaginationProvider.build(page, size, sort, asc);

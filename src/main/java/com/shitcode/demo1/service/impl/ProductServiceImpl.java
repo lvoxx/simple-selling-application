@@ -31,6 +31,7 @@ import com.shitcode.demo1.repository.ProductRepository;
 import com.shitcode.demo1.service.CategoryService;
 import com.shitcode.demo1.service.ProductService;
 import com.shitcode.demo1.utils.KeyLock;
+import com.shitcode.demo1.utils.cache.ProductCacheType;
 
 @Service
 @Transactional
@@ -52,7 +53,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     @Transactional(readOnly = true)
-    @Cacheable(value = "insell-products", key = "T(String).valueOf(#page) + '-' + T(String).valueOf(#size) + '-' + (#sort ?: 'default') + '-' + T(String).valueOf(#asc)")
+    @Cacheable(value = ProductCacheType.Fields.INSELL_PRODUCTS, key = "T(String).valueOf(#page) + '-' + T(String).valueOf(#size) + '-' + (#sort ?: 'default') + '-' + T(String).valueOf(#asc)")
     public Page<InSellResponse> findInSellWithPagination(int page, int size, @Nullable String sort, boolean asc) {
         log.debug("Fetching in-sell products with page: {}, size: {}, sort: {}, asc: {}", page, size, sort, asc);
 
@@ -67,7 +68,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     @Transactional(readOnly = true)
-    @Cacheable(value = "admin-products", key = "T(String).valueOf(#page) + '-' + T(String).valueOf(#size) + '-' + (#sort ?: 'default') + '-' + T(String).valueOf(#asc)")
+    @Cacheable(value = ProductCacheType.Fields.ADMIN_PRODUCTS, key = "T(String).valueOf(#page) + '-' + T(String).valueOf(#size) + '-' + (#sort ?: 'default') + '-' + T(String).valueOf(#asc)")
     public Page<AdminResponse> findAdminWithPagination(int page, int size, @Nullable String sort, boolean asc) {
         log.debug("Fetching admin products with page: {}, size: {}, sort: {}, asc: {}", page, size, sort, asc);
 
@@ -82,8 +83,8 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     @Caching(evict = {
-            @CacheEvict(value = "admin-products", allEntries = true),
-            @CacheEvict(value = "insell-products", allEntries = true)
+            @CacheEvict(value = ProductCacheType.Fields.ADMIN_PRODUCTS, allEntries = true),
+            @CacheEvict(value = ProductCacheType.Fields.INSELL_PRODUCTS, allEntries = true)
     })
     public AdminResponse create(Request request) {
         log.debug("Creating product with name: {}", request.getName());
@@ -109,12 +110,12 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     @Caching(evict = {
-            @CacheEvict(value = "admin-products", allEntries = true),
-            @CacheEvict(value = "insell-products", allEntries = true),
-            @CacheEvict(value = "admin-product-id", key = "#id"),
-            @CacheEvict(value = "insell-product-id", key = "#id"),
-            @CacheEvict(value = "admin-product-name", key = "#req.name"),
-            @CacheEvict(value = "insell-product-name", key = "#req.name")
+            @CacheEvict(value = ProductCacheType.Fields.ADMIN_PRODUCTS, allEntries = true),
+            @CacheEvict(value = ProductCacheType.Fields.INSELL_PRODUCTS, allEntries = true),
+            @CacheEvict(value = ProductCacheType.Fields.ADMIN_PRODUCT_ID, key = "#id"),
+            @CacheEvict(value = ProductCacheType.Fields.INSELL_PRODUCT_ID, key = "#id"),
+            @CacheEvict(value = ProductCacheType.Fields.ADMIN_PRODUCT_NAME, key = "#req.name"),
+            @CacheEvict(value = ProductCacheType.Fields.INSELL_PRODUCT_NAME, key = "#req.name")
     })
     public AdminResponse update(Request request, Long id) {
         log.debug("Updating product with ID: {}", id);
@@ -134,22 +135,26 @@ public class ProductServiceImpl implements ProductService {
         return response;
     }
 
-    
-
     @Override
+    @Caching(evict = {
+            @CacheEvict(value = ProductCacheType.Fields.ADMIN_PRODUCTS, allEntries = true),
+            @CacheEvict(value = ProductCacheType.Fields.INSELL_PRODUCTS, allEntries = true),
+            @CacheEvict(value = ProductCacheType.Fields.ADMIN_PRODUCT_ID, key = "#requests.productIds"),
+            @CacheEvict(value = ProductCacheType.Fields.INSELL_PRODUCT_ID, key = "#requests.productIds")
+    })
     public ApplyToProductsResponse putDiscountToProducts(ApplyToProductsRequest requests) {
-        // TODO Auto-generated method stub
-        return null;
+        requests.getProductIds().forEach(pId -> {
+            productRepository.updateDiscountByProductId(pId, requests.getDiscountId());
+        });
+        return productMapper.toApplyDiscountResponse(requests);
     }
 
     @Override
     @Caching(evict = {
-            @CacheEvict(value = "admin-products", allEntries = true),
-            @CacheEvict(value = "insell-products", allEntries = true),
-            @CacheEvict(value = "admin-product-id", key = "#id"),
-            @CacheEvict(value = "insell-product-id", key = "#id"),
-            @CacheEvict(value = "admin-product-name", key = "#req.name"),
-            @CacheEvict(value = "insell-product-name", key = "#req.name")
+            @CacheEvict(value = ProductCacheType.Fields.ADMIN_PRODUCTS, allEntries = true),
+            @CacheEvict(value = ProductCacheType.Fields.INSELL_PRODUCTS, allEntries = true),
+            @CacheEvict(value = ProductCacheType.Fields.ADMIN_PRODUCT_ID, key = "#id"),
+            @CacheEvict(value = ProductCacheType.Fields.INSELL_PRODUCT_ID, key = "#id")
     })
     public InSellResponse sellWith(Integer quantity, Long id) {
         log.debug("Selling {} units of product ID: {}", quantity, id);
@@ -165,12 +170,10 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     @Caching(evict = {
-            @CacheEvict(value = "admin-products", allEntries = true),
-            @CacheEvict(value = "insell-products", allEntries = true),
-            @CacheEvict(value = "admin-product-id", key = "#id"),
-            @CacheEvict(value = "insell-product-id", key = "#id"),
-            @CacheEvict(value = "admin-product-name", key = "#req.name"),
-            @CacheEvict(value = "insell-product-name", key = "#req.name")
+            @CacheEvict(value = ProductCacheType.Fields.ADMIN_PRODUCTS, allEntries = true),
+            @CacheEvict(value = ProductCacheType.Fields.INSELL_PRODUCTS, allEntries = true),
+            @CacheEvict(value = ProductCacheType.Fields.ADMIN_PRODUCT_ID, key = "#id"),
+            @CacheEvict(value = ProductCacheType.Fields.INSELL_PRODUCT_ID, key = "#id")
     })
     public InSellResponse importWith(Integer quantity, Long id) {
         log.debug("Importing {} units for product ID: {}", quantity, id);
@@ -186,12 +189,10 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     @Caching(evict = {
-            @CacheEvict(value = "admin-products", allEntries = true),
-            @CacheEvict(value = "insell-products", allEntries = true),
-            @CacheEvict(value = "admin-product-id", key = "#id"),
-            @CacheEvict(value = "insell-product-id", key = "#id"),
-            @CacheEvict(value = "admin-product-name", key = "#req.name"),
-            @CacheEvict(value = "insell-product-name", key = "#req.name")
+            @CacheEvict(value = ProductCacheType.Fields.ADMIN_PRODUCTS, allEntries = true),
+            @CacheEvict(value = ProductCacheType.Fields.INSELL_PRODUCTS, allEntries = true),
+            @CacheEvict(value = ProductCacheType.Fields.ADMIN_PRODUCT_ID, key = "#id"),
+            @CacheEvict(value = ProductCacheType.Fields.INSELL_PRODUCT_ID, key = "#id")
     })
     public InSellResponse exportWith(Integer quantity, Long id) {
         log.debug("Exporting {} units from product ID: {}", quantity, id);
@@ -207,12 +208,10 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     @Caching(evict = {
-            @CacheEvict(value = "admin-products", allEntries = true),
-            @CacheEvict(value = "insell-products", allEntries = true),
-            @CacheEvict(value = "admin-product-id", key = "#id"),
-            @CacheEvict(value = "insell-product-id", key = "#id"),
-            @CacheEvict(value = "admin-product-name", key = "#req.name"),
-            @CacheEvict(value = "insell-product-name", key = "#req.name")
+            @CacheEvict(value = ProductCacheType.Fields.ADMIN_PRODUCTS, allEntries = true),
+            @CacheEvict(value = ProductCacheType.Fields.INSELL_PRODUCTS, allEntries = true),
+            @CacheEvict(value = ProductCacheType.Fields.ADMIN_PRODUCT_ID, key = "#id"),
+            @CacheEvict(value = ProductCacheType.Fields.INSELL_PRODUCT_ID, key = "#id")
     })
     public void delete(Long id) {
         log.debug("Deleting product with ID: {}", id);
@@ -224,28 +223,28 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    @Cacheable(value = "admin-products-id", key = "#id")
+    @Cacheable(value = ProductCacheType.Fields.ADMIN_PRODUCT_ID, key = "#id")
     @Transactional(readOnly = true)
     public AdminResponse findAdminProductWithId(Long id) {
         return productMapper.toProductAdminResponse(findEntityWithId(id));
     }
 
     @Override
-    @Cacheable(value = "admin-products-name", key = "#name")
+    @Cacheable(value = ProductCacheType.Fields.ADMIN_PRODUCT_NAME, key = "#name")
     @Transactional(readOnly = true)
     public AdminResponse findAdminProductWithName(String name) {
         return productMapper.toProductAdminResponse(findEntityWithName(name));
     }
 
     @Override
-    @Cacheable(value = "insell-products-id", key = "#id")
+    @Cacheable(value = ProductCacheType.Fields.INSELL_PRODUCT_ID, key = "#id")
     @Transactional(readOnly = true)
     public InSellResponse findInSellProductWithId(Long id) {
         return productMapper.toProductInSellResponse(findEntityWithId(id));
     }
 
     @Override
-    @Cacheable(value = "insell-products-name", key = "#name")
+    @Cacheable(value = ProductCacheType.Fields.INSELL_PRODUCT_NAME, key = "#name")
     @Transactional(readOnly = true)
     public InSellResponse findInSellWithName(String name) {
         return productMapper.toProductInSellResponse(findEntityWithName(name));

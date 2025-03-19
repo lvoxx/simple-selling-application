@@ -8,6 +8,6 @@ import lombok.Setter;
 @Getter
 @Setter
 public abstract class AbstractAuditableEntity {
-    protected Instant createdAt;
-    protected Instant updatedAt;
+    protected Instant createdAt = Instant.now();
+    protected Instant updatedAt = Instant.now();
 }

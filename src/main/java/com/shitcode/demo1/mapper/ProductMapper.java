@@ -5,6 +5,8 @@ import org.mapstruct.Mapping;
 import org.mapstruct.Mappings;
 import org.mapstruct.factory.Mappers;
 
+import com.shitcode.demo1.dto.DiscountDTO.ApplyToProductsRequest;
+import com.shitcode.demo1.dto.DiscountDTO.ApplyToProductsResponse;
 import com.shitcode.demo1.dto.ProductDTO;
 import com.shitcode.demo1.entity.Product;
 
@@ -27,4 +29,8 @@ public interface ProductMapper {
         ProductDTO.InSellResponse toProductInSellResponse(Product product);
 
         ProductDTO.AdminResponse toProductAdminResponse(Product product);
+
+        ApplyToProductsResponse toApplyDiscountResponse(ApplyToProductsRequest request);
+
+        ApplyToProductsRequest toApplyDiscountRequest(ApplyToProductsResponse response);
 }
