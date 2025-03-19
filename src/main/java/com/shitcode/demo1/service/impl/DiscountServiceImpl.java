@@ -13,6 +13,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.shitcode.demo1.annotation.logging.LogCollector;
 import com.shitcode.demo1.component.DatabaseLock;
@@ -28,7 +29,6 @@ import com.shitcode.demo1.utils.KeyLock;
 import com.shitcode.demo1.utils.cache.DiscountCacheType;
 
 import jakarta.annotation.PostConstruct;
-import jakarta.transaction.Transactional;
 
 @Service
 @Transactional
@@ -55,6 +55,7 @@ public class DiscountServiceImpl implements DiscountService {
 
     @Override
     @Cacheable(value = DiscountCacheType.Fields.DISCOUNT_ID, key = "#id")
+    @Transactional(readOnly = true)
     public ManageResponse findById(UUID id) {
         return discountMapper.toManageResponse(findEntityById(id));
     }
@@ -112,6 +113,7 @@ public class DiscountServiceImpl implements DiscountService {
 
     @Override
     @Cacheable(value = DiscountCacheType.Fields.DISCOUNTS_TITLE_EXPDATE, key = "T(String).valueOf(#page) + '-' + T(String).valueOf(#size) + '-' + (#sort ?: 'default') + '-' + T(String).valueOf(#asc)")
+    @Transactional(readOnly = true)
     public Page<ManageResponse> findByTitleAndExpDateBetween(int page, int size, @Nullable String sort, boolean asc,
             String title, OffsetDateTime startDate, OffsetDateTime endDate) {
         Pageable pageable = PaginationProvider.build(page, size, sort, asc);
