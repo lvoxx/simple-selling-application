@@ -4,12 +4,10 @@ import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
 
-import com.shitcode.demo1.helper.DiscountConverter;
 import com.shitcode.demo1.utils.DiscountType;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
-import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -42,8 +40,7 @@ public class Discount extends AbstractAuditableEntity {
     private String title;
 
     @Enumerated(EnumType.STRING)
-    @Convert(converter = DiscountConverter.class)
-    private List<DiscountType> types;
+    private DiscountType type;
 
     @Column(name = "sales-percent-amount", precision = 0, nullable = false)
     private double salesPercentAmount;

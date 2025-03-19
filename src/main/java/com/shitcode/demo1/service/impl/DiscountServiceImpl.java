@@ -82,7 +82,7 @@ public class DiscountServiceImpl implements DiscountService {
     public ManageResponse update(ManageRequest request, UUID id) {
         Discount discount = findEntityById(id);
         discount.setTitle(request.getTitle());
-        discount.setTypes(request.getTypes());
+        discount.setType(request.getType());
         discount.setSalesPercentAmount(request.getSalesPercentAmount());
         discount.setExpDate(request.getExpDate());
 

@@ -19,7 +19,7 @@ public abstract class DiscountDTO {
     @Setter(value = AccessLevel.PRIVATE)
     public static class ManageRequest {
         private String title;
-        private List<DiscountType> types;
+        private DiscountType type;
         private double salesPercentAmount;
         @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ssXXX")
         private OffsetDateTime expDate;
@@ -31,7 +31,7 @@ public abstract class DiscountDTO {
     public static class ManageResponse extends AbstractAuditableEntity {
         private UUID id;
         private String title;
-        private List<DiscountType> types;
+        private DiscountType type;
         private double salesPercentAmount;
         @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ssXXX")
         private OffsetDateTime expDate;

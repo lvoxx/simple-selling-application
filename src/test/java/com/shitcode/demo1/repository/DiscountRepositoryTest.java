@@ -64,7 +64,7 @@ public class DiscountRepositoryTest extends AbstractRepositoryTest {
                                 // Example 1: FLASH_SALES Discount
                                 Discount.builder()
                                                 .title("Flash Sales Discount")
-                                                .types(List.of(DiscountType.FLASH_SALES))
+                                                .type(DiscountType.FLASH_SALES)
                                                 .salesPercentAmount(20.0)
                                                 .expDate(DiscountDateTimeConverter.convert(DiscountType.FLASH_SALES,
                                                                 time)) // Expires in 2
@@ -73,7 +73,7 @@ public class DiscountRepositoryTest extends AbstractRepositoryTest {
                                 // Example 2: DAILY_SALES Discount
                                 Discount.builder()
                                                 .title("Daily Sales Discount")
-                                                .types(List.of(DiscountType.DAILY_SALES))
+                                                .type(DiscountType.DAILY_SALES)
                                                 .salesPercentAmount(10.0)
                                                 .expDate(DiscountDateTimeConverter.convert(DiscountType.DAILY_SALES,
                                                                 time)) // Expires in 12
@@ -137,7 +137,7 @@ public class DiscountRepositoryTest extends AbstractRepositoryTest {
                 // Then
                 assertThat(discount).isPresent().hasValueSatisfying(d -> {
                         assertThat(d.getTitle()).isEqualTo("Flash Sales Discount");
-                        assertThat(d.getTypes()).isEqualTo(List.of(DiscountType.FLASH_SALES));
+                        assertThat(d.getType()).isEqualTo(DiscountType.FLASH_SALES);
                         assertThat(d.getExpDate()).isAfterOrEqualTo(time.plusHours(2));
                 })
                                 .withFailMessage(
