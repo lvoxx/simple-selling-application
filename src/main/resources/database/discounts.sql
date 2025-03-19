@@ -21,7 +21,7 @@ WHERE id IN (
     SELECT id FROM products
     WHERE discount_id IS NULL
     ORDER BY random()
-    LIMIT 40
+    LIMIT 15
 );
 
 -- 4. Update products for DAILY_SALES discount
@@ -33,7 +33,7 @@ WHERE id IN (
     SELECT id FROM products
     WHERE discount_id IS NULL
     ORDER BY random()
-    LIMIT 35
+    LIMIT 20
 );
 
 -- 5. Update products for SEASONAL_SALES discount
@@ -45,5 +45,5 @@ WHERE id IN (
     SELECT id FROM products
     WHERE discount_id IS NULL
     ORDER BY random()
-    LIMIT 30
+    LIMIT 15
 );
