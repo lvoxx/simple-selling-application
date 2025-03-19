@@ -42,10 +42,10 @@ public class Discount extends AbstractAuditableEntity {
     @Enumerated(EnumType.STRING)
     private DiscountType type;
 
-    @Column(name = "sales-percent-amount", precision = 0, nullable = false)
+    @Column(name = "sales_percent_amount", precision = 0, nullable = false)
     private double salesPercentAmount;
 
-    @Column(name = "exp-date", nullable = false, columnDefinition = "TIMESTAMP WITH TIME ZONE")
+    @Column(name = "exp_date", nullable = false, columnDefinition = "TIMESTAMP WITH TIME ZONE")
     private OffsetDateTime expDate;
 
     @OneToMany(mappedBy = "discount", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
