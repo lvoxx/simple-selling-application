@@ -51,6 +51,11 @@ services:
       SPRING_MAIL_PROPERTIES_MAIL_STMP_AUTH_STARTTLS_ENABLE: false # true
     networks:
       - lvoxx-networks
+    volumes:
+      - application-logs:/deploy/simple-selling-application
     depends_on:
       postgres:
         condition: service_healthy
+
+volumes:
+  application-logs:
