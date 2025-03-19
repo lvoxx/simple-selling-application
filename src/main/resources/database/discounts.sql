@@ -1,47 +1,49 @@
--- Function to Assign Discount to Products (Ensures No Duplicate Assignments)
-WITH available_products AS (
-    SELECT id FROM generate_series(1, 50) id 
-    WHERE id NOT IN (
-        SELECT DISTINCT product_id FROM discount_product dp
-        JOIN discount d ON dp.discount_id = d.id
-        WHERE d.exp-date > NOW()
-    )
+-- 1. Enable the UUID extension for generating UUIDs
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
+-- 2. Insert Discount Records
+WITH new_discounts AS (
+    INSERT INTO discount (id, title, type, sales_percent_amount, exp_date)
+    VALUES 
+        (uuid_generate_v4(), 'Flash Sale Discount', 'FLASH_SALES', 15.0, NOW() + INTERVAL '7 days'),
+        (uuid_generate_v4(), 'Daily Sale Discount', 'DAILY_SALES', 10.0, NOW() + INTERVAL '30 days'),
+        (uuid_generate_v4(), 'Seasonal Sale Discount', 'SEASONAL_SALES', 20.0, NOW() + INTERVAL '90 days')
+    RETURNING id, type
 )
-INSERT INTO discount_product (discount_id, product_id)
-SELECT $1, id FROM (
-    SELECT id FROM available_products ORDER BY random() LIMIT $2
-) sub;
+SELECT * FROM new_discounts;
 
--- Insert Discount Records
-INSERT INTO discount (id, title, type, sales-percent-amount, exp-date)
-VALUES 
-    ('550e8400-e29b-41d4-a716-446655440001', 'Flash Sale Discount', 'FLASH_SALES', 15.0, NOW() + INTERVAL '7 days'),
-    ('550e8400-e29b-41d4-a716-446655440002', 'Daily Sale Discount', 'DAILY_SALES', 10.0, NOW() + INTERVAL '30 days'),
-    ('550e8400-e29b-41d4-a716-446655440003', 'Seasonal Sale Discount', 'SEASONAL_SALES', 20.0, NOW() + INTERVAL '90 days');
+-- 3. Update products for FLASH_SALES discount
+UPDATE products
+SET discount_id = (
+    SELECT id FROM discount WHERE type = 'FLASH_SALES' LIMIT 1
+)
+WHERE id IN (
+    SELECT id FROM products
+    WHERE discount_id IS NULL
+    ORDER BY random()
+    LIMIT 40
+);
 
--- Assign Discounts to Products Using the Optimized Query
-DO $$ 
-DECLARE 
-    discount_assignments TABLE (discount_id UUID, product_count INT) VALUES 
-        ('550e8400-e29b-41d4-a716-446655440001', 40),
-        ('550e8400-e29b-41d4-a716-446655440002', 35),
-        ('550e8400-e29b-41d4-a716-446655440003', 30);
-    rec RECORD;
-BEGIN
-    FOR rec IN SELECT * FROM discount_assignments LOOP
-        EXECUTE format($$
-            WITH available_products AS (
-                SELECT id FROM generate_series(1, 50) id 
-                WHERE id NOT IN (
-                    SELECT DISTINCT product_id FROM discount_product dp
-                    JOIN discount d ON dp.discount_id = d.id
-                    WHERE d.exp-date > NOW()
-                )
-            )
-            INSERT INTO discount_product (discount_id, product_id)
-            SELECT '%s', id FROM (
-                SELECT id FROM available_products ORDER BY random() LIMIT %s
-            ) sub;
-        $$, rec.discount_id, rec.product_count);
-    END LOOP;
-END $$;
+-- 4. Update products for DAILY_SALES discount
+UPDATE products
+SET discount_id = (
+    SELECT id FROM discount WHERE type = 'DAILY_SALES' LIMIT 1
+)
+WHERE id IN (
+    SELECT id FROM products
+    WHERE discount_id IS NULL
+    ORDER BY random()
+    LIMIT 35
+);
+
+-- 5. Update products for SEASONAL_SALES discount
+UPDATE products
+SET discount_id = (
+    SELECT id FROM discount WHERE type = 'SEASONAL_SALES' LIMIT 1
+)
+WHERE id IN (
+    SELECT id FROM products
+    WHERE discount_id IS NULL
+    ORDER BY random()
+    LIMIT 30
+);
