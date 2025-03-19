@@ -7,6 +7,7 @@ import java.util.UUID;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -28,6 +29,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     @Query("SELECT p FROM Product p LEFT JOIN FETCH p.category")
     Page<Product> findPagedAllProductsWithCategory(Pageable pageable);
 
-    @Query("UPDATE Product p SET p.discount = :discountId WHERE p.id = :productId")
-    Product updateDiscountByProductId(@Param("productId") Long productId, @Param("discountId") UUID discountId);
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query("UPDATE Product p SET p.discount.id = :discountId WHERE p.id = :productId")
+    void updateDiscountByProductId(@Param("productId") Long productId, @Param("discountId") UUID discountId);
 }
