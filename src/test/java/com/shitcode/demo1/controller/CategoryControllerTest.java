@@ -257,23 +257,23 @@ public class CategoryControllerTest {
                                 .header("accept", "application/vnd.lvoxx.app-v1+json")
                                 .content(objectMapper.writeValueAsString(requestBlank)))
                                 .andDo(print())
-                                .andExpect(status().isUnprocessableEntity())
+                                .andExpect(status().isBadRequest())
                                 .andExpect(content().contentType("application/vnd.lvoxx.app-v1+json"))
                                 .andExpect(jsonPath("$.errors[0].field").value("name"))
                                 .andExpect(jsonPath("$.errors[0].message").value("Category name cannot be blank."))
-                                .andExpect(jsonPath("$.status").value("UNPROCESSABLE_ENTITY"));
+                                .andExpect(jsonPath("$.status").value("BAD_REQUEST"));
                 // Invalid - Out of size
                 mockMvc.perform(post("/categories")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .header("accept", "application/vnd.lvoxx.app-v1+json")
                                 .content(objectMapper.writeValueAsString(requestOutOfSize)))
                                 .andDo(print())
-                                .andExpect(status().isUnprocessableEntity())
+                                .andExpect(status().isBadRequest())
                                 .andExpect(content().contentType("application/vnd.lvoxx.app-v1+json"))
                                 .andExpect(jsonPath("$.errors[0].field").value("name"))
                                 .andExpect(jsonPath("$.errors[0].message")
                                                 .value("Category name must not exceed 60 characters."))
-                                .andExpect(jsonPath("$.status").value("UNPROCESSABLE_ENTITY"));
+                                .andExpect(jsonPath("$.status").value("BAD_REQUEST"));
         }
 
         // Category update
