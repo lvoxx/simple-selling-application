@@ -169,8 +169,8 @@ public class AuthControllerTest {
                                 .andDo(print())
                                 .andExpect(status().isBadRequest())
                                 .andExpect(content().contentType("application/vnd.lvoxx.app-v1+json"))
-                                .andExpect(jsonPath("$.errors[0].field").value("email"))
-                                .andExpect(jsonPath("$.errors[0].message")
+                                .andExpect(jsonPath("$.errors[1].field").value("email"))
+                                .andExpect(jsonPath("$.errors[1].message")
                                                 .value("Email must not between 6 and 320 characters, include @."))
                                 .andExpect(jsonPath("$.message").value("Validation failed"))
                                 .andExpect(jsonPath("$.status").value("BAD_REQUEST"));
