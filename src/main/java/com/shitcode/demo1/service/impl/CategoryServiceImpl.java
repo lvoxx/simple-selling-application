@@ -26,6 +26,14 @@ import com.shitcode.demo1.service.CategoryService;
 import com.shitcode.demo1.utils.LoggingModel;
 import com.shitcode.demo1.utils.cache.CategoryCacheType;
 
+/**
+ * Service implementation for managing Category entities.
+ * <p>
+ * This service provides operations to create, read, update, and delete categories,
+ * as well as fetching categories with pagination support. Caching mechanisms
+ * are applied to improve performance and reduce database load.
+ * </p>
+ */
 @Service
 @Transactional
 @LogCollector(loggingModel = LoggingModel.SERVICE)
@@ -39,20 +47,32 @@ public class CategoryServiceImpl implements CategoryService {
         this.categoryRepository = categoryRepository;
     }
 
+    /**
+     * Retrieves a paginated list of categories.
+     *
+     * @param page the page number (zero-based index)
+     * @param size the number of categories per page
+     * @param sort optional sorting parameter
+     * @param asc  true for ascending order, false for descending
+     * @return a paginated list of categories
+     */
     @Override
     @Transactional(readOnly = true)
     @Cacheable(value = CategoryCacheType.Fields.CATEGORIES, key = "T(String).valueOf(#page) + '-' + T(String).valueOf(#size) + '-' + (#sort ?: 'default') + '-' + T(String).valueOf(#asc)")
-    public Page<CategoryDTO.Response> findCategoryWithPagination(int page, int size, @Nullable String sort,
-            boolean asc) {
+    public Page<CategoryDTO.Response> findCategoryWithPagination(int page, int size, @Nullable String sort, boolean asc) {
         Pageable pageable = PaginationProvider.build(page, size, sort, asc);
-        ;
-
         Page<Category> res = Optional.ofNullable(categoryRepository.findPagedCategories(pageable)).orElse(Page.empty());
         log.debug("Return Category Page with load size {} at {}", res.getTotalElements(), Instant.now());
-
-        return res.map(c -> categoryMapper.toCategoryResponse(c));
+        return res.map(categoryMapper::toCategoryResponse);
     }
 
+    /**
+     * Finds a category by its unique ID.
+     *
+     * @param id the ID of the category
+     * @return the category details
+     * @throws EntityNotFoundException if the category does not exist
+     */
     @Override
     @Cacheable(value = CategoryCacheType.Fields.CATEGORY_ID, key = "#id")
     @Transactional(readOnly = true)
@@ -61,6 +81,13 @@ public class CategoryServiceImpl implements CategoryService {
         return categoryMapper.toCategoryResponse(res);
     }
 
+    /**
+     * Finds a category by its unique name.
+     *
+     * @param name the name of the category
+     * @return the category details
+     * @throws EntityNotFoundException if the category does not exist
+     */
     @Override
     @Cacheable(value = CategoryCacheType.Fields.CATEGORY_NAME, key = "#name")
     @Transactional(readOnly = true)
@@ -69,6 +96,13 @@ public class CategoryServiceImpl implements CategoryService {
         return categoryMapper.toCategoryResponse(res);
     }
 
+    /**
+     * Creates a new category.
+     *
+     * @param req the category request DTO
+     * @return the created category details
+     * @throws EntityExistsException if a category with the same name already exists
+     */
     @Override
     @CacheEvict(value = CategoryCacheType.Fields.CATEGORIES, allEntries = true)
     public CategoryDTO.Response createCategory(CategoryDTO.Request req) {
@@ -76,6 +110,14 @@ public class CategoryServiceImpl implements CategoryService {
         return categoryMapper.toCategoryResponse(categoryRepository.save(categoryMapper.toCategory(req)));
     }
 
+    /**
+     * Updates an existing category.
+     *
+     * @param req the category request DTO containing updated details
+     * @param id  the ID of the category to update
+     * @return the updated category details
+     * @throws EntityNotFoundException if the category does not exist
+     */
     @Override
     @Caching(evict = {
             @CacheEvict(value = CategoryCacheType.Fields.CATEGORIES, allEntries = true),
@@ -88,6 +130,12 @@ public class CategoryServiceImpl implements CategoryService {
         return categoryMapper.toCategoryResponse(categoryRepository.save(res));
     }
 
+    /**
+     * Deletes a category by its ID.
+     *
+     * @param id the ID of the category to delete
+     * @throws EntityNotFoundException if the category does not exist
+     */
     @Override
     @Caching(evict = {
             @CacheEvict(value = CategoryCacheType.Fields.CATEGORIES),
@@ -99,6 +147,13 @@ public class CategoryServiceImpl implements CategoryService {
         categoryRepository.deleteById(id);
     }
 
+    /**
+     * Retrieves a category entity by its ID.
+     *
+     * @param id the ID of the category
+     * @return the category entity
+     * @throws EntityNotFoundException if the category does not exist
+     */
     @Override
     public Category findCategoryEntityById(Long id) {
         return categoryRepository.findById(id)
@@ -106,6 +161,13 @@ public class CategoryServiceImpl implements CategoryService {
                         String.format("{exception.entity-not-found.category-id}", id)));
     }
 
+    /**
+     * Retrieves a category entity by its name.
+     *
+     * @param name the name of the category
+     * @return the category entity
+     * @throws EntityNotFoundException if the category does not exist
+     */
     @Override
     public Category findCategoryEntityByName(String name) {
         return categoryRepository.findByName(name)
@@ -114,6 +176,12 @@ public class CategoryServiceImpl implements CategoryService {
                                 String.format("{exception.entity-not-found.category-name}", name)));
     }
 
+    /**
+     * Validates that a category with the given name does not already exist.
+     *
+     * @param req the category request DTO
+     * @throws EntityExistsException if a category with the same name already exists
+     */
     private void doNotReturnCategoryByRequest(CategoryDTO.Request req) {
         categoryRepository.findByName(req.getName()).ifPresent(t -> {
             throw new EntityExistsException(String.format("{exception.entity-exists.category}", req.getName()));
