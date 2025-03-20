@@ -19,16 +19,18 @@ public interface ProductInteractionRepository extends JpaRepository<ProductInter
 
     List<ProductInteraction> findByUserStage(String userStage);
 
-    List<ProductInteraction> findByOnTime(LocalDateTime on);
+    @Query("SELECT p FROM ProductInteraction p WHERE p.onTime BETWEEN :startTime AND :endTime")
+    List<ProductInteraction> findByTime(@Param("startTime") LocalDateTime startTime,
+            @Param("endTime") LocalDateTime endTime);
 
     List<ProductInteraction> findByLocateAt(String at);
 
     // Special query to find by concatenated column within a time range
-    @Query("SELECT CONCAT(p.productName, '.', p.eventStage, '.', p.userStage, '.', p.onTime, '.', p.locateAt) AS events FROM ProductInteraction p " +
-           "WHERE p.eventStage = :eventStage AND p.onTime BETWEEN :startTime AND :endTime")
+    @Query("SELECT CONCAT(p.productName, '.', p.eventStage, '.', p.userStage, '.', p.onTime, '.', p.locateAt) AS events FROM ProductInteraction p "
+            +
+            "WHERE p.eventStage = :eventStage AND p.onTime BETWEEN :startTime AND :endTime")
     List<String> searchByFormattedColumnAndTimeRange(
-        @Param("eventStage") InteractionEvent eventStage,
-        @Param("startTime") LocalDateTime startTime,
-        @Param("endTime") LocalDateTime endTime
-    );
+            @Param("eventStage") InteractionEvent eventStage,
+            @Param("startTime") LocalDateTime startTime,
+            @Param("endTime") LocalDateTime endTime);
 }

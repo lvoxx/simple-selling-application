@@ -121,7 +121,8 @@ public class ProductInteractionRepositoryTest extends AbstractRepositoryTest {
     @DisplayName("Should return entities when finding by event stage")
     void shouldReturnEntities_whenFindingByEventStage() {
         // When
-        List<ProductInteraction> results = productInteractionRepository.findByEventStage(InteractionEvent.SEARCH_PRODUCT);
+        List<ProductInteraction> results = productInteractionRepository
+                .findByEventStage(InteractionEvent.SEARCH_PRODUCT);
 
         // Then
         assertThat(results)
@@ -146,14 +147,15 @@ public class ProductInteractionRepositoryTest extends AbstractRepositoryTest {
     void shouldReturnEntities_whenFindingByOnTime() {
         // Given
         LocalDateTime timestamp = LocalDateTime.now().minusHours(6);
+        LocalDateTime endTime = LocalDateTime.now();
 
         // When
-        List<ProductInteraction> results = productInteractionRepository.findByOnTime(timestamp);
+        List<ProductInteraction> results = productInteractionRepository.findByTime(timestamp, endTime);
 
         // Then
         assertThat(results)
                 .isNotEmpty()
-                .allMatch(pi -> pi.getOnTime().equals(timestamp));
+                .allMatch(pi -> !pi.getOnTime().isBefore(timestamp) && !pi.getOnTime().isAfter(endTime)); // Check range
     }
 
     @Test
