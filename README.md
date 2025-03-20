@@ -43,9 +43,9 @@ Simple Selling Application is a ready-to-use solution designed for small and med
 ### Benefits
 
 - Gain AI-driven insights from user behavior data.
-- <u>Reduce operational costs</u> while maintaining efficiency.
-- Simplify sales management with an <u>easy-to-use</u> interface.
-- Improve <u>decision-making</u> with structured and standardized processes.
+- ___Reduce operational costs___ while maintaining efficiency.
+- Simplify sales management with an ___easy-to-use___ interface.
+- Improve ___decision-making___ with structured and standardized processes.
 
 ## 🏁 Getting Started <a name = "getting_started"></a>
 
