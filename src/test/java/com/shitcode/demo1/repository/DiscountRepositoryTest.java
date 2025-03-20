@@ -30,8 +30,6 @@ import com.shitcode.demo1.helper.PaginationProvider;
 import com.shitcode.demo1.testcontainer.AbstractRepositoryTest;
 import com.shitcode.demo1.utils.DiscountType;
 
-import jakarta.persistence.EntityManager;
-
 @AutoConfigureTestDatabase(replace = Replace.NONE) // Dont load String datasource autoconfig
 @ActiveProfiles("test")
 @DisplayName("Discount Repository Tests")
@@ -47,9 +45,6 @@ public class DiscountRepositoryTest extends AbstractRepositoryTest {
 
         @Autowired
         CategoryRepository categoryRepository;
-
-        @Autowired
-        EntityManager entityManager;
 
         OffsetDateTime time = OffsetDateTime.now();
 
