@@ -43,9 +43,9 @@ Simple Selling Application is a ready-to-use solution designed for small and med
 ### Benefits
 
 - Gain AI-driven insights from user behavior data.
-- **Reduce operational costs** while maintaining efficiency.
-- Simplify sales management with an **easy-to-use** interface.
-- Improve **decision-making** with structured and standardized processes.
+- <u>Reduce operational costs</u> while maintaining efficiency.
+- Simplify sales management with an <u>easy-to-use</u> interface.
+- Improve <u>decision-making</u> with structured and standardized processes.
 
 ## 🏁 Getting Started <a name = "getting_started"></a>
 
@@ -54,7 +54,7 @@ These instructions will get you a copy of the project up and running on your loc
 ### Prerequisites
 
 ```
-**Java version 21, Spring Boot version 3.4.1**
+Java version 21, Spring Boot version 3.4.1
 ```
 
 ### Insight
