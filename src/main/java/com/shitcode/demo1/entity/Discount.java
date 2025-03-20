@@ -43,7 +43,7 @@ public class Discount extends AbstractAuditableEntity {
     private DiscountType type;
 
     @Column(name = "sales_percent_amount", precision = 0, nullable = false)
-    private double salesPercentAmount;
+    private Double salesPercentAmount;
 
     @Column(name = "exp_date", nullable = false, columnDefinition = "TIMESTAMP WITH TIME ZONE")
     private OffsetDateTime expDate;

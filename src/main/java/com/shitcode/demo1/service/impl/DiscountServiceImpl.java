@@ -2,6 +2,7 @@ package com.shitcode.demo1.service.impl;
 
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.cache.Cache;
@@ -21,6 +22,7 @@ import com.shitcode.demo1.dto.DiscountDTO.ManageRequest;
 import com.shitcode.demo1.dto.DiscountDTO.ManageResponse;
 import com.shitcode.demo1.entity.Discount;
 import com.shitcode.demo1.exception.model.EntityExistsException;
+import com.shitcode.demo1.helper.DiscountDateTimeConverter;
 import com.shitcode.demo1.helper.PaginationProvider;
 import com.shitcode.demo1.mapper.DiscountMapper;
 import com.shitcode.demo1.repository.DiscountRepository;
@@ -66,7 +68,7 @@ public class DiscountServiceImpl implements DiscountService {
     })
     public ManageResponse create(ManageRequest request) {
         Discount discount = discountMapper.toEntity(request);
-        mustNotReturnEntityWhenFindingByTitle(request.getTitle());
+        mustNotReturnEntityWhenFindingByTitle(request.getType().getFullTitle());
         Discount res = discountRepository.save(discount);
 
         cache.putIfAbsent(res.getId(), res.getExpDate().toString());
@@ -81,10 +83,12 @@ public class DiscountServiceImpl implements DiscountService {
     })
     public ManageResponse update(ManageRequest request, UUID id) {
         Discount discount = findEntityById(id);
-        discount.setTitle(request.getTitle());
+
+        discount.setTitle(request.getType().getFullTitle());
         discount.setType(request.getType());
-        discount.setSalesPercentAmount(request.getSalesPercentAmount());
-        discount.setExpDate(request.getExpDate());
+        discount.setSalesPercentAmount(Optional.ofNullable(request.getSalesPercentAmount())
+                .orElseGet(() -> request.getType().getSalesPercentAmount()));
+        discount.setExpDate(DiscountDateTimeConverter.convert(request.getType()));
 
         ManageResponse response = databaseLock.doAndLock(KeyLock.DISCOUNT,
                 () -> discountMapper.toManageResponse(discountRepository.save(discount)));
