@@ -1,8 +1,9 @@
 package com.shitcode.demo1.repository;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.UUID;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -21,9 +22,9 @@ import com.shitcode.demo1.utils.InteractionEvent;
 
 @AutoConfigureTestDatabase(replace = Replace.NONE) // Dont load String datasource autoconfig
 @ActiveProfiles("test")
-@DisplayName("Discount Repository Tests")
+@DisplayName("Product Interaction Repository Tests")
 @Tags({
-        @Tag("Reporitory"), @Tag("No Mock")
+        @Tag("Repository"), @Tag("No Mock")
 })
 public class ProductInteractionRepositoryTest extends AbstractRepositoryTest {
     @Autowired
@@ -35,7 +36,6 @@ public class ProductInteractionRepositoryTest extends AbstractRepositoryTest {
 
         productInteractionRepository.saveAll(List.of(
                 ProductInteraction.builder()
-                        .id(UUID.randomUUID())
                         .eventStage(InteractionEvent.PICK_CATEGORY)
                         .productName("Electronics")
                         .userStage("Guest User")
@@ -44,7 +44,6 @@ public class ProductInteractionRepositoryTest extends AbstractRepositoryTest {
                         .build(),
 
                 ProductInteraction.builder()
-                        .id(UUID.randomUUID())
                         .eventStage(InteractionEvent.SEARCH_PRODUCT)
                         .productName("Smartphone X")
                         .userStage("Registered User")
@@ -53,7 +52,6 @@ public class ProductInteractionRepositoryTest extends AbstractRepositoryTest {
                         .build(),
 
                 ProductInteraction.builder()
-                        .id(UUID.randomUUID())
                         .eventStage(InteractionEvent.VIEW_PRODUCT)
                         .productName("Wireless Earbuds")
                         .userStage("Registered User")
@@ -62,7 +60,6 @@ public class ProductInteractionRepositoryTest extends AbstractRepositoryTest {
                         .build(),
 
                 ProductInteraction.builder()
-                        .id(UUID.randomUUID())
                         .eventStage(InteractionEvent.VIEW_AND_ADD_TO_CART)
                         .productName("Gaming Laptop")
                         .userStage("Premium Member")
@@ -71,7 +68,6 @@ public class ProductInteractionRepositoryTest extends AbstractRepositoryTest {
                         .build(),
 
                 ProductInteraction.builder()
-                        .id(UUID.randomUUID())
                         .eventStage(InteractionEvent.CART_TO_PURCHASE)
                         .productName("Smartwatch 2")
                         .userStage("Registered User")
@@ -80,7 +76,6 @@ public class ProductInteractionRepositoryTest extends AbstractRepositoryTest {
                         .build(),
 
                 ProductInteraction.builder()
-                        .id(UUID.randomUUID())
                         .eventStage(InteractionEvent.PAY_BY_CARD)
                         .productName("Noise Cancelling Headphones")
                         .userStage("Verified Buyer")
@@ -89,7 +84,6 @@ public class ProductInteractionRepositoryTest extends AbstractRepositoryTest {
                         .build(),
 
                 ProductInteraction.builder()
-                        .id(UUID.randomUUID())
                         .eventStage(InteractionEvent.PAY_BY_PAYPAL)
                         .productName("Gaming Mouse")
                         .userStage("Premium Member")
@@ -98,7 +92,6 @@ public class ProductInteractionRepositoryTest extends AbstractRepositoryTest {
                         .build(),
 
                 ProductInteraction.builder()
-                        .id(UUID.randomUUID())
                         .eventStage(InteractionEvent.PAY_BY_CASH)
                         .productName("Mechanical Keyboard")
                         .userStage("Guest User")
@@ -115,36 +108,78 @@ public class ProductInteractionRepositoryTest extends AbstractRepositoryTest {
     @Test
     @DisplayName("Should return entities when finding by product name")
     void shouldReturnEntities_whenFindingByProductName() {
-        // Implement test for findByProductName
+        // When
+        List<ProductInteraction> results = productInteractionRepository.findByProductName("Smartphone X");
+
+        // Then
+        assertThat(results)
+                .isNotEmpty()
+                .allMatch(pi -> "Smartphone X".equals(pi.getProductName()));
     }
 
     @Test
     @DisplayName("Should return entities when finding by event stage")
     void shouldReturnEntities_whenFindingByEventStage() {
-        // Implement test for findByEventStage
+        // When
+        List<ProductInteraction> results = productInteractionRepository.findByEventStage(InteractionEvent.SEARCH_PRODUCT);
+
+        // Then
+        assertThat(results)
+                .isNotEmpty()
+                .allMatch(pi -> pi.getEventStage() == InteractionEvent.SEARCH_PRODUCT);
     }
 
     @Test
     @DisplayName("Should return entities when finding by user stage")
     void shouldReturnEntities_whenFindingByUserStage() {
-        // Implement test for findByUserStage
+        // When
+        List<ProductInteraction> results = productInteractionRepository.findByUserStage("Guest User");
+
+        // Then
+        assertThat(results)
+                .isNotEmpty()
+                .allMatch(pi -> "Guest User".equals(pi.getUserStage()));
     }
 
     @Test
     @DisplayName("Should return entities when finding by onTime")
     void shouldReturnEntities_whenFindingByOnTime() {
-        // Implement test for findByOnTime
+        // Given
+        LocalDateTime timestamp = LocalDateTime.now().minusHours(6);
+
+        // When
+        List<ProductInteraction> results = productInteractionRepository.findByOnTime(timestamp);
+
+        // Then
+        assertThat(results)
+                .isNotEmpty()
+                .allMatch(pi -> pi.getOnTime().equals(timestamp));
     }
 
     @Test
     @DisplayName("Should return entities when finding by location")
     void shouldReturnEntities_whenFindingByLocateAt() {
-        // Implement test for findByLocateAt
+        // When
+        List<ProductInteraction> results = productInteractionRepository.findByLocateAt("Search Bar");
+
+        // Then
+        assertThat(results)
+                .isNotEmpty()
+                .allMatch(pi -> "Search Bar".equals(pi.getLocateAt()));
     }
 
     @Test
     @DisplayName("Should return concatenated event details when searching by event stage and time range")
     void shouldReturnConcatenatedDetails_whenSearchingByEventStageAndTimeRange() {
-        // Implement test for searchByFormattedColumnAndTimeRange
+        // Given
+        LocalDateTime startTime = LocalDateTime.now().minusDays(3);
+        LocalDateTime endTime = LocalDateTime.now();
+
+        // When
+        List<String> results = productInteractionRepository.searchByFormattedColumnAndTimeRange(
+                InteractionEvent.SEARCH_PRODUCT, startTime, endTime);
+
+        // Then
+        assertThat(results).isNotEmpty();
     }
 }
