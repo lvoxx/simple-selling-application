@@ -24,6 +24,7 @@ import com.shitcode.demo1.mapper.CategoryMapper;
 import com.shitcode.demo1.repository.CategoryRepository;
 import com.shitcode.demo1.service.CategoryService;
 import com.shitcode.demo1.utils.LoggingModel;
+import com.shitcode.demo1.utils.cache.CategoryCacheType;
 
 @Service
 @Transactional
@@ -40,7 +41,7 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     @Transactional(readOnly = true)
-    @Cacheable(value = "categories", key = "T(String).valueOf(#page) + '-' + T(String).valueOf(#size) + '-' + (#sort ?: 'default') + '-' + T(String).valueOf(#asc)")
+    @Cacheable(value = CategoryCacheType.Fields.CATEGORIES, key = "T(String).valueOf(#page) + '-' + T(String).valueOf(#size) + '-' + (#sort ?: 'default') + '-' + T(String).valueOf(#asc)")
     public Page<CategoryDTO.Response> findCategoryWithPagination(int page, int size, @Nullable String sort,
             boolean asc) {
         Pageable pageable = PaginationProvider.build(page, size, sort, asc);
@@ -53,7 +54,7 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    @Cacheable(value = "category-id", key = "#id")
+    @Cacheable(value = CategoryCacheType.Fields.CATEGORY_ID, key = "#id")
     @Transactional(readOnly = true)
     public CategoryDTO.Response findCategoryById(Long id) {
         Category res = findCategoryEntityById(id);
@@ -61,7 +62,7 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    @Cacheable(value = "category-name", key = "#name")
+    @Cacheable(value = CategoryCacheType.Fields.CATEGORY_NAME, key = "#name")
     @Transactional(readOnly = true)
     public CategoryDTO.Response findCategoryByName(String name) {
         Category res = findCategoryEntityByName(name);
@@ -69,7 +70,7 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    @CacheEvict(value = "categories", allEntries = true)
+    @CacheEvict(value = CategoryCacheType.Fields.CATEGORIES, allEntries = true)
     public CategoryDTO.Response createCategory(CategoryDTO.Request req) {
         doNotReturnCategoryByRequest(req);
         return categoryMapper.toCategoryResponse(categoryRepository.save(categoryMapper.toCategory(req)));
@@ -77,9 +78,9 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     @Caching(evict = {
-            @CacheEvict(value = "categories", allEntries = true),
-            @CacheEvict(value = "category-id", key = "#id"),
-            @CacheEvict(value = "category-name", key = "#req.name")
+            @CacheEvict(value = CategoryCacheType.Fields.CATEGORIES, allEntries = true),
+            @CacheEvict(value = CategoryCacheType.Fields.CATEGORY_ID, key = "#id"),
+            @CacheEvict(value = CategoryCacheType.Fields.CATEGORY_NAME, key = "#req.name")
     })
     public CategoryDTO.Response updateCategory(CategoryDTO.Request req, Long id) {
         Category res = findCategoryEntityById(id);
@@ -89,9 +90,9 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     @Caching(evict = {
-            @CacheEvict(value = "categories"),
-            @CacheEvict(value = "category-id", allEntries = true),
-            @CacheEvict(value = "category-name", allEntries = true)
+            @CacheEvict(value = CategoryCacheType.Fields.CATEGORIES),
+            @CacheEvict(value = CategoryCacheType.Fields.CATEGORY_ID, allEntries = true),
+            @CacheEvict(value = CategoryCacheType.Fields.CATEGORY_NAME, allEntries = true)
     })
     public void deleteCategoryById(Long id) {
         findCategoryEntityById(id);
