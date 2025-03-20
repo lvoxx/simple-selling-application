@@ -1,10 +1,10 @@
 package com.shitcode.demo1.utils;
 
 public enum KeyLock {
-    CATEGORY("category"),
-    PRODUCT("product"),
-    DISCOUNT("discount"),
-    USER("user");
+    CATEGORY("CATEGORY"),
+    PRODUCT("PRODUCT"),
+    DISCOUNT("DISCOUNT"),
+    USER("USER");
 
     private final String key;
 

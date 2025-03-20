@@ -4,8 +4,16 @@ import java.time.Duration;
 
 import io.github.bucket4j.Bandwidth;
 
+/**
+ * Enum representing different rate limiter plans, each with a predefined
+ * bandwidth limit and refill interval. Each plan specifies a maximum
+ * number of requests allowed and the duration for refilling the limit.
+ */
 public enum RateLimiterPlan {
 
+    /**
+     * Basic plan allowing 15 requests every 2 minutes.
+     */
     BASIC {
         @Override
         public Bandwidth getLimit() {
@@ -15,6 +23,10 @@ public enum RateLimiterPlan {
                     .build();
         }
     },
+
+    /**
+     * Maximum plan allowing 1000 requests every 1 hour.
+     */
     MAX {
         @Override
         public Bandwidth getLimit() {
@@ -24,6 +36,10 @@ public enum RateLimiterPlan {
                     .build();
         }
     },
+
+    /**
+     * Plan for heavy loads allowing 55 requests every 5 minutes.
+     */
     HEAVY_LOADS {
         @Override
         public Bandwidth getLimit() {
@@ -33,6 +49,10 @@ public enum RateLimiterPlan {
                     .build();
         }
     },
+
+    /**
+     * Soft limit plan allowing 30 requests every 5 minutes.
+     */
     SOFT {
         @Override
         public Bandwidth getLimit() {
@@ -42,6 +62,10 @@ public enum RateLimiterPlan {
                     .build();
         }
     },
+
+    /**
+     * Medium limit plan allowing 25 requests every 5 minutes.
+     */
     MEDIUM {
         @Override
         public Bandwidth getLimit() {
@@ -51,6 +75,10 @@ public enum RateLimiterPlan {
                     .build();
         }
     },
+
+    /**
+     * Hard limit plan allowing 12 requests every 10 minutes.
+     */
     HARD {
         @Override
         public Bandwidth getLimit() {
@@ -60,6 +88,10 @@ public enum RateLimiterPlan {
                     .build();
         }
     },
+
+    /**
+     * Authentication plan allowing 5 requests every 30 minutes.
+     */
     AUTH {
         @Override
         public Bandwidth getLimit() {
@@ -69,6 +101,10 @@ public enum RateLimiterPlan {
                     .build();
         }
     },
+
+    /**
+     * Plan for completing sign-up process allowing 5 requests every 7 days.
+     */
     COMPLETE_SIGNUP {
         @Override
         public Bandwidth getLimit() {
@@ -78,6 +114,10 @@ public enum RateLimiterPlan {
                     .build();
         }
     },
+
+    /**
+     * Sign-up plan allowing 2 requests every 7 days.
+     */
     SIGNUP {
         @Override
         public Bandwidth getLimit() {
@@ -87,6 +127,10 @@ public enum RateLimiterPlan {
                     .build();
         }
     },
+
+    /**
+     * Plan for regranting authentication allowing 3 requests every 45 minutes.
+     */
     REGRANT_AUTH {
         @Override
         public Bandwidth getLimit() {
@@ -96,6 +140,10 @@ public enum RateLimiterPlan {
                     .build();
         }
     },
+
+    /**
+     * Token renewal plan allowing 5 requests every 30 days.
+     */
     RENEW_TOKEN {
         @Override
         public Bandwidth getLimit() {
@@ -106,6 +154,11 @@ public enum RateLimiterPlan {
         }
     };
 
-    // Abstract method that each constant must implement
+    /**
+     * Returns the bandwidth limit associated with the rate limiter plan.
+     * 
+     * @return the {@link Bandwidth} object containing the capacity and refill
+     *         interval.
+     */
     public abstract Bandwidth getLimit();
 }
