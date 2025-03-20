@@ -37,49 +37,54 @@ public abstract class DiscountDateTimeConverter {
      * @throws UnsupportedOperationException If the discount type requires manual
      *                                       handling.
      */
-    public static OffsetDateTime convert(DiscountType discountType, OffsetDateTime time) {
+    public static OffsetDateTime convert(DiscountType discountType, OffsetDateTime startTime) {
         switch (discountType) {
             case FLASH_SALES:
-                return time.plusHours(2);
+                return startTime.plusHours(2);
             case DAILY_SALES:
-                return time.plusHours(12);
+                return startTime.plusHours(12);
+            case SEASONAL_SALES:
+            case HOLIDAY_SALES:
+                return startTime.plusMonths(1);
+            case CLEARANCE_SALES:
+                return startTime.plusWeeks(2);
             case BLACK_FRIDAY:
-                return handleBlackFriday(time);
+                return handleBlackFriday(startTime);
             case CYBER_MONDAY:
-                return handleCyberMonday(time);
+                return handleCyberMonday(startTime);
             default:
                 if (SEVEN_DAYS_DISCOUNTS.contains(discountType)) {
-                    return handleSalesX_X(time, discountType);
+                    return handleSalesX_X(startTime, discountType);
                 } else if (THREE_DAYS_DISCOUNTS.contains(discountType)) {
-                    return time.plusDays(3);
+                    return startTime.plusDays(3);
                 } else {
-                    throw new UnsupportedOperationException(
+                    throw new DiscountOverTimeException(
                             "This discount type requires manual handling: " + discountType);
                 }
         }
     }
 
-    private static OffsetDateTime handleSalesX_X(OffsetDateTime now, DiscountType discountType) {
+    private static OffsetDateTime handleSalesX_X(OffsetDateTime startTime, DiscountType discountType) {
         int month = Integer.parseInt(discountType.getType().split("_")[1]);
-        OffsetDateTime salesDate = now.withMonth(month).withDayOfMonth(1).plusDays(6); // 7 days from the 1st
-        if (now.isAfter(salesDate)) {
+        OffsetDateTime salesDate = startTime.withMonth(month).withDayOfMonth(1).plusDays(6); // 7 days from the 1st
+        if (startTime.isAfter(salesDate)) {
             throw new DiscountOverTimeException("Discount time exceeded for " + discountType.getFullTitle());
         }
-        return salesDate;
+        return startTime.plusWeeks(2);
     }
 
-    private static OffsetDateTime handleBlackFriday(OffsetDateTime now) {
-        OffsetDateTime blackFriday = now.with(TemporalAdjusters.lastInMonth(DayOfWeek.FRIDAY));
-        if (now.isAfter(blackFriday)) {
+    private static OffsetDateTime handleBlackFriday(OffsetDateTime startTime) {
+        OffsetDateTime blackFriday = startTime.with(TemporalAdjusters.lastInMonth(DayOfWeek.FRIDAY));
+        if (startTime.isAfter(blackFriday)) {
             throw new DiscountOverTimeException("Black Friday discount has expired.");
         }
-        return blackFriday.plusDays(2);
+        return startTime.plusDays(2);
     }
 
-    private static OffsetDateTime handleCyberMonday(OffsetDateTime now) {
-        if (now.getDayOfWeek() != DayOfWeek.MONDAY) {
+    private static OffsetDateTime handleCyberMonday(OffsetDateTime startTime) {
+        if (startTime.getDayOfWeek() != DayOfWeek.MONDAY) {
             throw new DiscountOverTimeException("Cyber Monday discount can only be applied on a Monday.");
         }
-        return now.plusDays(1);
+        return startTime.plusDays(1);
     }
 }

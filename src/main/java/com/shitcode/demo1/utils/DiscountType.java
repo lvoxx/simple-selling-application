@@ -3,88 +3,99 @@ package com.shitcode.demo1.utils;
 /**
  * Represents different types of discounts available in the application.
  * Each discount type has a unique identifier and a full title.
+ * Default expired time: NOW + DEFAULT DURATION
  */
 public enum DiscountType {
 
-    /** Flash sales, typically for a limited time with steep discounts. */
+    /** Limited-time flash sales with steep discounts. Default duration: 2 hours. */
     FLASH_SALES("flash_sales", "Flash Sales"),
 
-    /** Daily sales that occur every day with special deals. */
+    /** Special daily deals available every day. Default duration: 12 hours. */
     DAILY_SALES("daily_sales", "Daily Sales"),
 
-    /** Sales occurring on January 1st. */
+    /** Sales event occurring on January 1st. Default duration: 2 weeks. */
     SALES_1_1("sales_1_1", "January 1st Sales"),
 
-    /** Sales occurring on February 2nd. */
+    /** Sales event occurring on February 2nd. Default duration: 2 weeks. */
     SALES_2_2("sales_2_2", "February 2nd Sales"),
 
-    /** Sales occurring on March 3rd. */
+    /** Sales event occurring on March 3rd. Default duration: 2 weeks. */
     SALES_3_3("sales_3_3", "March 3rd Sales"),
 
-    /** Sales occurring on April 4th. */
+    /** Sales event occurring on April 4th. Default duration: 2 weeks. */
     SALES_4_4("sales_4_4", "April 4th Sales"),
 
-    /** Sales occurring on May 5th. */
+    /** Sales event occurring on May 5th. Default duration: 2 weeks. */
     SALES_5_5("sales_5_5", "May 5th Sales"),
 
-    /** Sales occurring on June 6th. */
+    /** Sales event occurring on June 6th. Default duration: 2 weeks. */
     SALES_6_6("sales_6_6", "June 6th Sales"),
 
-    /** Sales occurring on July 7th. */
+    /** Sales event occurring on July 7th. Default duration: 2 weeks. */
     SALES_7_7("sales_7_7", "July 7th Sales"),
 
-    /** Sales occurring on August 8th. */
+    /** Sales event occurring on August 8th. Default duration: 2 weeks. */
     SALES_8_8("sales_8_8", "August 8th Sales"),
 
-    /** Sales occurring on September 9th. */
+    /** Sales event occurring on September 9th. Default duration: 2 weeks. */
     SALES_9_9("sales_9_9", "September 9th Sales"),
 
-    /** Sales occurring on October 10th. */
+    /** Sales event occurring on October 10th. Default duration: 2 weeks. */
     SALES_10_10("sales_10_10", "October 10th Sales"),
 
-    /** Sales occurring on November 11th (Singles' Day, popular in some regions). */
+    /**
+     * Sales event occurring on November 11th (Singles' Day in some regions).
+     * Default duration: 2 weeks.
+     */
     SALES_11_11("sales_11_11", "November 11th Sales"),
 
-    /** Sales occurring on December 12th. */
+    /** Sales event occurring on December 12th. Default duration: 2 weeks. */
     SALES_12_12("sales_12_12", "December 12th Sales"),
 
     /**
-     * Seasonal sales based on different times of the year (e.g., summer, winter).
+     * Seasonal sales held during different times of the year (e.g., summer,
+     * winter).
+     * Default duration: 1 month.
      */
     SEASONAL_SALES("seasonal_sales", "Seasonal Sales"),
 
-    /** Clearance sales for old stock or discontinued items. */
+    /**
+     * Clearance sales for discontinued or old stock items. Default duration: 2
+     * weeks.
+     * Default duration: 2 weeks.
+     */
     CLEARANCE_SALES("clearance_sales", "Clearance Sales"),
 
-    /** Sales offered during specific holidays like Christmas or Thanksgiving. */
+    /**
+     * Sales offered during major holidays like Christmas or Thanksgiving. Default
+     * duration: 1 month.
+     */
     HOLIDAY_SALES("holiday_sales", "Holiday Sales"),
 
-    /** Black Friday sale, typically occurring on the Friday after Thanksgiving. */
+    /**
+     * Black Friday sale, occurring the Friday after Thanksgiving. Default duration:
+     * 2 days.
+     */
     BLACK_FRIDAY("black_friday", "Black Friday Sale"),
 
-    /** Cyber Monday sale, occurring on the Monday after Black Friday. */
-    CYBER_MONDAY("cyber_monday", "Cyber Monday Sale"),
+    /**
+     * Cyber Monday sale, occurring the Monday following Black Friday. Default
+     * duration: 1 day.
+     */
+    CYBER_MONDAY("cyber_monday", "Cyber Monday Sale");
 
-    /** Discounts for customers purchasing in bulk. */
-    BULK_PURCHASE("bulk_purchase", "Bulk Purchase Discount"),
-
-    /** Exclusive discounts for registered members. */
-    MEMBER_EXCLUSIVE("member_exclusive", "Member Exclusive Discount"),
-
-    /** Discount offered to first-time buyers. */
-    FIRST_PURCHASE("first_purchase", "First Purchase Discount"),
-
-    /** Discount given when a customer refers a friend. */
-    REFERRAL_DISCOUNT("referral_discount", "Referral Discount");
-
+    // --------------------------------------------------------------------------
+    /** Unique identifier for the discount type, used for internal processing. */
     private final String type;
+
+    /** Full descriptive title of the discount type, displayed in UI. */
     private final String fullTitle;
 
     /**
-     * Constructs a DiscountType with a type identifier and a full title.
+     * Constructs a DiscountType with a unique identifier and a descriptive title.
      *
      * @param type      The unique identifier for the discount type.
-     * @param fullTitle The full descriptive title of the discount.
+     * @param fullTitle The full descriptive title of the discount type.
      */
     DiscountType(String type, String fullTitle) {
         this.type = type;
@@ -92,7 +103,8 @@ public enum DiscountType {
     }
 
     /**
-     * Gets the unique identifier of the discount type.
+     * Retrieves the unique identifier of the discount type.
+     * Used for backend processing and comparisons.
      *
      * @return The discount type identifier.
      */
@@ -101,7 +113,8 @@ public enum DiscountType {
     }
 
     /**
-     * Gets the full descriptive title of the discount type.
+     * Retrieves the full descriptive title of the discount type.
+     * Used for displaying user-friendly names in UI.
      *
      * @return The full title of the discount type.
      */
