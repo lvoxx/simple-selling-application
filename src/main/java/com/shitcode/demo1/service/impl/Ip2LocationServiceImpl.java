@@ -16,10 +16,25 @@ public class Ip2LocationServiceImpl implements Ip2LocationService {
 
     private final IP2Location ip2Location;
 
+    /**
+     * Constructs an instance of Ip2LocationServiceImpl with the given IP2Location
+     * instance.
+     *
+     * @param ip2Location The IP2Location service used for querying IP address
+     *                    locations.
+     */
     public Ip2LocationServiceImpl(IP2Location ip2Location) {
         this.ip2Location = ip2Location;
     }
 
+    /**
+     * Retrieves location information for a given IP address.
+     * The result is cached to optimize performance and reduce redundant queries.
+     *
+     * @param ipAddress The IP address to query.
+     * @return The {@link IPResult} containing location details, or {@code null} if
+     *         an error occurs.
+     */
     @Override
     @Cacheable(value = Ip2LocationCacheType.Fields.IP_ADDRESS, key = "#ipAddress")
     public IPResult getLocation(String ipAddress) {
@@ -32,5 +47,4 @@ public class Ip2LocationServiceImpl implements Ip2LocationService {
             return null;
         }
     }
-
 }
