@@ -33,6 +33,15 @@ import com.shitcode.demo1.utils.LoggingModel;
 
 import jakarta.servlet.http.HttpServletRequest;
 
+/**
+ * Implementation of the {@link AuthService} interface, responsible for
+ * authentication and user management.
+ * This service handles user login, registration, and account activation.
+ * <p>
+ * It integrates with JWT authentication, user management, and token services to
+ * provide a secure authentication process.
+ * </p>
+ */
 @Service
 @LogCollector(loggingModel = LoggingModel.SERVICE)
 public class AuthServiceImpl implements AuthService {
@@ -45,6 +54,18 @@ public class AuthServiceImpl implements AuthService {
     private final BCryptPasswordEncoder passwordEncoder;
     private final ClientConfigData clientConfigData;
 
+    /**
+     * Constructs an instance of {@code AuthServiceImpl} with required dependencies.
+     *
+     * @param jwtService            Service for generating and validating JWT
+     *                              tokens.
+     * @param springUserService     Service handling user-related operations.
+     * @param tokenService          Service managing registration tokens.
+     * @param authenticationManager Spring Security authentication manager.
+     * @param messageSource         Message source for localization.
+     * @param passwordEncoder       Encoder for hashing passwords.
+     * @param clientConfigData      Configuration data for client roles.
+     */
     public AuthServiceImpl(JwtService jwtService, SpringUserService springUserService,
             RegistrationTokenService tokenService, AuthenticationManager authenticationManager,
             MessageSource messageSource, BCryptPasswordEncoder passwordEncoder, ClientConfigData clientConfigData) {
@@ -59,6 +80,13 @@ public class AuthServiceImpl implements AuthService {
 
     private SpringUserMapper springUserMapper = SpringUserMapper.INSTANCE;
 
+    /**
+     * Authenticates a user and returns an access token and refresh token.
+     *
+     * @param request The login request containing email and password.
+     * @return A response containing the access token and refresh token.
+     * @throws AuthenticationException if authentication fails.
+     */
     @Override
     public AuthDTO.LoginResponse login(AuthDTO.LoginRequest request) {
         Authentication authentication = authenticationManager
@@ -76,6 +104,13 @@ public class AuthServiceImpl implements AuthService {
                 .build();
     }
 
+    /**
+     * Registers a new user in the system.
+     *
+     * @param request The user registration request.
+     * @return The created user's response DTO.
+     * @throws EntityExistsException if the email is already registered.
+     */
     @Override
     public SpringUserDTO.Response signUp(SpringUserDTO.UserRequest request) {
         Optional.ofNullable(springUserService.findByEmailWithDTO(request.getEmail())).ifPresent(u -> {
@@ -92,6 +127,13 @@ public class AuthServiceImpl implements AuthService {
         return springUserService.createUser(user, true);
     }
 
+    /**
+     * Activates a user's account based on a registration token.
+     *
+     * @param token The activation token.
+     * @return A response indicating successful activation.
+     * @throws EntityNotFoundException if the token is invalid.
+     */
     @Override
     public GenericDTO.Response activeUserAccount(String token) {
         RegistrationToken registrationToken = tokenService.findByToken(token);
@@ -100,6 +142,12 @@ public class AuthServiceImpl implements AuthService {
                 .message(messageSource.getMessage("success.user.active", null, Locale.getDefault())).build();
     }
 
+    /**
+     * Retrieves the authenticated user's username.
+     *
+     * @return The username of the authenticated user, or "Anonymous User" if no
+     *         user is authenticated.
+     */
     public static String getAuthenticatedUsername() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
@@ -118,9 +166,14 @@ public class AuthServiceImpl implements AuthService {
         return "Anonymous User";
     }
 
+    /**
+     * Retrieves the current HTTP servlet request.
+     *
+     * @return The {@link HttpServletRequest} associated with the current request.
+     * @throws IllegalStateException if there is no active request context.
+     */
     public static HttpServletRequest getHttpServletRequest() {
         return ((ServletRequestAttributes) RequestContextHolder
                 .currentRequestAttributes()).getRequest();
     }
-
 }
