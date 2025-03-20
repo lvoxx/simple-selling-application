@@ -8,6 +8,7 @@ import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.shitcode.demo1.utils.cache.CategoryCacheType;
 import com.shitcode.demo1.utils.cache.DiscountCacheType;
+import com.shitcode.demo1.utils.cache.Ip2LocationCacheType;
 import com.shitcode.demo1.utils.cache.ProductCacheType;
 import com.shitcode.demo1.utils.cache.UserCacheType;
 
@@ -44,19 +45,20 @@ public abstract class ApplicationCache {
          */
         public static Map<String, Cache<Object, Object>> getCaches() {
                 // * USER CACHE
+                // Assume 1000-2000 users
                 caches.put(UserCacheType.Fields.USERS,
                                 buildCache(100, 200, 15, TimeUnit.MINUTES));
                 caches.put(UserCacheType.Fields.USER_ID,
-                                buildCache(200, 1400, 180, TimeUnit.DAYS));// 6 months
+                                buildCache(200, 2400, 30, TimeUnit.DAYS)); // 1 month
                 caches.put(UserCacheType.Fields.USER_NAME,
-                                buildCache(400, 1200, 180, TimeUnit.DAYS));// 6 months
+                                buildCache(400, 2500, 30, TimeUnit.DAYS)); // 1 month
                 // * CATEGORY CACHE
                 caches.put(CategoryCacheType.Fields.CATEGORIES,
-                                buildCache(10, 50, 30, TimeUnit.DAYS));
+                                buildCache(10, 50, 180, TimeUnit.DAYS)); // 6 months
                 caches.put(CategoryCacheType.Fields.CATEGORY_ID,
-                                buildCache(20, 100, 1, TimeUnit.HOURS));
+                                buildCache(20, 100, 30, TimeUnit.DAYS)); // 1 month
                 caches.put(CategoryCacheType.Fields.CATEGORY_NAME,
-                                buildCache(20, 100, 1, TimeUnit.HOURS));
+                                buildCache(20, 100, 30, TimeUnit.DAYS)); // 1 month
                 // * PRODUCT
                 caches.put(ProductCacheType.Fields.ADMIN_PRODUCTS,
                                 buildCache(900, 1500, 2, TimeUnit.MINUTES));
@@ -64,12 +66,12 @@ public abstract class ApplicationCache {
                                 buildCache(900, 1500, 2, TimeUnit.MINUTES));
                 // ? PRODUCT-NAME
                 caches.put(ProductCacheType.Fields.ADMIN_PRODUCT_NAME,
-                                buildCache(100, 400, 2, TimeUnit.DAYS));
+                                buildCache(100, 400, 12, TimeUnit.HOURS));
                 caches.put(ProductCacheType.Fields.INSELL_PRODUCT_NAME,
                                 buildCache(400, 1200, 12, TimeUnit.HOURS));
                 // ? PRODUCT-ID
                 caches.put(ProductCacheType.Fields.ADMIN_PRODUCT_ID,
-                                buildCache(100, 600, 7, TimeUnit.DAYS));
+                                buildCache(100, 600, 12, TimeUnit.HOURS));
                 caches.put(ProductCacheType.Fields.INSELL_PRODUCT_ID,
                                 buildCache(500, 2500, 12, TimeUnit.HOURS));
                 // * DISCOUNT
@@ -79,6 +81,10 @@ public abstract class ApplicationCache {
                                 buildCache(20, 120, 2, TimeUnit.HOURS));
                 caches.put(DiscountCacheType.Fields.EXPIRED_DISCOUNTS,
                                 buildCache(50, 200, 24, TimeUnit.HOURS));
+
+                // * IP2LOCATION
+                caches.put(Ip2LocationCacheType.Fields.IP_ADDRESS,
+                                buildCache(200, 12000, 2, TimeUnit.HOURS));
 
                 return caches;
         }
