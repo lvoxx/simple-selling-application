@@ -13,7 +13,7 @@ import com.shitcode.demo1.dto.DiscountDTO;
 import com.shitcode.demo1.entity.Discount;
 
 public interface DiscountService {
-    DiscountDTO.ManageResponse findById(UUID id);
+    DiscountDTO.DiscountDetailsResponse findById(UUID id);
 
     DiscountDTO.ManageResponse create(DiscountDTO.ManageRequest request);
 
@@ -33,6 +33,8 @@ public interface DiscountService {
     Discount findEntityByTitle(String title);
 
     Discount findEntityById(UUID id);
+
+    Discount findDetailEntityById(UUID id);
 
     List<Discount> findEntitiesByExpDateBetween(OffsetDateTime startDate, OffsetDateTime endDate);
 }

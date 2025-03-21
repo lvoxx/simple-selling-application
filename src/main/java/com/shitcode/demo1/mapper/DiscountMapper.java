@@ -18,12 +18,18 @@ public interface DiscountMapper {
         DiscountMapper INSTANCE = Mappers.getMapper(DiscountMapper.class);
 
         // Mapping from DTO to Entity
-        @Mapping(target = "id", ignore = true)
-        @Mapping(target = "products", ignore = true)
+        @Mappings({
+                        @Mapping(target = "id", ignore = true),
+                        @Mapping(target = "title", ignore = true),
+                        @Mapping(target = "expDate", ignore = true),
+                        @Mapping(target = "products", ignore = true)
+        })
         Discount toEntity(DiscountDTO.ManageRequest dto);
 
         // Mapping from Entity to DTO
         DiscountDTO.ManageResponse toManageResponse(Discount entity);
+
+        DiscountDTO.DiscountDetailsResponse toDiscountDetailsResponse(Discount entity);
 
         // List mappings
         List<DiscountDTO.ManageResponse> toManageResponseList(List<Discount> entities);

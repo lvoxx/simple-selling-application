@@ -33,4 +33,6 @@ public interface ProductMapper {
         ApplyToProductsResponse toApplyDiscountResponse(ApplyToProductsRequest request);
 
         ApplyToProductsRequest toApplyDiscountRequest(ApplyToProductsResponse response);
+
+        ProductDTO.DiscountResponse toDiscountResponse(Product product);
 }

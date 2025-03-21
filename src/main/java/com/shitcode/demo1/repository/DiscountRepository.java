@@ -16,6 +16,9 @@ import com.shitcode.demo1.entity.Discount;
 
 public interface DiscountRepository extends JpaRepository<Discount, UUID> {
 
+        @Query("SELECT d FROM Discount d LEFT JOIN FETCH d.products WHERE d.id = :id")
+        Optional<Discount> findDetailDiscountById(@Param("id")UUID id);
+
         @Query("SELECT d FROM Discount d WHERE LOWER(d.title) LIKE LOWER(CONCAT('%', :title, '%'))")
         List<Discount> findEntitiesByTitle(String title);
 

@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.shitcode.demo1.annotation.logging.LogCollector;
 import com.shitcode.demo1.component.DatabaseLock;
+import com.shitcode.demo1.dto.DiscountDTO.DiscountDetailsResponse;
 import com.shitcode.demo1.dto.DiscountDTO.ManageRequest;
 import com.shitcode.demo1.dto.DiscountDTO.ManageResponse;
 import com.shitcode.demo1.entity.Discount;
@@ -59,8 +60,8 @@ public class DiscountServiceImpl implements DiscountService {
     @Override
     @Cacheable(value = DiscountCacheType.Fields.DISCOUNT_ID, key = "#id")
     @Transactional(readOnly = true)
-    public ManageResponse findById(UUID id) {
-        return discountMapper.toManageResponse(findEntityById(id));
+    public DiscountDetailsResponse findById(UUID id) {
+        return discountMapper.toDiscountDetailsResponse(findDetailEntityById(id));
     }
 
     @Override
@@ -135,6 +136,12 @@ public class DiscountServiceImpl implements DiscountService {
     @Override
     public Discount findEntityById(UUID id) {
         return discountRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("{exception.entity-not-found.discount-id}"));
+    }
+
+    @Override
+    public Discount findDetailEntityById(UUID id) {
+        return discountRepository.findDetailDiscountById(id)
                 .orElseThrow(() -> new EntityNotFoundException("{exception.entity-not-found.discount-id}"));
     }
 

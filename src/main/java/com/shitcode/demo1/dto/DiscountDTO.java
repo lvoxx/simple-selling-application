@@ -35,6 +35,19 @@ public abstract class DiscountDTO {
     }
 
     @Data
+    @EqualsAndHashCode(callSuper = false)
+    @Builder
+    public static class DiscountDetailsResponse extends AbstractAuditableEntity {
+        private UUID id;
+        private String title;
+        private DiscountType type;
+        private Double salesPercentAmount;
+        @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ssXXX")
+        private OffsetDateTime expDate;
+        private List<ProductDTO.DiscountResponse> products;
+    }
+
+    @Data
     @Builder
     @Setter(value = AccessLevel.PRIVATE)
     public static class ApplyToProductsRequest {
