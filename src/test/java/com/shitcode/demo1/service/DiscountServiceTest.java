@@ -126,12 +126,6 @@ public class DiscountServiceTest {
         }
 
         @Test
-        @DisplayName("Should throw RuntimeException when an unknown error occurs")
-        void shouldThrowRuntimeException_whenUnexpectedErrorOccurs() {
-
-        }
-
-        @Test
         @DisplayName("Should successfully create a discount")
         void shouldCreateDiscountSuccessfully() {
 
