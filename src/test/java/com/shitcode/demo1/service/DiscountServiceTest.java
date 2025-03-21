@@ -1,6 +1,7 @@
 package com.shitcode.demo1.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -30,6 +31,7 @@ import org.springframework.data.domain.Pageable;
 
 import com.shitcode.demo1.dto.DiscountDTO.DiscountDetailsResponse;
 import com.shitcode.demo1.entity.Discount;
+import com.shitcode.demo1.exception.model.EntityNotFoundException;
 import com.shitcode.demo1.helper.DiscountDateTimeConverter;
 import com.shitcode.demo1.mapper.DiscountMapper;
 import com.shitcode.demo1.repository.DiscountRepository;
@@ -93,11 +95,11 @@ public class DiscountServiceTest {
                 when(discountRepository.findDetailDiscountById(any(UUID.class))).thenReturn(Optional.of(newDiscount));
                 // Then
                 DiscountDetailsResponse result = discountService.findById(discountId);
+                logger.info(result.toString());
                 assertThat(result)
                                 .isNotNull()
                                 .isInstanceOf(DiscountDetailsResponse.class)
                                 .satisfies(res -> {
-                                        // logger.info(res.toString());
                                         assertThat(res.getId()).isEqualByComparingTo(discountId);
                                         assertThat(res.getTitle()).isEqualTo(DiscountType.DAILY_SALES.getFullTitle());
                                         assertThat(res.getSalesPercentAmount())
@@ -113,7 +115,14 @@ public class DiscountServiceTest {
         @Test
         @DisplayName("Should throw EntityNotFoundException when finding by non-existent ID")
         void shouldThrowEntityNotFoundException_whenFindingByNonExistanceId() {
-
+                // When
+                when(discountRepository.findDetailDiscountById(any(UUID.class))).thenReturn(Optional.empty());
+                // Then
+                RuntimeException exception = assertThrows(EntityNotFoundException.class,
+                                () -> discountService.findById(discountId));
+                assertThat(exception).isInstanceOf(EntityNotFoundException.class);
+                assertThat(exception.getMessage()).isEqualTo("{exception.entity-not-found.discount-id}");
+                verify(discountRepository, times(1)).findDetailDiscountById(discountId);
         }
 
         @Test
