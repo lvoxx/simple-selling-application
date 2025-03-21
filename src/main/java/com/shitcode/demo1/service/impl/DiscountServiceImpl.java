@@ -22,6 +22,7 @@ import com.shitcode.demo1.dto.DiscountDTO.ManageRequest;
 import com.shitcode.demo1.dto.DiscountDTO.ManageResponse;
 import com.shitcode.demo1.entity.Discount;
 import com.shitcode.demo1.exception.model.EntityExistsException;
+import com.shitcode.demo1.exception.model.EntityNotFoundException;
 import com.shitcode.demo1.helper.DiscountDateTimeConverter;
 import com.shitcode.demo1.helper.PaginationProvider;
 import com.shitcode.demo1.mapper.DiscountMapper;
@@ -67,8 +68,14 @@ public class DiscountServiceImpl implements DiscountService {
             @CacheEvict(value = DiscountCacheType.Fields.DISCOUNTS_TITLE_EXPDATE, allEntries = true),
     })
     public ManageResponse create(ManageRequest request) {
-        Discount discount = discountMapper.toEntity(request);
         mustNotReturnEntityWhenFindingByTitle(request.getType().getFullTitle());
+        Discount discount = discountMapper.toEntity(request);
+
+        discount.setTitle(request.getType().getFullTitle());
+        discount.setSalesPercentAmount(Optional.ofNullable(request.getSalesPercentAmount())
+                .orElseGet(() -> request.getType().getSalesPercentAmount()));
+        discount.setExpDate(DiscountDateTimeConverter.convert(request.getType()));
+
         Discount res = discountRepository.save(discount);
 
         cache.putIfAbsent(res.getId(), res.getExpDate().toString());
@@ -128,13 +135,13 @@ public class DiscountServiceImpl implements DiscountService {
     @Override
     public Discount findEntityById(UUID id) {
         return discountRepository.findById(id)
-                .orElseThrow(() -> new EntityExistsException("{exception.entity-not-found.discount-id}"));
+                .orElseThrow(() -> new EntityNotFoundException("{exception.entity-not-found.discount-id}"));
     }
 
     @Override
     public Discount findEntityByTitle(String title) {
         return discountRepository.findEntityByTitle(title)
-                .orElseThrow(() -> new EntityExistsException("{exception.entity-not-found.discount-title}"));
+                .orElseThrow(() -> new EntityNotFoundException("{exception.entity-not-found.discount-title}"));
     }
 
     @Override
