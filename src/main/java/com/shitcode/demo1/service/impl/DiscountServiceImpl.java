@@ -68,6 +68,7 @@ public class DiscountServiceImpl implements DiscountService {
     @Caching(evict = {
             @CacheEvict(value = DiscountCacheType.Fields.DISCOUNTS_TITLE_EXPDATE, allEntries = true),
     })
+    @Cacheable(value = DiscountCacheType.Fields.EXPIRED_DISCOUNTS, key = "#result.id")
     public ManageResponse create(ManageRequest request) {
         mustNotReturnEntityWhenFindingByTitle(request.getType().getFullTitle());
         Discount discount = discountMapper.toEntity(request);
@@ -79,15 +80,13 @@ public class DiscountServiceImpl implements DiscountService {
 
         Discount res = discountRepository.save(discount);
 
-        cache.putIfAbsent(res.getId(), res.getExpDate().toString());
-
         return discountMapper.toManageResponse(res);
     }
 
     @Override
     @Caching(evict = {
             @CacheEvict(value = DiscountCacheType.Fields.DISCOUNT_ID, key = "#id"),
-            @CacheEvict(value = DiscountCacheType.Fields.DISCOUNTS_TITLE_EXPDATE, allEntries = true),
+            @CacheEvict(value = DiscountCacheType.Fields.DISCOUNTS_TITLE_EXPDATE, key = "#id"),
     })
     public ManageResponse update(ManageRequest request, UUID id) {
         Discount discount = findEntityById(id);
