@@ -24,6 +24,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -218,12 +219,22 @@ public class DiscountServiceTest {
         @Test
         @DisplayName("Should delete discount successfully")
         void shouldDeleteDiscountSuccessfully() {
-
+                // When
+                when(discountRepository.findById(any(UUID.class))).thenReturn(Optional.of(oldDiscount));
+                Mockito.doNothing().when(discountRepository).deleteById(any(UUID.class));
+                // Then
+                discountService.delete(discountId);
+                Mockito.verify(discountRepository, times(1)).deleteById(discountId);
         }
 
         @Test
         @DisplayName("Should throw EntityNotFoundException when deleting non-existent discount")
         void shouldThrowEntityNotFoundException_whenDeletingNonExistentDiscount() {
-
+                // When
+                when(discountRepository.findById(any(UUID.class))).thenReturn(Optional.empty());
+                // Then
+                RuntimeException ex = assertThrows(EntityNotFoundException.class,
+                                () -> discountService.delete(discountId));
+                assertThat(ex.getMessage()).isEqualTo("{exception.entity-not-found.discount-id}");
         }
 }
