@@ -1,7 +1,7 @@
 package com.shitcode.demo1.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -199,7 +199,20 @@ public class DiscountServiceTest {
         @Test
         @DisplayName("Should throw EntityNotFoundException when updating non-existent discount")
         void shouldThrowEntityNotFoundException_whenUpdatingNonExistentDiscount() {
-
+                // When
+                when(discountRepository.findById(any(UUID.class))).thenReturn(Optional.empty());
+                // Then
+                RuntimeException ex = assertThrows(EntityNotFoundException.class,
+                                () -> discountService.update(ManageRequest.builder()
+                                                .type(newDiscount.getType())
+                                                .salesPercentAmount(null)
+                                                .build(), discountId));
+                assertThat(ex).isNotNull()
+                                .isInstanceOf(EntityNotFoundException.class)
+                                .satisfies(e -> {
+                                        assertThat(e.getMessage())
+                                                        .isEqualTo("{exception.entity-not-found.discount-id}");
+                                });
         }
 
         @Test
