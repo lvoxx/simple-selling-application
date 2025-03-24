@@ -7,10 +7,12 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.lang.reflect.Field;
 import java.time.OffsetDateTime;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Tags;
@@ -27,13 +29,10 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.cache.CacheManager;
-import org.springframework.cache.annotation.EnableCaching;
-import org.springframework.cache.concurrent.ConcurrentMapCacheManager;
-import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Pageable;
 
+import com.shitcode.demo1.component.DatabaseLock;
 import com.shitcode.demo1.dto.DiscountDTO.DiscountDetailsResponse;
 import com.shitcode.demo1.dto.DiscountDTO.ManageRequest;
 import com.shitcode.demo1.dto.DiscountDTO.ManageResponse;
@@ -44,7 +43,6 @@ import com.shitcode.demo1.mapper.DiscountMapper;
 import com.shitcode.demo1.repository.DiscountRepository;
 import com.shitcode.demo1.service.impl.DiscountServiceImpl;
 import com.shitcode.demo1.utils.DiscountType;
-import com.shitcode.demo1.utils.cache.DiscountCacheType;
 
 import io.jsonwebtoken.lang.Collections;
 
@@ -54,6 +52,7 @@ import io.jsonwebtoken.lang.Collections;
 })
 @RunWith(MockitoJUnitRunner.class)
 @ExtendWith({ MockitoExtension.class })
+@Import({ DatabaseLock.class })
 public class DiscountServiceTest {
 
         private static final Logger logger = LoggerFactory.getLogger(DiscountServiceTest.class);
@@ -67,6 +66,8 @@ public class DiscountServiceTest {
         @Spy
         DiscountMapper discountMapper = Mappers.getMapper(DiscountMapper.class);
 
+        DatabaseLock databaseLock;
+
         @Captor
         ArgumentCaptor<Pageable> pagableCaptor;
 
@@ -76,20 +77,20 @@ public class DiscountServiceTest {
         @Captor
         ArgumentCaptor<UUID> idCaptor;
 
-        @EnableCaching
-        @TestConfiguration
-        public static class CachingTestConfig {
-                @Bean
-                CacheManager cacheManager() {
-                        return new ConcurrentMapCacheManager(DiscountCacheType.Fields.DISCOUNTS_TITLE_EXPDATE,
-                                        DiscountCacheType.Fields.DISCOUNT_ID,
-                                        DiscountCacheType.Fields.EXPIRED_DISCOUNTS);
-                }
-
-        }
-
         OffsetDateTime now = OffsetDateTime.now();
         UUID discountId = UUID.randomUUID();
+
+        @BeforeEach
+        void setUp() throws Exception {
+                // Manually create a real instance of DatabaseLock
+                databaseLock = new DatabaseLock();
+                databaseLock.init(); // Ensure cache is initialized
+
+                // Inject it into DiscountServiceImpl
+                Field databaseLockField = DiscountServiceImpl.class.getDeclaredField("databaseLock");
+                databaseLockField.setAccessible(true);
+                databaseLockField.set(discountService, databaseLock);
+        }
 
         Discount newDiscount = Discount.builder()
                         .id(discountId)
@@ -172,7 +173,27 @@ public class DiscountServiceTest {
         @Test
         @DisplayName("Should update discount successfully")
         void shouldUpdateDiscountSuccessfully() {
-
+                // When
+                when(discountRepository.findById(any(UUID.class))).thenReturn(Optional.of(oldDiscount));
+                when(discountRepository.save(any(Discount.class))).thenReturn(newDiscount);
+                // Then
+                assertThat(discountService.update(ManageRequest.builder()
+                                .type(newDiscount.getType())
+                                .salesPercentAmount(null)
+                                .build(), discountId))
+                                .isNotNull()
+                                .isInstanceOf(ManageResponse.class)
+                                .satisfies(res -> {
+                                        assertThat(res.getTitle()).isEqualTo(newDiscount.getTitle());
+                                        assertThat(res.getType()).isEqualTo(newDiscount.getType());
+                                        assertThat(res.getId()).isEqualTo(newDiscount.getId());
+                                        assertThat(res.getExpDate()).isAfterOrEqualTo(newDiscount.getExpDate());
+                                        assertThat(res.getSalesPercentAmount())
+                                                        .isEqualTo(newDiscount.getSalesPercentAmount());
+                                });
+                verify(discountRepository, times(1)).save(discountCaptor.capture());
+                assertThat(discountCaptor.getValue().getTitle())
+                                .isEqualTo(newDiscount.getTitle());
         }
 
         @Test

@@ -5,8 +5,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import org.springframework.cache.Cache;
-import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
@@ -32,8 +30,6 @@ import com.shitcode.demo1.service.DiscountService;
 import com.shitcode.demo1.utils.KeyLock;
 import com.shitcode.demo1.utils.cache.DiscountCacheType;
 
-import jakarta.annotation.PostConstruct;
-
 @Service
 @Transactional
 @LogCollector
@@ -41,20 +37,10 @@ public class DiscountServiceImpl implements DiscountService {
     private final DiscountMapper discountMapper = DiscountMapper.INSTANCE;
     private final DiscountRepository discountRepository;
     private final DatabaseLock databaseLock;
-    private final CacheManager cacheManager;
 
-    public DiscountServiceImpl(DiscountRepository discountRepository, DatabaseLock databaseLock,
-            CacheManager cacheManager) {
+    public DiscountServiceImpl(DiscountRepository discountRepository, DatabaseLock databaseLock) {
         this.discountRepository = discountRepository;
         this.databaseLock = databaseLock;
-        this.cacheManager = cacheManager;
-    }
-
-    private Cache cache;
-
-    @PostConstruct
-    void setUp() {
-        cacheManager.getCache(DiscountCacheType.Fields.EXPIRED_DISCOUNTS);
     }
 
     @Override
@@ -88,6 +74,7 @@ public class DiscountServiceImpl implements DiscountService {
             @CacheEvict(value = DiscountCacheType.Fields.DISCOUNT_ID, key = "#id"),
             @CacheEvict(value = DiscountCacheType.Fields.DISCOUNTS_TITLE_EXPDATE, key = "#id"),
     })
+    @Cacheable(value = DiscountCacheType.Fields.EXPIRED_DISCOUNTS, key = "#result.id")
     public ManageResponse update(ManageRequest request, UUID id) {
         Discount discount = findEntityById(id);
 
@@ -100,9 +87,6 @@ public class DiscountServiceImpl implements DiscountService {
         ManageResponse response = databaseLock.doAndLock(KeyLock.DISCOUNT,
                 () -> discountMapper.toManageResponse(discountRepository.save(discount)));
 
-        cache.evictIfPresent(response.getId());
-        cache.putIfAbsent(response.getId(), response.getExpDate().toString());
-
         return response;
     }
 
@@ -114,7 +98,6 @@ public class DiscountServiceImpl implements DiscountService {
     public void delete(UUID id) {
         findEntityById(id);
         discountRepository.deleteById(id);
-        cache.evictIfPresent(id);
     }
 
     @Override
