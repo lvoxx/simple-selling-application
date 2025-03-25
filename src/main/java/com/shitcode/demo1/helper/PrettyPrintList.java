@@ -21,7 +21,8 @@ public abstract class PrettyPrintList {
 
             // Print Pretty JSON
             String jsonOutput = objectMapper.writeValueAsString(prettyData);
-            System.out.println(jsonOutput.replace("], [", "],\n [")); // Force line breaks;
+            System.out.println(jsonOutput.replace("], [", "],\n [")
+                    .replace("] ]", "]\n ]")); // Force line breaks;
         } catch (Exception e) {
             e.printStackTrace();
         }
