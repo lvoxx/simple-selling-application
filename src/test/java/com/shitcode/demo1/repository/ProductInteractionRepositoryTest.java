@@ -161,78 +161,35 @@ public class ProductInteractionRepositoryTest extends AbstractRepositoryTest {
                 assertThat(results).containsSubsequence(new Object[] { "Laptop", 4L });
         }
 
-        // @Test
-        // @DisplayName("Should return entities when finding by event stage")
-        // void shouldReturnEntities_whenFindingByEventStage() {
-        // // When
-        // List<ProductInteraction> results = productInteractionRepository
-        // .findByEventStage(InteractionEvent.SEARCH_PRODUCT);
+        @Test
+        @DisplayName("Should return entities when searching by username")
+        void shouldReturnEntities_whenFindingByUsername() {
+                // When
+                List<ProductInteraction> res = productInteractionRepository.findByUsernameContaining("Shopper");
+                // Then
+                assertThat(res).hasSize(2)
+                                .extracting(ProductInteraction::getUsername)
+                                .containsExactlyInAnyOrder("In-Store Shopper", "Active Shopper");
+        }
 
-        // // Then
-        // assertThat(results)
-        // .isNotEmpty()
-        // .allMatch(pi -> pi.getEventStage() == InteractionEvent.SEARCH_PRODUCT);
-        // }
+        @Test
+        @DisplayName("Should return entities when searching by location")
+        void shouldReturnEntities_whenFindingByLocateAt() {
+                // When
+                List<ProductInteraction> res = productInteractionRepository.findByLocateAtContaining("Page");
+                // Then
+                assertThat(res).hasSize(5)
+                                .extracting(ProductInteraction::getLocateAt)
+                                .containsAnyOf("Product Page",
+                                                "Cart Page",
+                                                "Checkout Page");
+        }
 
-        // @Test
-        // @DisplayName("Should return entities when finding by user stage")
-        // void shouldReturnEntities_whenFindingByUserStage() {
-        // // When
-        // List<ProductInteraction> results =
-        // productInteractionRepository.findByUserStage("Guest User");
+        @Test
+        @DisplayName("Should return paginated results with joined Product and Category tables when searching by time range")
+        void shouldReturnPageWithJoiningProductAndCategoryTable_whenFindingByPageByTimeBetween() {
+                // When
+                // Then
+        }
 
-        // // Then
-        // assertThat(results)
-        // .isNotEmpty()
-        // .allMatch(pi -> "Guest User".equals(pi.getUserStage()));
-        // }
-
-        // @Test
-        // @DisplayName("Should return entities when finding by onTime")
-        // void shouldReturnEntities_whenFindingByOnTime() {
-        // // Given
-        // LocalDateTime timestamp = LocalDateTime.now().minusHours(6);
-        // LocalDateTime endTime = LocalDateTime.now();
-
-        // // When
-        // List<ProductInteraction> results =
-        // productInteractionRepository.findByTime(timestamp, endTime);
-
-        // // Then
-        // assertThat(results)
-        // .isNotEmpty()
-        // .allMatch(pi -> !pi.getOnTime().isBefore(timestamp)
-        // && !pi.getOnTime().isAfter(endTime)); // Check range
-        // }
-
-        // @Test
-        // @DisplayName("Should return entities when finding by location")
-        // void shouldReturnEntities_whenFindingByLocateAt() {
-        // // When
-        // List<ProductInteraction> results =
-        // productInteractionRepository.findByLocateAt("Search Bar");
-
-        // // Then
-        // assertThat(results)
-        // .isNotEmpty()
-        // .allMatch(pi -> "Search Bar".equals(pi.getLocateAt()));
-        // }
-
-        // @Test
-        // @DisplayName("Should return concatenated event details when searching by
-        // event stage and time range")
-        // void shouldReturnConcatenatedDetails_whenSearchingByEventStageAndTimeRange()
-        // {
-        // // Given
-        // LocalDateTime startTime = LocalDateTime.now().minusDays(3);
-        // LocalDateTime endTime = LocalDateTime.now();
-
-        // // When
-        // List<String> results =
-        // productInteractionRepository.searchByFormattedColumnAndTimeRange(
-        // InteractionEvent.SEARCH_PRODUCT, startTime, endTime);
-
-        // // Then
-        // assertThat(results).isNotEmpty();
-        // }
 }

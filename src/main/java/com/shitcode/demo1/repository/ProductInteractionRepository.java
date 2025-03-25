@@ -23,9 +23,9 @@ public interface ProductInteractionRepository extends JpaRepository<ProductInter
                         """, nativeQuery = true)
         List<Object[]> findExaggerationGroupByProductName(@Param("productName") String productName);
 
-        List<ProductInteraction> findByUsername(String username);
+        List<ProductInteraction> findByUsernameContaining(String username);
 
-        List<ProductInteraction> findByLocateAt(String at);
+        List<ProductInteraction> findByLocateAtContaining(String at);
 
         @Query(value = """
                         WITH temp_pi_prod AS (
