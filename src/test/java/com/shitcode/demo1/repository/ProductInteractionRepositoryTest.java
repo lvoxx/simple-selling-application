@@ -83,60 +83,61 @@ public class ProductInteractionRepositoryTest extends AbstractRepositoryTest {
                                 .collect(Collectors.toMap(Product::getName, Product::getId));
 
                 // Setup product interactions with associated product IDs
+                LocalDateTime now = LocalDateTime.now();
                 List<ProductInteraction> interactions = List.of(
                                 ProductInteraction.builder()
                                                 .productId(productIdMap.get("T-Shirt"))
                                                 .username("New Visitor")
-                                                .onTime(LocalDateTime.now().minusDays(2))
+                                                .onTime(now.minusDays(2))
                                                 .locateAt("Homepage")
                                                 .build(),
 
                                 ProductInteraction.builder()
                                                 .productId(productIdMap.get("Laptop"))
                                                 .username("Returning Customer")
-                                                .onTime(LocalDateTime.now().minusHours(6))
+                                                .onTime(now.minusHours(6))
                                                 .locateAt("Search Bar")
                                                 .build(),
 
                                 ProductInteraction.builder()
                                                 .productId(productIdMap.get("Laptop"))
                                                 .username("Active Shopper")
-                                                .onTime(LocalDateTime.now().minusHours(3))
+                                                .onTime(now.minusHours(3))
                                                 .locateAt("Product Page")
                                                 .build(),
 
                                 ProductInteraction.builder()
                                                 .productId(productIdMap.get("T-Shirt"))
                                                 .username("Loyal Member")
-                                                .onTime(LocalDateTime.now().minusMinutes(45))
+                                                .onTime(now.minusMinutes(45))
                                                 .locateAt("Product Page")
                                                 .build(),
 
                                 ProductInteraction.builder()
                                                 .productId(productIdMap.get("T-Shirt"))
                                                 .username("Cart Abandoner")
-                                                .onTime(LocalDateTime.now().minusMinutes(30))
+                                                .onTime(now.minusMinutes(30))
                                                 .locateAt("Cart Page")
                                                 .build(),
 
                                 ProductInteraction.builder()
                                                 .productId(productIdMap.get("Laptop"))
                                                 .username("Verified Buyer")
-                                                .onTime(LocalDateTime.now().minusMinutes(15))
+                                                .onTime(now.minusMinutes(15))
                                                 .locateAt("Checkout Page")
                                                 .build(),
 
                                 ProductInteraction.builder()
                                                 .productId(productIdMap.get("Laptop"))
                                                 .username("Premium Subscriber")
-                                                .onTime(LocalDateTime.now().minusMinutes(10))
+                                                .onTime(now.minusMinutes(10))
                                                 .locateAt("Checkout Page")
                                                 .build(),
 
                                 ProductInteraction.builder()
                                                 .productId(productIdMap.get("T-Shirt"))
                                                 .username("In-Store Shopper")
-                                                .onTime(LocalDateTime.now().minusMinutes(5))
+                                                .onTime(now.minusMinutes(5))
                                                 .locateAt("Pickup Store")
                                                 .build());
 
@@ -188,8 +189,15 @@ public class ProductInteractionRepositoryTest extends AbstractRepositoryTest {
         @Test
         @DisplayName("Should return paginated results with joined Product and Category tables when searching by time range")
         void shouldReturnPageWithJoiningProductAndCategoryTable_whenFindingByPageByTimeBetween() {
+                // Given
+                LocalDateTime now = LocalDateTime.now();
                 // When
+                List<Object[]> res = productInteractionRepository.findPageByTimeBetween(0, 1000000,
+                                now.minusHours(9), now.plusHours(1));
                 // Then
+                PrettyPrintList.printPrettyJson(res);
+                assertThat(res)
+                                .hasSize(7);
         }
 
 }

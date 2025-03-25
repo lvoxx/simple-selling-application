@@ -29,24 +29,34 @@ public interface ProductInteractionRepository extends JpaRepository<ProductInter
 
         @Query(value = """
                         WITH temp_pi_prod AS (
-                                SELECT pi.product_id, pi.locate_at, pi.on_time FROM product_interaction pi
+                                SELECT pi.product_id, pi.locate_at, pi.on_time
+                                FROM product_interaction pi
                                 WHERE pi.on_time BETWEEN :startTime AND :endTime
                                 ORDER BY pi.on_time
                                 LIMIT COALESCE(:size, 1000000)
                                 OFFSET :page * COALESCE(:size, 1000000)
                         )
-                        SELECT p.id AS prod_id, p.name AS prod_name, c.name AS ctg_name, pi.locate_at, pi.on_time
+                        SELECT  COALESCE(prod.prod_id, 0) AS prod_id,
+                                COALESCE(prod.prod_name, 'Unknown') AS prod_name,
+                                COALESCE(prod.in_stock_quantity, 0) AS in_stock_quantity,
+                                COALESCE(prod.in_sell_quantity, 0) AS in_sell_quantity,
+                                COALESCE(prod.price, 0.00) AS price,
+                                COALESCE(prod.currency, 'Unknown') AS currency,
+                                COALESCE(prod.ctg_name, 'Uncategorized') AS ctg_name,
+                                COALESCE(pi.locate_at, 'Unknown') AS locate_at,
+                                COALESCE(pi.on_time, NOW()) AS on_time
                         FROM temp_pi_prod pi
                         LEFT JOIN
                         (
-                                SELECT p.id AS prod_id, p.name AS prod_name, c.name AS ctg_name
+                                SELECT  p.id AS prod_id, p.name AS prod_name,
+                                        p.in_stock_quantity, p.in_sell_quantity,
+                                        p.price, p.currency,
+                                        c.name AS ctg_name
                                 FROM category c
                                 LEFT JOIN products p
                                 ON c.id = p.category_id
-                                WHERE p.category_id IS NOT NULL
-                        ) p
-                        ON pi.product_id = p.prod_id
-                        WHERE pi.product_id IS NOT NULL
+                        ) prod
+                        ON pi.product_id = prod.prod_id
                         """, nativeQuery = true)
         List<Object[]> findPageByTimeBetween(
                         @Param("page") Integer page,
