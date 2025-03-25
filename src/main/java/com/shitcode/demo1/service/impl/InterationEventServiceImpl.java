@@ -56,7 +56,7 @@ public class InterationEventServiceImpl implements InterationEventService {
     @Cacheable(value = ProductInterationCacheType.Fields.TIME_BETWEEN, key = "T(String).valueOf(#page) + '-' + T(String).valueOf(#size) + '-' + T(String).valueOf(#startTime) + '-' + T(String).valueOf(#endTime)")
     public List<PageResponse> findRecordsWithTimeBetween(Integer page, Integer size, LocalDateTime startTime,
             LocalDateTime endTime) {
-        List<Object[]> res = interactionRepository.findPageByTime(page, size, startTime, endTime);
+        List<Object[]> res = interactionRepository.findPageByTimeBetween(page, size, startTime, endTime);
         List<PageResponse> pageResponse = new LinkedList<>();
         res.stream().forEach(r -> {
             pageResponse.add(PageResponse.builder()

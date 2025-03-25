@@ -48,7 +48,7 @@ public interface ProductInteractionRepository extends JpaRepository<ProductInter
                         ON pi.product_id = p.prod_id
                         WHERE pi.product_id IS NOT NULL
                         """, nativeQuery = true)
-        List<Object[]> findPageByTime(
+        List<Object[]> findPageByTimeBetween(
                         @Param("page") Integer page,
                         @Param("size") Integer size,
                         @Param("startTime") LocalDateTime startTime,
