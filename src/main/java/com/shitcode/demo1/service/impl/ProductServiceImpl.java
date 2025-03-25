@@ -21,6 +21,7 @@ import com.shitcode.demo1.dto.DiscountDTO.ApplyToProductsResponse;
 import com.shitcode.demo1.dto.ProductDTO.AdminResponse;
 import com.shitcode.demo1.dto.ProductDTO.InSellResponse;
 import com.shitcode.demo1.dto.ProductDTO.Request;
+import com.shitcode.demo1.dto.ProductInteractionDTO;
 import com.shitcode.demo1.entity.Category;
 import com.shitcode.demo1.entity.Product;
 import com.shitcode.demo1.exception.model.EntityExistsException;
@@ -29,6 +30,7 @@ import com.shitcode.demo1.helper.PaginationProvider;
 import com.shitcode.demo1.mapper.ProductMapper;
 import com.shitcode.demo1.repository.ProductRepository;
 import com.shitcode.demo1.service.CategoryService;
+import com.shitcode.demo1.service.InterationEventService;
 import com.shitcode.demo1.service.ProductService;
 import com.shitcode.demo1.utils.KeyLock;
 import com.shitcode.demo1.utils.cache.ProductCacheType;
@@ -42,12 +44,14 @@ public class ProductServiceImpl implements ProductService {
 
     private final ProductRepository productRepository;
     private final CategoryService categoryService;
+    private final InterationEventService interationEventService;
     private final DatabaseLock databaseLock;
 
     public ProductServiceImpl(ProductRepository productRepository, CategoryService categoryService,
-            DatabaseLock databaseLock) {
+            DatabaseLock databaseLock, InterationEventService interationEventService) {
         this.productRepository = productRepository;
         this.categoryService = categoryService;
+        this.interationEventService = interationEventService;
         this.databaseLock = databaseLock;
     }
 
@@ -240,6 +244,7 @@ public class ProductServiceImpl implements ProductService {
     @Cacheable(value = ProductCacheType.Fields.INSELL_PRODUCT_ID, key = "#id")
     @Transactional(readOnly = true)
     public InSellResponse findInSellProductWithId(Long id) {
+        interationEventService.recordNewEvent(new ProductInteractionDTO.Request(id));
         return productMapper.toProductInSellResponse(findEntityWithId(id));
     }
 
@@ -247,7 +252,9 @@ public class ProductServiceImpl implements ProductService {
     @Cacheable(value = ProductCacheType.Fields.INSELL_PRODUCT_NAME, key = "#name")
     @Transactional(readOnly = true)
     public InSellResponse findInSellWithName(String name) {
-        return productMapper.toProductInSellResponse(findEntityWithName(name));
+        Product product = findEntityWithName(name);
+        interationEventService.recordNewEvent(new ProductInteractionDTO.Request(product.getId()));
+        return productMapper.toProductInSellResponse(product);
     }
 
     @Override
