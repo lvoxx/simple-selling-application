@@ -4,15 +4,12 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-import com.shitcode.demo1.utils.InteractionEvent;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -26,23 +23,19 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "product_interaction")
+@Table(name = "product_interaction", indexes = @Index(columnList = "on_time", name = "idx_product_interaction_on_time"))
 public class ProductInteraction implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID id;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "event_stage", nullable = false, updatable = false)
-    private InteractionEvent eventStage;
-
-    @Column(name = "product_name", updatable = false, nullable = true)
-    private String productName;
+    @Column(name = "product_id", updatable = false, nullable = true)
+    private Long productId;
 
     // Event by user
-    @Column(name = "user_stage", nullable = false, updatable = false)
+    @Column(name = "username", nullable = false, updatable = false)
     @Builder.Default
-    private String userStage = "Anonymous User";
+    private String username = "Anonymous User";
 
     // Event time
     @Column(name = "on_time", nullable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")

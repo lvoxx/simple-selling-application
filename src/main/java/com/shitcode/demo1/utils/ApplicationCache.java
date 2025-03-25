@@ -10,6 +10,7 @@ import com.shitcode.demo1.utils.cache.CategoryCacheType;
 import com.shitcode.demo1.utils.cache.DiscountCacheType;
 import com.shitcode.demo1.utils.cache.Ip2LocationCacheType;
 import com.shitcode.demo1.utils.cache.ProductCacheType;
+import com.shitcode.demo1.utils.cache.ProductInterationCacheType;
 import com.shitcode.demo1.utils.cache.UserCacheType;
 
 /**
@@ -84,8 +85,10 @@ public abstract class ApplicationCache {
 
                 // * IP2LOCATION
                 caches.put(Ip2LocationCacheType.Fields.IP_ADDRESS,
-                                buildCache(200, 12000, 2, TimeUnit.HOURS));
-
+                                buildCache(200, 12000, 30, TimeUnit.DAYS));
+                // * PRODUCT INTERATION
+                caches.put(ProductInterationCacheType.Fields.TIME_BETWEEN,
+                                buildCache(20, 300, 7, TimeUnit.DAYS));
                 return caches;
         }
 
