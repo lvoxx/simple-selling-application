@@ -38,10 +38,6 @@ public interface ProductInteractionRepository extends JpaRepository<ProductInter
                         )
                         SELECT  COALESCE(prod.prod_id, 0) AS prod_id,
                                 COALESCE(prod.prod_name, 'Unknown') AS prod_name,
-                                COALESCE(prod.in_stock_quantity, 0) AS in_stock_quantity,
-                                COALESCE(prod.in_sell_quantity, 0) AS in_sell_quantity,
-                                COALESCE(prod.price, 0.00) AS price,
-                                COALESCE(prod.currency, 'Unknown') AS currency,
                                 COALESCE(prod.ctg_name, 'Uncategorized') AS ctg_name,
                                 COALESCE(pi.locate_at, 'Unknown') AS locate_at,
                                 COALESCE(pi.on_time, NOW()) AS on_time
@@ -49,8 +45,6 @@ public interface ProductInteractionRepository extends JpaRepository<ProductInter
                         LEFT JOIN
                         (
                                 SELECT  p.id AS prod_id, p.name AS prod_name,
-                                        p.in_stock_quantity, p.in_sell_quantity,
-                                        p.price, p.currency,
                                         c.name AS ctg_name
                                 FROM category c
                                 LEFT JOIN products p
