@@ -37,7 +37,7 @@ public class Discount extends AbstractAuditableEntity {
     private UUID id;
 
     @Column(name = "title", length = 60, nullable = false, unique = true)
-    private String title;
+    private String title; // B-Tree Index
 
     @Enumerated(EnumType.STRING)
     private DiscountType type;
@@ -46,7 +46,7 @@ public class Discount extends AbstractAuditableEntity {
     private Double salesPercentAmount;
 
     @Column(name = "exp_date", nullable = false, columnDefinition = "TIMESTAMP WITH TIME ZONE")
-    private OffsetDateTime expDate;
+    private OffsetDateTime expDate; // BRIN Index
 
     @OneToMany(mappedBy = "discount", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Product> products;

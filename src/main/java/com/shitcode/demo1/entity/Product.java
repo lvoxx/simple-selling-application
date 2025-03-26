@@ -9,7 +9,6 @@ import jakarta.persistence.ForeignKey;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PrePersist;
@@ -26,9 +25,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "products", // Lowercase for PostgreSQL
-        indexes = @Index(name = "idx_products_name", columnList = "name") // Lowercase index name
-)
+@Table(name = "products") // Lowercase for PostgreSQL
 public class Product extends AbstractAuditableEntity {
 
     @Id
@@ -36,7 +33,7 @@ public class Product extends AbstractAuditableEntity {
     private Long id;
 
     @Column(name = "name", nullable = false, length = 255)
-    private String name;
+    private String name;    // GIN Index
 
     @Column(name = "in_stock_quantity", nullable = false)
     @Builder.Default

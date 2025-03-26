@@ -11,7 +11,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.Index;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -26,8 +25,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "spring_user", // Lowercase for PostgreSQL
-        indexes = @Index(name = "idx_spring_user_email", columnList = "email"))
+@Table(name = "spring_user") // Lowercase for PostgreSQL
 public class SpringUser extends AbstractAuditableEntity {
 
     @Id
@@ -35,7 +33,7 @@ public class SpringUser extends AbstractAuditableEntity {
     private Long id;
 
     @Column(name = "email", unique = true, nullable = false, length = 255)
-    private String email; // Validation should be handled in the service layer
+    private String email; // Hash Index
 
     @Column(name = "password", nullable = false)
     private String password;
@@ -47,7 +45,7 @@ public class SpringUser extends AbstractAuditableEntity {
     private String lastName;
 
     @Column(name = "phone_number", length = 60, unique = true, nullable = false)
-    private String phoneNumber; // +84-<numbers>
+    private String phoneNumber; // +84-<numbers>   Hash Index
 
     @Column(name = "locked", nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
     @Builder.Default

@@ -9,7 +9,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.Index;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -23,7 +22,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "product_interaction", indexes = @Index(columnList = "on_time", name = "idx_product_interaction_on_time"))
+@Table(name = "product_interaction")
 public class ProductInteraction implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -40,10 +39,10 @@ public class ProductInteraction implements Serializable {
     // Event time
     @Column(name = "on_time", nullable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     @Builder.Default
-    private LocalDateTime onTime = LocalDateTime.now();
+    private LocalDateTime onTime = LocalDateTime.now();     // BRIN Index
 
     // Time event occurs
     @Column(name = "locate_at", nullable = false)
     @Builder.Default
-    private String locateAt = "Unknown";
+    private String locateAt = "Unknown";    // B-tree Index
 }

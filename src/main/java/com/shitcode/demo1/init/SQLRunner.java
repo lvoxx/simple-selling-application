@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.IntStream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,9 +46,11 @@ public class SQLRunner implements CommandLineRunner {
                         if (connection.isValid(2)) { // Check if connection is valid within 2 seconds
                             LogPrinter.printLog(LogPrinter.Type.INFO, LogPrinter.Flag.START_UP,
                                     "Database connection established successfully.");
+                            sqlMap.add("database/indexes.sql");
                             sqlMap.add("database/categories.sql");
                             sqlMap.add("database/products.sql");
                             sqlMap.add("database/discounts.sql");
+                            sqlMap.add("database/product_interaction.sql");
                         } else {
                             LogPrinter.printLog(LogPrinter.Type.ERROR, LogPrinter.Flag.START_UP,
                                     "Database connection is not valid.");
@@ -74,6 +77,12 @@ public class SQLRunner implements CommandLineRunner {
                     Matcher matcher = pattern.matcher(sql);
 
                     if (matcher.find()) {
+                        // COMMENT THIS TO IGNORE GENERATE DUMMY
+                        if (matcher.group(1).equalsIgnoreCase("product_interaction")) {
+                            insertProductInteractionData(connection, sql);
+                            continue;
+                        }
+                        // COMMENT THIS TO IGNORE GENERATE DUMMY
                         ScriptUtils.executeSqlScript(connection, new ClassPathResource(sql));
                         LogPrinter.printLog(LogPrinter.Type.INFO, LogPrinter.Flag.START_UP,
                                 String.format("SQL script executed from initial database %s",
@@ -88,6 +97,24 @@ public class SQLRunner implements CommandLineRunner {
                 }
             }
         }
+    }
+
+    private void insertProductInteractionData(Connection connection, String sqlPath) {
+        final int totalRows = 5_000_000;
+        final int batchSize = 100_000;
+
+        LogPrinter.printLog(LogPrinter.Type.INFO, LogPrinter.Flag.START_UP,
+                String.format("Starting batch insert for %d rows in batches of %d",
+                        totalRows, batchSize));
+
+        IntStream.range(0, totalRows / batchSize).forEach(batch -> {
+            ScriptUtils.executeSqlScript(connection, new ClassPathResource(sqlPath));
+            LogPrinter.printLog(LogPrinter.Type.INFO, LogPrinter.Flag.START_UP,
+                    String.format("Batch %d inserted successfully", batch + 1));
+        });
+
+        LogPrinter.printLog(LogPrinter.Type.INFO, LogPrinter.Flag.START_UP,
+                String.format("Completed batch inserts for product_interaction table."));
     }
 
 }
