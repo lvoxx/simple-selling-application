@@ -21,6 +21,8 @@ security-path:
       /categories/**,
       /auth,
       /auth/**,
+      /product-interaction,
+      /product-interaction/**
     ]
   user: [/users/**, /dashboard/user, /dashboard/user/**]
   super-user:

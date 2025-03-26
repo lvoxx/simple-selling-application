@@ -61,6 +61,8 @@ public class ProductInteractionController {
             @RequestParam(name = "st", required = true) LocalDateTime startTime,
             @RequestParam(name = "et", required = true) LocalDateTime endTime)
             throws Exception {
+                // 5 minutes: size 10k x 20 (reqs / m) = 200k rows
+                // A hour: 200k x 12 = 2.4 mil rows
         return responseService.mapping(
                 () -> ResponseEntity.ok().body(
                         interationEventService.findRecordsWithTimeBetween(page, size, startTime, endTime)),
