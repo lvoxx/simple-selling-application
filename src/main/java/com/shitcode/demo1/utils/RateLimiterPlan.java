@@ -152,6 +152,19 @@ public enum RateLimiterPlan {
                     .refillIntervally(5, Duration.ofDays(30))
                     .build();
         }
+    },
+
+    /**
+     * Product interaction plan allowing 20 requests every 5 minutes.
+     */
+    PRODUCT_INTERACTION {
+        @Override
+        public Bandwidth getLimit() {
+            return Bandwidth.builder()
+                    .capacity(20)
+                    .refillIntervally(20, Duration.ofMinutes(5))
+                    .build();
+        }
     };
 
     /**

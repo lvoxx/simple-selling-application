@@ -9,6 +9,7 @@
 # COMPLETE_SIGNUP - 5 / 7 days
 # REGRANT_AUTH - 3 / 45 minutes
 # RENEW_TOKEN - 5 / 30 days
+# PRODUCT_INTERACTION - 20 / 5 minutes
 rate-limiter:
   category:
     find-all: HARD
@@ -30,3 +31,5 @@ rate-limiter:
     complete_signup: COMPLETE_SIGNUP
     renew-token: RENEW_TOKEN
     forgot-password: REGRANT_AUTH
+  product-interaction:
+    time: PRODUCT_INTERACTION
