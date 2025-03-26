@@ -1,7 +1,7 @@
 package com.shitcode.demo1.entity;
 
 import java.io.Serializable;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.UUID;
 
 import jakarta.persistence.Column;
@@ -39,7 +39,7 @@ public class ProductInteraction implements Serializable {
     // Event time
     @Column(name = "on_time", nullable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     @Builder.Default
-    private LocalDateTime onTime = LocalDateTime.now();     // BRIN Index
+    private Instant onTime = Instant.now();     // BRIN Index
 
     // Time event occurs
     @Column(name = "locate_at", nullable = false)

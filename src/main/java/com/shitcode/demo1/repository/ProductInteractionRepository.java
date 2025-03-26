@@ -1,6 +1,6 @@
 package com.shitcode.demo1.repository;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
@@ -55,14 +55,14 @@ public interface ProductInteractionRepository extends JpaRepository<ProductInter
         List<Object[]> findPageByTimeBetween(
                         @Param("page") Integer page,
                         @Param("size") Integer size,
-                        @Param("startTime") LocalDateTime startTime,
-                        @Param("endTime") LocalDateTime endTime);
+                        @Param("startTime") Instant startTime,
+                        @Param("endTime") Instant endTime);
 
         // Special query to find by concatenated column within a time range
         @Query("SELECT CONCAT(p.productId, '.', p.username, '.', p.onTime, '.', p.locateAt) AS events FROM ProductInteraction p "
                         +
                         "WHERE p.onTime BETWEEN :startTime AND :endTime")
         List<String> searchFormattedColumnByTimeRange(
-                        @Param("startTime") LocalDateTime startTime,
-                        @Param("endTime") LocalDateTime endTime);
+                        @Param("startTime") Instant startTime,
+                        @Param("endTime") Instant endTime);
 }

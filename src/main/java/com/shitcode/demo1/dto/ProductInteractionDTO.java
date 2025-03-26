@@ -1,6 +1,6 @@
 package com.shitcode.demo1.dto;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.UUID;
 
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -42,7 +42,7 @@ public abstract class ProductInteractionDTO {
         private String username;
 
         @Schema(description = "Timestamp of the interaction", example = "2024-03-24T12:30:45")
-        private LocalDateTime onTime;
+        private Instant onTime;
 
         @Schema(description = "Location where the interaction occurred", example = "New York, USA")
         private String locateAt;
@@ -58,6 +58,6 @@ public abstract class ProductInteractionDTO {
         private String productName; 
         private String categoryName;
         private String locateAt; 
-        private LocalDateTime onTime;
+        private Instant onTime;
     }   
 }

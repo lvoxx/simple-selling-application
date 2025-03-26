@@ -100,8 +100,8 @@ public class SQLRunner implements CommandLineRunner {
     }
 
     private void insertProductInteractionData(Connection connection, String sqlPath) {
-        final int totalRows = 5_000_000;
-        final int batchSize = 100_000;
+        final int totalRows = 1_000_000;
+        final int batchSize = 50_000;
 
         LogPrinter.printLog(LogPrinter.Type.INFO, LogPrinter.Flag.START_UP,
                 String.format("Starting batch insert for %d rows in batches of %d",

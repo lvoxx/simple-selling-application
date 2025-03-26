@@ -1,6 +1,11 @@
 package com.shitcode.demo1.controller;
 
+import java.time.Instant;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.shitcode.demo1.annotation.logging.LogCollector;
@@ -18,12 +23,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.PostConstruct;
 import lombok.Data;
-
-import java.time.LocalDateTime;
-
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 
 @Data
 @RestController
@@ -58,8 +57,8 @@ public class ProductInteractionController {
     public ResponseEntity<?> getInteractionEventByTimeBetween(
             @RequestParam(name = "s", defaultValue = "10000") Integer size,
             @RequestParam(name = "p", defaultValue = "0") Integer page,
-            @RequestParam(name = "st", required = true) LocalDateTime startTime,
-            @RequestParam(name = "et", required = true) LocalDateTime endTime)
+            @RequestParam(name = "st", required = true) Instant startTime,
+            @RequestParam(name = "et", required = true) Instant endTime)
             throws Exception {
                 // 5 minutes: size 10k x 20 (reqs / m) = 200k rows
                 // A hour: 200k x 12 = 2.4 mil rows
