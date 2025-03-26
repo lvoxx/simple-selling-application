@@ -75,7 +75,7 @@ public class SQLRunner implements CommandLineRunner {
                 try {
                     Pattern pattern = Pattern.compile("database/(.*?).sql");
                     Matcher matcher = pattern.matcher(sql);
-
+                    connection.createStatement().setQueryTimeout(300); // Timeout in seconds (5 minutes)
                     if (matcher.find()) {
                         // COMMENT THIS TO IGNORE GENERATE DUMMY
                         if (matcher.group(1).equalsIgnoreCase("product_interaction")) {
