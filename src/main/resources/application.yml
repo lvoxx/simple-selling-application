@@ -13,6 +13,7 @@ spring:
       - config/database.yml
       - config/email.yml
       - config/logging.yml
+      - config/media.yml
       - config/rate-limiter.yml
       - config/security.yml
       - config/server.yml

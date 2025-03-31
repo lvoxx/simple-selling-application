@@ -33,3 +33,6 @@ rate-limiter:
     forgot-password: REGRANT_AUTH
   product-interaction:
     time: PRODUCT_INTERACTION
+  media:
+    id: SOFT
+    manage: MEDIUM

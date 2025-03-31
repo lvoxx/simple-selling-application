@@ -33,7 +33,7 @@ public class Product extends AbstractAuditableEntity {
     private Long id;
 
     @Column(name = "name", nullable = false, length = 255)
-    private String name;    // GIN Index
+    private String name; // GIN Index
 
     @Column(name = "in_stock_quantity", nullable = false)
     @Builder.Default

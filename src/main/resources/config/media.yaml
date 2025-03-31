@@ -1,0 +1,20 @@
+media:
+  path:
+    root: /media
+    images: /images/
+    videos: /videos/
+  upload-locally: true
+
+spring:
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 50MB
+      max-request-size: 50MB
+server:
+  compression:
+    min-response-size: 2KB
+    enabled: true
+    mime-types: image/jpeg, image/gif, image/png, video/mp4, video/mpeg, video/mpeg4-generic, application/octet-stream
+    ffmpeg: ${FFMPEG_PATH:ffmpeg}
+    ffprobe: ${FFPROBE_PATH:ffprobe}

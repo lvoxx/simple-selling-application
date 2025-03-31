@@ -1,5 +1,6 @@
 package com.shitcode.demo1.exception.handler;
 
+import java.io.FileNotFoundException;
 import java.security.InvalidParameterException;
 
 import org.springframework.http.HttpStatus;
@@ -49,7 +50,7 @@ public class ApplicationExceptionHandler {
         return new ResponseEntity<>(errorResponse, HttpStatus.GONE);
     }
 
-    @ExceptionHandler({ EntityNotFoundException.class, ResourceNotFoundException.class
+    @ExceptionHandler({ EntityNotFoundException.class, ResourceNotFoundException.class, FileNotFoundException.class
     })
     public ResponseEntity<ErrorModel> handleDataNotFoundOperationException(RuntimeException ex) {
         ErrorModel errorResponse = ErrorModel.of(HttpStatus.NOT_FOUND, ex.getMessage(), null);
