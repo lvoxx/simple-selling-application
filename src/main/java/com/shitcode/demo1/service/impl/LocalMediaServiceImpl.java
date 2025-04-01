@@ -78,12 +78,28 @@ public class LocalMediaServiceImpl implements MediaService {
         this.mediaConfigData = mediaConfigData;
         if (!StringUtils.isEmpty(ffmpegPath)) {
             this.ffmpeg = new FFmpeg(ffmpegPath);
+            LogPrinter.printServiceLog(Type.ERROR,
+                    "LocalMediaServiceImpl",
+                    "LocalMediaServiceImpl", LocalDateTime.now().toString(),
+                    "Found FFmpeg path.");
         } else {
             this.ffmpeg = new FFmpeg();
+            LogPrinter.printServiceLog(Type.ERROR,
+                    "LocalMediaServiceImpl",
+                    "LocalMediaServiceImpl", LocalDateTime.now().toString(),
+                    "Can not found FFmpeg path.");
         }
         if (!StringUtils.isEmpty(ffprobePath)) {
             this.ffprobe = new FFprobe(ffprobePath);
+            LogPrinter.printServiceLog(Type.ERROR,
+                    "LocalMediaServiceImpl",
+                    "LocalMediaServiceImpl", LocalDateTime.now().toString(),
+                    "Found FFprobe path.");
         } else {
+            LogPrinter.printServiceLog(Type.ERROR,
+                    "LocalMediaServiceImpl",
+                    "LocalMediaServiceImpl", LocalDateTime.now().toString(),
+                    "Can not found FFprobe path.");
             this.ffprobe = new FFprobe();
         }
     }
@@ -123,13 +139,11 @@ public class LocalMediaServiceImpl implements MediaService {
         return compressVideo(location);
     }
 
-    
-
     @Override
     public List<String> saveMediaFiles(List<MultipartFile> files) throws Exception {
         List<String> urls = new ArrayList<>();
         for (MultipartFile file : files) {
-            String url=saveMediaFile(file);
+            String url = saveMediaFile(file);
             urls.add(url);
         }
         return urls;
