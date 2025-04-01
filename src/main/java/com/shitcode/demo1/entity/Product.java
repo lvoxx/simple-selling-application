@@ -1,8 +1,12 @@
 package com.shitcode.demo1.entity;
 
 import java.math.BigDecimal;
+import java.util.List;
+
+import com.shitcode.demo1.helper.MediaUrlsConverter;
 
 import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.ForeignKey;
@@ -58,6 +62,13 @@ public class Product extends AbstractAuditableEntity {
     @ManyToOne(optional = true, fetch = FetchType.LAZY)
     @JoinColumn(name = "discount_id", foreignKey = @ForeignKey(name = "fk_product_discount"))
     private Discount discount;
+
+    @Convert(converter = MediaUrlsConverter.class)
+    @Column(name = "images", length = 2000) // Ensure enough space for multiple paths
+    private List<String> images;
+
+    @Column(name = "video")
+    private String video;
 
     @PrePersist
     public void prePersist() {

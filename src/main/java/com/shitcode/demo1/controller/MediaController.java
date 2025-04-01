@@ -41,9 +41,9 @@ public class MediaController {
         ID_PLAN = rateLimiterConfigData.getRateLimiterPlan("media", "id");
     }
 
-    @GetMapping
+    @GetMapping("/{mediaPath}")
     public ResponseEntity<Resource> findMediaByPath(@PathVariable String mediaPath) throws Exception {
-        return ResponseEntity.ok().body(mediaService.findFile(mediaPath));
+        return ResponseEntity.ok().body(mediaService.findFile("/".concat(mediaPath)));
     }
 
 }

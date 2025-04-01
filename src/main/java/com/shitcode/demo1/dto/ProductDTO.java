@@ -1,8 +1,12 @@
 package com.shitcode.demo1.dto;
 
 import java.math.BigDecimal;
+import java.util.List;
+
+import org.springframework.web.multipart.MultipartFile;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.Min;
@@ -54,6 +58,15 @@ public abstract class ProductDTO {
         @Min(value = 1, message = "{validation.product.category-id.min}")
         @Schema(description = "Identifier of the category the product belongs to", example = "3", minimum = "1", required = true)
         private Long categoryId;
+
+        @Schema(description = "List of product images (JPEG, PNG only)", type = "array", format = "binary")
+        @Size(min = 1, message = "{validation.product.images.size}")
+        private List<@Pattern(regexp = ".*\\.(jpg|jpeg|png)$", message = "{validation.product.pictures.format}") MultipartFile> images;
+
+        @Schema(description = "Product video (MP4 only)", format = "binary")
+        @Nullable
+        @Pattern(regexp = ".*\\.(mp4)$", message = "{validation.product.video.format}")
+        private MultipartFile video;
     }
 
     @Data
@@ -84,6 +97,43 @@ public abstract class ProductDTO {
         @Schema(description = "Category the product belongs to", implementation = CategoryDTO.Response.class, example = "{\"id\": 3, \"name\": \"Electronics\"}")
         private CategoryDTO.Response category;
 
+        @Schema(description = "List of image URLs associated with the product", example = "[\"https://example.com/images/product1.jpg\", \"https://example.com/images/product2.jpg\"]")
+        private List<String> imageUrls;
+
+        @Schema(description = "Video URL showcasing the product", example = "https://example.com/videos/product.mp4")
+        private String videoUrl;
+    }
+
+    @Data
+    @EqualsAndHashCode(callSuper = false)
+    @Builder
+    @Schema(name = "InSell Product Response", description = "Response containing product details for items available for sale")
+    public static class InSellResponse extends AbstractAuditableEntity {
+
+        @Schema(description = "Unique identifier of the product", example = "101")
+        private Long id;
+
+        @Schema(description = "Name of the product", example = "Wireless Headphones")
+        private String name;
+
+        @Schema(description = "Quantity of the product available for sale", example = "50")
+        private Integer availableQuatity;
+
+        @Schema(description = "Price of the product", example = "199.99", format = "double")
+        private Double price;
+
+        @Builder.Default
+        @Schema(description = "Currency symbol for the product price", example = "$")
+        private String currency = "$";
+
+        @Schema(description = "Category the product belongs to", implementation = CategoryDTO.Response.class, example = "{\"id\": 3, \"name\": \"Electronics\"}")
+        private CategoryDTO.Response category;
+
+        @Schema(description = "List of image URLs associated with the product", example = "[\"https://example.com/images/product1.jpg\", \"https://example.com/images/product2.jpg\"]")
+        private List<String> imageUrls;
+
+        @Schema(description = "Video URL showcasing the product", example = "https://example.com/videos/product.mp4")
+        private String videoUrl;
     }
 
     @Data
@@ -113,30 +163,4 @@ public abstract class ProductDTO {
 
     }
 
-    @Data
-    @EqualsAndHashCode(callSuper = false)
-    @Builder
-    @Schema(name = "InSell Product Response", description = "Response containing product details for items available for sale")
-    public static class InSellResponse extends AbstractAuditableEntity {
-
-        @Schema(description = "Unique identifier of the product", example = "101")
-        private Long id;
-
-        @Schema(description = "Name of the product", example = "Wireless Headphones")
-        private String name;
-
-        @Schema(description = "Quantity of the product available for sale", example = "50")
-        private Integer availableQuatity;
-
-        @Schema(description = "Price of the product", example = "199.99", format = "double")
-        private Double price;
-
-        @Builder.Default
-        @Schema(description = "Currency symbol for the product price", example = "$")
-        private String currency = "$";
-
-        @Schema(description = "Category the product belongs to", implementation = CategoryDTO.Response.class, example = "{\"id\": 3, \"name\": \"Electronics\"}")
-        private CategoryDTO.Response category;
-
-    }
 }

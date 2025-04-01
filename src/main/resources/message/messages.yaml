@@ -9,6 +9,16 @@ validation:
     name:
       blank: Category name cannot be blank.
       size: Category name must not exceed 60 characters.
+  image:
+    name:
+      blank: Image name cannot be blank.
+    path:
+      blank: Image path cannot be blank.
+  video:
+    name:
+      blank: Video name cannot be blank.
+    path:
+      blank: Video path cannot be blank.
   generic:
     request:
       blank: Request cannot be blank.
@@ -33,6 +43,10 @@ validation:
     category-id:
       blank: Category ID cannot be blank.
       min: Category ID must be greater than 0.
+    images:
+      size: Require at least one product image.
+    video:
+      format: Require mp4 video.
   spring-user:
     email:
       email: Invalid email format.

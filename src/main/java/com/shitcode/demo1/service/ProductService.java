@@ -34,7 +34,7 @@ public interface ProductService {
 
         ProductDTO.InSellResponse findInSellWithName(String name);
 
-        ProductDTO.AdminResponse create(ProductDTO.Request request);
+        ProductDTO.AdminResponse create(ProductDTO.Request request) throws Exception;
 
         ProductDTO.AdminResponse update(ProductDTO.Request request, Long id);
 

@@ -1,6 +1,7 @@
 package com.shitcode.demo1.service.impl;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 
 import org.slf4j.Logger;
@@ -31,6 +32,7 @@ import com.shitcode.demo1.mapper.ProductMapper;
 import com.shitcode.demo1.repository.ProductRepository;
 import com.shitcode.demo1.service.CategoryService;
 import com.shitcode.demo1.service.InterationEventService;
+import com.shitcode.demo1.service.MediaService;
 import com.shitcode.demo1.service.ProductService;
 import com.shitcode.demo1.utils.KeyLock;
 import com.shitcode.demo1.utils.cache.ProductCacheType;
@@ -44,13 +46,15 @@ public class ProductServiceImpl implements ProductService {
 
     private final ProductRepository productRepository;
     private final CategoryService categoryService;
+    private final MediaService mediaService;
     private final InterationEventService interationEventService;
     private final DatabaseLock databaseLock;
 
     public ProductServiceImpl(ProductRepository productRepository, CategoryService categoryService,
-            DatabaseLock databaseLock, InterationEventService interationEventService) {
+            MediaService mediaService, InterationEventService interationEventService, DatabaseLock databaseLock) {
         this.productRepository = productRepository;
         this.categoryService = categoryService;
+        this.mediaService = mediaService;
         this.interationEventService = interationEventService;
         this.databaseLock = databaseLock;
     }
@@ -90,25 +94,28 @@ public class ProductServiceImpl implements ProductService {
             @CacheEvict(value = ProductCacheType.Fields.ADMIN_PRODUCTS, allEntries = true),
             @CacheEvict(value = ProductCacheType.Fields.INSELL_PRODUCTS, allEntries = true)
     })
-    public AdminResponse create(Request request) {
+    public AdminResponse create(Request request) throws Exception {
         log.debug("Creating product with name: {}", request.getName());
 
         Optional.ofNullable(findEntityWithName(request.getName())).ifPresent(p -> {
             log.warn("Product with name '{}' already exists.", request.getName());
             throw new EntityExistsException("{exception.entity-exists.product}");
         });
-
-        log.debug("Fetching category with ID: {}", request.getCategoryId());
+        // Find Category
         Category category = categoryService.findCategoryEntityById(request.getCategoryId());
 
-        log.debug("Mapping request to Product entity.");
+        // Save media
+        List<String> imageUrls = mediaService.saveMediaFiles(request.getImages());
+        String videoUrl = mediaService.saveMediaFile(request.getVideo());
+
+        // Set ref value
         Product product = productMapper.toProduct(request);
         product.setCategory(category);
+        product.setImages(imageUrls);
+        product.setVideo(videoUrl);
 
-        log.debug("Saving product: {}", product);
         Product savedProduct = productRepository.save(product);
 
-        log.debug("Returning mapped AdminResponse.");
         return productMapper.toProductAdminResponse(savedProduct);
     }
 
