@@ -4,7 +4,6 @@ import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.util.function.ThrowingSupplier;
 
 import com.github.benmanes.caffeine.cache.Cache;
@@ -47,7 +46,6 @@ public class DatabaseLock {
     }
 
     // Generic method for Supplier<T>
-    @Async
     public <T> T doAndLock(KeyLock key, ThrowingSupplier<T> task) {
         int retriesLeft = TRY_TIMES;
         String keyName = key.getKey();

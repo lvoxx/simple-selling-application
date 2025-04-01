@@ -11,6 +11,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -20,7 +22,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -104,7 +105,6 @@ public class LocalMediaServiceImpl implements MediaService {
      * @throws Exception If the file type is unknown or processing fails
      */
     @Override
-    @Async
     public String saveMediaFile(MultipartFile file) throws Exception {
         String mimeType = MediaDetector.detect(file.getInputStream());
 
@@ -121,6 +121,18 @@ public class LocalMediaServiceImpl implements MediaService {
         String location = saveFileToServer(file, TypeOfMedia.Videos);
         // C:/Users/${current_user_name}/user/media/videos/compressed/31/3/2025/{uuid}.mp4
         return compressVideo(location);
+    }
+
+    
+
+    @Override
+    public List<String> saveMediaFiles(List<MultipartFile> files) throws Exception {
+        List<String> urls = new ArrayList<>();
+        for (MultipartFile file : files) {
+            String url=saveMediaFile(file);
+            urls.add(url);
+        }
+        return urls;
     }
 
     /**
