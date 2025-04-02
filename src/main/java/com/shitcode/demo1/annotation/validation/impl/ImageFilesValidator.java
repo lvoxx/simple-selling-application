@@ -14,27 +14,27 @@ public class ImageFilesValidator implements ConstraintValidator<ValidImages, Lis
 
     private static final Set<String> ALLOWED_FORMATS = Set.of("image/jpeg", "image/png", "application/pdf");
 
+    private boolean nullable;
+
     @Override
-    public boolean isValid(List<MultipartFile> multipartFiles, ConstraintValidatorContext context) {
-
-        boolean result = true;
-
-        for (MultipartFile file : multipartFiles) {
-            String contentType = file.getContentType();
-            if (!isSupportedContentType(contentType)) {
-                context.disableDefaultConstraintViolation();
-                context.buildConstraintViolationWithTemplate(
-                        "Only PNG or JPG images are allowed.")
-                        .addConstraintViolation();
-
-                result = false;
-            }
-        }
-
-        return result;
+    public void initialize(ValidImages constraintAnnotation) {
+        this.nullable = constraintAnnotation.nullable();
     }
 
-    private boolean isSupportedContentType(String contentType) {
-        return ALLOWED_FORMATS.contains(contentType);
+    @Override
+    public boolean isValid(List<MultipartFile> files, ConstraintValidatorContext context) {
+        if (files == null || files.isEmpty()) {
+            return nullable;
+        }
+
+        for (MultipartFile file : files) {
+            if (file == null || file.isEmpty() || file.getContentType() == null) {
+                return false;
+            }
+            if (!ALLOWED_FORMATS.contains(file.getContentType())) {
+                return false;
+            }
+        }
+        return true;
     }
 }

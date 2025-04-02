@@ -9,15 +9,18 @@ import jakarta.validation.ConstraintValidatorContext;
 
 public class VideoFileValidator implements ConstraintValidator<ValidVideo, MultipartFile> {
 
+    private boolean nullable;
+
     @Override
     public void initialize(ValidVideo constraintAnnotation) {
-
+        this.nullable = constraintAnnotation.nullable();
     }
 
     @Override
     public boolean isValid(MultipartFile multipartFile, ConstraintValidatorContext context) {
-
-        boolean result = true;
+        if (multipartFile == null || multipartFile.isEmpty()) {
+            return nullable;
+        }
 
         String contentType = multipartFile.getContentType();
         if (!isSupportedContentType(contentType)) {
@@ -25,11 +28,10 @@ public class VideoFileValidator implements ConstraintValidator<ValidVideo, Multi
             context.buildConstraintViolationWithTemplate(
                     "Only x-msvideo, quicktime, mpeg or mp4 videos are allowed.")
                     .addConstraintViolation();
-
-            result = false;
+            return false;
         }
 
-        return result;
+        return true;
     }
 
     private boolean isSupportedContentType(String contentType) {

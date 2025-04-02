@@ -14,9 +14,11 @@ import jakarta.validation.Payload;
 @Retention(RetentionPolicy.RUNTIME)
 @Constraint(validatedBy = { VideoFileValidator.class })
 public @interface ValidVideo {
-    String message() default "Invalid image file format";
+    String message() default "Invalid video file format";
 
     Class<?>[] groups() default {};
 
     Class<? extends Payload>[] payload() default {};
+    
+    boolean nullable() default false;
 }
