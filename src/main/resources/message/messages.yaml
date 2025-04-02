@@ -44,9 +44,9 @@ validation:
       blank: Category ID cannot be blank.
       min: Category ID must be greater than 0.
     images:
-      size: Require at least one product image.
+      size: Require at least one image product.
     video:
-      format: Require mp4 video.
+      format: Video must be in MP4 format.
   spring-user:
     email:
       email: Invalid email format.

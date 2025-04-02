@@ -5,13 +5,17 @@ import java.util.List;
 
 import org.springframework.web.multipart.MultipartFile;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.shitcode.demo1.annotation.validation.ValidImages;
+import com.shitcode.demo1.annotation.validation.ValidVideo;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.annotation.Nullable;
-import jakarta.validation.constraints.DecimalMin;
-import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -48,9 +52,8 @@ public abstract class ProductDTO {
         @Schema(description = "Quantity of the product currently being sold", example = "50", minimum = "0", required = true)
         private Integer inSellQuantity;
 
-        @NotBlank(message = "{validation.product.price.blank}")
-        @DecimalMin(value = "0.0", inclusive = false, message = "{validation.product.price.min}")
-        @Digits(integer = 99, fraction = 2, message = "{validation.product.price.digits}")
+        @NotNull(message = "{validation.product.price.blank}")
+        @Positive(message = "{validation.product.price.min}")
         @Schema(description = "Price of the product", example = "199.99", minimum = "0.01", required = true, format = "double")
         private BigDecimal price;
 
@@ -60,12 +63,15 @@ public abstract class ProductDTO {
         private Long categoryId;
 
         @Schema(description = "List of product images (JPEG, PNG only)", type = "array", format = "binary")
-        @Size(min = 1, message = "{validation.product.images.size}")
+        @NotNull
+        @ValidImages
+        @JsonIgnore
         private List<@Pattern(regexp = ".*\\.(jpg|jpeg|png)$", message = "{validation.product.pictures.format}") MultipartFile> images;
 
         @Schema(description = "Product video (MP4 only)", format = "binary")
         @Nullable
-        @Pattern(regexp = ".*\\.(mp4)$", message = "{validation.product.video.format}")
+        @ValidVideo
+        @JsonIgnore
         private MultipartFile video;
     }
 

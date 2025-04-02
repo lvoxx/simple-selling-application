@@ -31,6 +31,7 @@ import com.shitcode.demo1.exception.model.UnknownFileExtension;
 import com.shitcode.demo1.properties.MediaConfigData;
 import com.shitcode.demo1.service.MediaService;
 import com.shitcode.demo1.utils.LogPrinter;
+import com.shitcode.demo1.utils.LogPrinter.Flag;
 import com.shitcode.demo1.utils.LogPrinter.Type;
 import com.shitcode.demo1.utils.LoggingModel;
 
@@ -78,28 +79,16 @@ public class LocalMediaServiceImpl implements MediaService {
         this.mediaConfigData = mediaConfigData;
         if (!StringUtils.isEmpty(ffmpegPath)) {
             this.ffmpeg = new FFmpeg(ffmpegPath);
-            LogPrinter.printServiceLog(Type.ERROR,
-                    "LocalMediaServiceImpl",
-                    "LocalMediaServiceImpl", LocalDateTime.now().toString(),
-                    "Found FFmpeg path.");
+            LogPrinter.printLog(Type.INFO, Flag.START_UP, "Found FFmpeg path. Init FFmpeg.");
         } else {
             this.ffmpeg = new FFmpeg();
-            LogPrinter.printServiceLog(Type.ERROR,
-                    "LocalMediaServiceImpl",
-                    "LocalMediaServiceImpl", LocalDateTime.now().toString(),
-                    "Can not found FFmpeg path.");
+            LogPrinter.printLog(Type.ERROR, Flag.START_UP, "Can not found FFmpeg path.");
         }
         if (!StringUtils.isEmpty(ffprobePath)) {
             this.ffprobe = new FFprobe(ffprobePath);
-            LogPrinter.printServiceLog(Type.ERROR,
-                    "LocalMediaServiceImpl",
-                    "LocalMediaServiceImpl", LocalDateTime.now().toString(),
-                    "Found FFprobe path.");
+            LogPrinter.printLog(Type.INFO, Flag.START_UP, "Found FFprobe path. Init FFprobe.");
         } else {
-            LogPrinter.printServiceLog(Type.ERROR,
-                    "LocalMediaServiceImpl",
-                    "LocalMediaServiceImpl", LocalDateTime.now().toString(),
-                    "Can not found FFprobe path.");
+            LogPrinter.printLog(Type.ERROR, Flag.START_UP, "Can not found FFprobe path.");
             this.ffprobe = new FFprobe();
         }
     }
@@ -131,12 +120,12 @@ public class LocalMediaServiceImpl implements MediaService {
             // C:/Users/${current_user_name}/user/media/images/original/31/3/2025/{UUID}.png
             String location = saveFileToServer(file, TypeOfMedia.Images);
             // C:/Users/${current_user_name}/user/media/images/compressed/31/3/2025/{uuid}.webp
-            return compressImage(location);
+            return extractCompressPath(compressImage(location));
         }
         // C:/Users/${current_user_name}/user/media/videos/original/31/3/2025/{UUID}.mp4
         String location = saveFileToServer(file, TypeOfMedia.Videos);
         // C:/Users/${current_user_name}/user/media/videos/compressed/31/3/2025/{uuid}.mp4
-        return compressVideo(location);
+        return extractCompressPath(compressVideo(location));
     }
 
     @Override
@@ -332,10 +321,10 @@ public class LocalMediaServiceImpl implements MediaService {
         return System.getProperty("user.home");
     }
 
-    // /images/compressed/31/3/2025/{uuid}.webp
-    // /video/compressed/31/3/2025/{uuid}.mp4
+    // /media/images/compressed/31/3/2025/{uuid}.webp
+    // /media/video/compressed/31/3/2025/{uuid}.mp4
     public String extractCompressPath(String fullPath) {
-        return fullPath.replace(getHomeDir().concat(mediaConfigData.getPath().getRoot()), "");
+        return fullPath.replace(getHomeDir(), "");
     }
 
 }
