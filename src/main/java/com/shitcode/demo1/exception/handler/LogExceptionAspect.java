@@ -14,8 +14,14 @@ public class LogExceptionAspect {
 
     // Define a pointcut for any exception thrown by the service layer
     @AfterThrowing(pointcut = "execution(* com.shitcode.demo1.service..*(..))", throwing = "ex")
-    public void handleException(RuntimeException ex) {
+    public void handleServiceException(RuntimeException ex) {
         // Log the exception with full details
         logger.error("Catched an error throwed from services layer: {}", ex.getMessage(), ex);
+    }
+
+    @AfterThrowing(pointcut = "execution(* com.shitcode.demo1.controller..*(..))", throwing = "ex")
+    public void handleControllerException(RuntimeException ex) {
+        // Log the exception with full details
+        logger.error("Caught an error thrown from controllers layer: {}", ex.getMessage(), ex);
     }
 }
