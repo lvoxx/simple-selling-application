@@ -16,5 +16,5 @@ server:
     min-response-size: 2KB
     enabled: true
     mime-types: image/jpeg, image/gif, image/png, video/mp4, video/mpeg, video/mpeg4-generic, application/octet-stream
-    ffmpeg: /usr/bin/ffmpeg
-    ffprobe: /usr/bin/ffprobe
+    ffmpeg: /usr/local/bin/ffmpeg
+    ffprobe: /usr/local/bin/ffprobe

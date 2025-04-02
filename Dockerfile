@@ -1,12 +1,5 @@
 ARG PORT=9090
 
-# ------------ UBUNTU_BUILD ------------
-FROM ubuntu:24.04 AS ubuntu_layer
-
-# Install FFmpeg
-RUN apt-get update && apt-get install -y --no-install-recommends ffmpeg && \
-    rm -rf /var/lib/apt/lists/*
-
 # ------------ MAVEN_BUILD ------------
 FROM maven:3.9.9-eclipse-temurin-21 AS build_layer
 LABEL maintainer="Lvoxx" email="lvoxxartist@gmail.com"
@@ -36,11 +29,10 @@ COPY --from=layers_build application/dependencies/ ./
 COPY --from=layers_build application/spring-boot-loader/ ./
 COPY --from=layers_build application/snapshot-dependencies/ ./
 COPY --from=layers_build application/application/ ./
-# Copy the FFmpeg binary and necessary libraries from the build stage
-COPY --from=ubuntu_layer /usr/bin/ffmpeg /usr/bin/ffmpeg
-COPY --from=ubuntu_layer /usr/bin/ffprobe /usr/bin/ffprobe
-COPY --from=ubuntu_layer /lib /lib
-COPY --from=ubuntu_layer /lib64 /lib64
-COPY --from=ubuntu_layer /usr/lib /usr/lib
+# Copy statis FFmpeg
+# Learn more: https://hub.docker.com/r/mwader/static-ffmpeg/
+COPY --from=mwader/static-ffmpeg:7.1 /ffmpeg /usr/local/bin/
+COPY --from=mwader/static-ffmpeg:7.1 /ffprobe /usr/local/bin/
+
 
 ENTRYPOINT ["java", "org.springframework.boot.loader.launch.JarLauncher"]
