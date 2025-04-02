@@ -2,12 +2,15 @@ package com.shitcode.demo1.controller;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.shitcode.demo1.annotation.logging.LogCollector;
+import com.shitcode.demo1.dto.ProductDTO;
 import com.shitcode.demo1.dto.ResponseDTO;
 import com.shitcode.demo1.exception.model.ErrorModel;
 import com.shitcode.demo1.service.ProductService;
@@ -21,6 +24,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.Data;
 
 @Data
@@ -109,5 +113,18 @@ public class ProductController {
                 return responseService.mapping(
                                 () -> ResponseEntity.ok().body(productService.findInSellProductWithId(id)),
                                 RateLimiterPlan.HEAVY_LOADS);
+        }
+
+        @PostMapping("/admin")
+        @Operation(summary = "Create a new product", description = "Creates a new product with the provided details.")
+        @ApiResponses(value = {
+                        @ApiResponse(responseCode = "201", description = "Product created successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseDTO.class))),
+                        @ApiResponse(responseCode = "400", description = "Invalid request body", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorModel.class))),
+                        @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorModel.class)))
+        })
+        public ResponseEntity<?> createProduct(@ModelAttribute @Valid ProductDTO.Request request) throws Exception {
+                return responseService.mapping(
+                                () -> ResponseEntity.ok().body(productService.create(request)),
+                                RateLimiterPlan.BASIC);
         }
 }
