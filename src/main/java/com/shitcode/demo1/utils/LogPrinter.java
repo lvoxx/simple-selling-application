@@ -31,9 +31,9 @@ public class LogPrinter {
          * Log message templates for different modules.
          */
         private static abstract class Log {
-                private static final String MISSED_CONTROLLER_LOG = "Handling request via %s.%s() at %s. %s.";
-                private static final String CONTROLLER_LOG = "Handling request %s via %s.%s() at %s. %s.";
-                private static final String SERVICE_LOG = "Executing %s.%s() at %s. %s.";
+                private static final String MISSED_CONTROLLER_LOG = "Handling request via %s.%s() at %s. %s";
+                private static final String CONTROLLER_LOG = "Handling request %s via %s.%s() at %s. %s";
+                private static final String SERVICE_LOG = "Executing %s.%s() at %s. %s";
                 private static final String REPOSITORY_LOG = "Accessing %s.%s() at %s. %s";
                 private static final String ASPECT_LOG = "Triggering %s.%s() at %s. %s";
                 private static final String UTILS_LOG = "Utilizing %s.%s() at %s. %s";
