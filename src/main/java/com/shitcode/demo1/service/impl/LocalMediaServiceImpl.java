@@ -29,6 +29,7 @@ import com.shitcode.demo1.annotation.logging.LogCollector;
 import com.shitcode.demo1.component.MediaDetector;
 import com.shitcode.demo1.exception.model.EmptyFileException;
 import com.shitcode.demo1.exception.model.UnknownFileExtension;
+import com.shitcode.demo1.properties.LvoxxServerConfigData;
 import com.shitcode.demo1.properties.MediaConfigData;
 import com.shitcode.demo1.service.MediaService;
 import com.shitcode.demo1.utils.LogPrinter;
@@ -56,6 +57,7 @@ import net.coobird.thumbnailator.Thumbnails;
 @ConditionalOnProperty(havingValue = "true", matchIfMissing = true, name = "upload-locally", prefix = "media.path")
 public class LocalMediaServiceImpl implements MediaService {
     private final MediaConfigData mediaConfigData;
+    private final LvoxxServerConfigData lvoxxServerConfigData;
     private final FFmpeg ffmpeg;
     private final FFprobe ffprobe;
 
@@ -76,8 +78,10 @@ public class LocalMediaServiceImpl implements MediaService {
      */
     public LocalMediaServiceImpl(MediaConfigData mediaConfigData,
             @Value("${server.compression.ffmpeg}") String ffmpegPath,
-            @Value("${server.compression.ffprobe}") String ffprobePath) throws IOException {
+            @Value("${server.compression.ffprobe}") String ffprobePath, LvoxxServerConfigData lvoxxServerConfigData)
+            throws IOException {
         this.mediaConfigData = mediaConfigData;
+        this.lvoxxServerConfigData = lvoxxServerConfigData;
         if (!StringUtils.isEmpty(ffmpegPath)) {
             this.ffmpeg = new FFmpeg(ffmpegPath);
             LogPrinter.printLog(Type.INFO, Flag.START_UP, "Found FFmpeg path. Init FFmpeg.");
@@ -117,7 +121,9 @@ public class LocalMediaServiceImpl implements MediaService {
             }
             String location = saveFileToServer(image, TypeOfMedia.Images);
             // C:/Users/${current_user_name}/user/media/images/compressed/31/3/2025/{uuid}.webp
-            imageUrls.add(extractCompressPath(compressImage(location)));
+            imageUrls.add(
+                    generateMediaUrl(
+                            extractCompressPath(compressImage(location))));
         }
 
         return imageUrls;
@@ -136,7 +142,7 @@ public class LocalMediaServiceImpl implements MediaService {
         // C:/Users/${current_user_name}/user/media/videos/original/31/3/2025/{UUID}.mp4
         String location = saveFileToServer(video, TypeOfMedia.Videos);
         // C:/Users/${current_user_name}/user/media/videos/compressed/31/3/2025/{uuid}.mp4
-        return extractCompressPath(compressVideo(location));
+        return generateMediaUrl(extractCompressPath(compressVideo(location)));
     }
 
     /**
@@ -326,6 +332,15 @@ public class LocalMediaServiceImpl implements MediaService {
     // /media/video/compressed/31/3/2025/{uuid}.mp4
     public String extractCompressPath(String fullPath) {
         return fullPath.replace(getHomeDir(), "");
+    }
+
+    public String generateMediaUrl(String mediaPath) {
+        boolean isDeploy = lvoxxServerConfigData.isProductDeploy();
+        String mediaMap = "/media";
+        String baseMediaUrl = isDeploy ? lvoxxServerConfigData.getProdServer().getBaseUrl()
+                : lvoxxServerConfigData.getDevServer().getBaseUrl();
+
+        return baseMediaUrl.concat(mediaMap).concat(mediaPath);
     }
 
 }

@@ -102,7 +102,7 @@ public class ProductServiceImpl implements ProductService {
     })
     public AdminResponse create(ProductDTO.Request jsonRequest, List<MultipartFile> images, MultipartFile video)
             throws Exception {
-        Optional.ofNullable(productRepository.findByName(jsonRequest.getName())).ifPresent(p -> {
+        productRepository.findByName(jsonRequest.getName()).ifPresent(p -> {
             log.warn("Product with name '{}' already exists.", jsonRequest.getName());
 
             throw new EntityExistsException(messageSource.getMessage("exception.entity-exists.product",

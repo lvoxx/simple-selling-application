@@ -78,7 +78,7 @@ validation:
 
 success:
   user:
-    active: User with id [%d] is actived.
+    active: User with id [{0}] is actived.
 
 exception:
   registration:
@@ -86,23 +86,23 @@ exception:
     conflict: Signup email has been sent. Check your's mailbox.
     expired: Token has been expired. Please request a new one.
   account:
-    disabled: Account name [%s] is disabled.
+    disabled: Account name [{0}] is disabled.
   resource-not-found:
-    default: Resource {} Not Found.
+    default: Resource {0} Not Found.
     rate-limit: Limit Resources not found.
   rate-limit:
     exceed: Rate limit exceeded. Please try again later.
   entity-not-found:
-    category-name: Can not found category with name [%s]
-    category-id: Can not found category with id [%d]
-    user-email: Can not found user with email [%s]
-    user-id: Can not found user with id [%d]
-    product-name: Can not found product with name [%s]
-    product-id: Can not found product with id [%d]
-    discount-title: Can not found discount with title [%s]
-    discount-id: Can not found discount with id [%d]
-    registration-name: Can not found registration token with name [%s]
-    registration-token: Can not found registration token with token [%s]
+    category-name: Can not found category with name [{0}]
+    category-id: Can not found category with id [{0}]
+    user-email: Can not found user with email [{0}]
+    user-id: Can not found user with id [{0}]
+    product-name: Can not found product with name [{0}]
+    product-id: Can not found product with id [{0}]
+    discount-title: Can not found discount with title [{0}]
+    discount-id: Can not found discount with id [{0}]
+    registration-name: Can not found registration token with name [{0}]
+    registration-token: Can not found registration token with token [{0}]
   entity-not-changed:
     user:
       locked: The user has been locked.
@@ -110,10 +110,10 @@ exception:
       enabled: The user has been enabled.
       non-enabled: The user has not been enabled.
   entity-exists:
-    category: Category with name [%s] already exist.
-    discount: Discount with title [%s] already exist.
-    product: Product with name [%s] already exists.
-    user: User with email [%s] already exists.
+    category: Category with name [{0}] already exist.
+    discount: Discount with title [{0}] already exist.
+    product: Product with name [{0}] already exists.
+    user: User with email [{0}] already exists.
   worker-busy:
     thread: Server is not responding correctly. Try again later.
     db-lock: Service is busy at the moment. Try again later.
