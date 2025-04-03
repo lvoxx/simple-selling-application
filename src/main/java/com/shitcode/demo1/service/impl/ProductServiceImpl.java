@@ -105,8 +105,8 @@ public class ProductServiceImpl implements ProductService {
         Category category = categoryService.findCategoryEntityById(jsonRequest.getCategoryId());
 
         // Save media
-        List<String> imageUrls = mediaService.saveMediaFiles(images);
-        String videoUrl = mediaService.saveMediaFile(video);
+        List<String> imageUrls = mediaService.saveImagesFile(images);
+        String videoUrl = mediaService.saveVideoFile(video);
 
         // Set ref value
         Product product = productMapper.toProduct(jsonRequest);

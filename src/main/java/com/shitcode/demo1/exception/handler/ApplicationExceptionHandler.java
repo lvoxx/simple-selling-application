@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import com.shitcode.demo1.exception.model.ConflictTokenException;
 import com.shitcode.demo1.exception.model.DiscountOverTimeException;
+import com.shitcode.demo1.exception.model.EmptyFileException;
 import com.shitcode.demo1.exception.model.EntityExistsException;
 import com.shitcode.demo1.exception.model.EntityNotChangedException;
 import com.shitcode.demo1.exception.model.EntityNotFoundException;
@@ -61,5 +62,11 @@ public class ApplicationExceptionHandler {
     public ResponseEntity<ErrorModel> handleDataExistsOperationException(RuntimeException ex) {
         ErrorModel errorResponse = ErrorModel.of(HttpStatus.CONFLICT, ex.getMessage(), null);
         return new ResponseEntity<>(errorResponse, HttpStatus.CONFLICT);
+    }
+
+    @ExceptionHandler({ EmptyFileException.class })
+    public ResponseEntity<ErrorModel> handleBadRequestsException(RuntimeException ex) {
+        ErrorModel errorResponse = ErrorModel.of(HttpStatus.BAD_REQUEST, ex.getMessage(), null);
+        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
 }

@@ -13,7 +13,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -28,6 +27,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.shitcode.demo1.annotation.logging.LogCollector;
 import com.shitcode.demo1.component.MediaDetector;
+import com.shitcode.demo1.exception.model.EmptyFileException;
 import com.shitcode.demo1.exception.model.UnknownFileExtension;
 import com.shitcode.demo1.properties.MediaConfigData;
 import com.shitcode.demo1.service.MediaService;
@@ -103,45 +103,40 @@ public class LocalMediaServiceImpl implements MediaService {
         videosPath = mediaConfigData.getPath().getRoot().concat(mediaConfigData.getPath().getVideos());
     }
 
-    /**
-     * Saves a media file and compresses it if needed.
-     *
-     * @param file The uploaded file
-     * @return The path to the compressed file
-     * @throws Exception If the file type is unknown or processing fails
-     */
     @Override
-    public String saveMediaFile(MultipartFile file) throws Exception {
-        Optional<MultipartFile> fileChecker = Optional.ofNullable(file); 
-        if (fileChecker.isEmpty()) {
-            //throw new EmptyFileException();
+    public List<String> saveImagesFile(List<MultipartFile> images) throws Exception {
+        if (images.isEmpty()) {
+            throw new EmptyFileException("{validation.product.images.not-null}");
         }
-        
-        String mimeType = MediaDetector.detect(file.getInputStream());
+        List<String> imageUrls = new ArrayList<>();
+        for (MultipartFile image : images) {
+            String mimeType = MediaDetector.detect(image.getInputStream());
 
-        if (!(mimeType.startsWith("image/")) || !(mimeType.startsWith("video/"))) {
-            throw new UnknownFileExtension("{exception.media.unknown}");
-        }
-        if (mimeType.startsWith("image/")) {
-            // C:/Users/${current_user_name}/user/media/images/original/31/3/2025/{UUID}.png
-            String location = saveFileToServer(file, TypeOfMedia.Images);
+            if (!(mimeType.startsWith("image/"))) {
+                throw new UnknownFileExtension("{validation.product.images.valid}");
+            }
+            String location = saveFileToServer(image, TypeOfMedia.Images);
             // C:/Users/${current_user_name}/user/media/images/compressed/31/3/2025/{uuid}.webp
-            return extractCompressPath(compressImage(location));
+            imageUrls.add(extractCompressPath(compressImage(location)));
         }
-        // C:/Users/${current_user_name}/user/media/videos/original/31/3/2025/{UUID}.mp4
-        String location = saveFileToServer(file, TypeOfMedia.Videos);
-        // C:/Users/${current_user_name}/user/media/videos/compressed/31/3/2025/{uuid}.mp4
-        return extractCompressPath(compressVideo(location));
+
+        return imageUrls;
     }
 
     @Override
-    public List<String> saveMediaFiles(List<MultipartFile> files) throws Exception {
-        List<String> urls = new ArrayList<>();
-        for (MultipartFile file : files) {
-            String url = saveMediaFile(file);
-            urls.add(url);
+    public String saveVideoFile(MultipartFile video) throws Exception {
+        if (video == null) {
+            return null;
         }
-        return urls;
+        String mimeType = MediaDetector.detect(video.getInputStream());
+
+        if (!(mimeType.startsWith("video/"))) {
+            throw new UnknownFileExtension("{validation.product.video.valid}");
+        }
+        // C:/Users/${current_user_name}/user/media/videos/original/31/3/2025/{UUID}.mp4
+        String location = saveFileToServer(video, TypeOfMedia.Videos);
+        // C:/Users/${current_user_name}/user/media/videos/compressed/31/3/2025/{uuid}.mp4
+        return extractCompressPath(compressVideo(location));
     }
 
     /**

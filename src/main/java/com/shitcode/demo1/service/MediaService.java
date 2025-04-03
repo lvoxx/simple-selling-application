@@ -10,9 +10,9 @@ import org.springframework.web.multipart.MultipartFile;
 import com.shitcode.demo1.service.impl.LocalMediaServiceImpl.TypeOfMedia;
 
 public interface MediaService {
-    List<String> saveMediaFiles(List<MultipartFile> files) throws Exception;
+    List<String> saveImagesFile(List<MultipartFile> images) throws Exception;
 
-    String saveMediaFile(MultipartFile file) throws Exception;
+    String saveVideoFile(MultipartFile video) throws Exception;
 
     Resource findFile(String filePathAndNameWithExtension) throws FileNotFoundException;
 

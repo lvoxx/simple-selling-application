@@ -120,5 +120,4 @@ exception:
   key-lock:
     missed: Error while executing task with lock on key [%s].
   media:
-    unknown: Unknown format file. Should be video or image format.
     file-not-found: File not found with path [%s].
