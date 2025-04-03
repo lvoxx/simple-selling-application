@@ -2,6 +2,7 @@ package com.shitcode.demo1.service.impl;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 
 import org.slf4j.Logger;
@@ -9,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
+import org.springframework.context.MessageSource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.lang.Nullable;
@@ -50,14 +52,17 @@ public class ProductServiceImpl implements ProductService {
     private final MediaService mediaService;
     private final InterationEventService interationEventService;
     private final DatabaseLock databaseLock;
+    private final MessageSource messageSource;
 
     public ProductServiceImpl(ProductRepository productRepository, CategoryService categoryService,
-            MediaService mediaService, InterationEventService interationEventService, DatabaseLock databaseLock) {
+            MediaService mediaService, InterationEventService interationEventService, DatabaseLock databaseLock,
+            MessageSource messageSource) {
         this.productRepository = productRepository;
         this.categoryService = categoryService;
         this.mediaService = mediaService;
         this.interationEventService = interationEventService;
         this.databaseLock = databaseLock;
+        this.messageSource = messageSource;
     }
 
     @Override
@@ -99,7 +104,9 @@ public class ProductServiceImpl implements ProductService {
             throws Exception {
         Optional.ofNullable(productRepository.findByName(jsonRequest.getName())).ifPresent(p -> {
             log.warn("Product with name '{}' already exists.", jsonRequest.getName());
-            throw new EntityExistsException("{exception.entity-exists.product}");
+
+            throw new EntityExistsException(messageSource.getMessage("exception.entity-exists.product",
+                    new Object[] { jsonRequest.getName() }, Locale.getDefault()));
         });
         // Find Category
         Category category = categoryService.findCategoryEntityById(jsonRequest.getCategoryId());
@@ -128,7 +135,8 @@ public class ProductServiceImpl implements ProductService {
             @CacheEvict(value = ProductCacheType.Fields.ADMIN_PRODUCT_NAME, key = "#req.name"),
             @CacheEvict(value = ProductCacheType.Fields.INSELL_PRODUCT_NAME, key = "#req.name")
     })
-    public AdminResponse update(ProductDTO.Request jsonRequest, List<MultipartFile> images, MultipartFile video, Long id) {
+    public AdminResponse update(ProductDTO.Request jsonRequest, List<MultipartFile> images, MultipartFile video,
+            Long id) {
         log.debug("Updating product with ID: {}", id);
 
         Product product = findEntityWithId(id);
@@ -269,7 +277,8 @@ public class ProductServiceImpl implements ProductService {
         return productRepository.findById(id)
                 .orElseThrow(
                         () -> new EntityNotFoundException(
-                                String.format("{exception.entity-not-found.product-id}", id)));
+                                messageSource.getMessage("exception.entity-not-found.product-id",
+                                        new Object[] { id }, Locale.getDefault())));
     }
 
     @Override
@@ -277,6 +286,7 @@ public class ProductServiceImpl implements ProductService {
         return productRepository.findByName(name)
                 .orElseThrow(
                         () -> new EntityNotFoundException(
-                                String.format("{exception.entity-not-found.product-name}", name)));
+                                messageSource.getMessage("exception.entity-not-found.product-name",
+                                        new Object[] { name }, Locale.getDefault())));
     }
 }
