@@ -209,7 +209,7 @@ public class LocalMediaServiceImpl implements MediaService {
     }
 
     /**
-     * Compresses an image and saves it as WebP.
+     * Compresses an image and saves it as webp.
      *
      * @param originalLocation Path to the original image
      * @return Path to the compressed image
@@ -225,7 +225,7 @@ public class LocalMediaServiceImpl implements MediaService {
         Thumbnails.of(inputStream)
                 .size(1200, 800) // Resize to 800x600 (adjust as needed)
                 .outputQuality(0.7) // Reduce quality to 70%
-                .outputFormat("webm")
+                .outputFormat("webp")
                 .toOutputStream(outputStream);
         Path filePath = Files.write(Path.of(path), outputStream.toByteArray());
         return filePath.toFile().getAbsolutePath();
