@@ -63,7 +63,12 @@ public class LocalMediaServiceImpl implements MediaService {
 
     public static final String ORIGINAL_FOLDER = "original";
     public static final String COMPRESSED_FOLDER = "compressed";
+    public static final String IMAGE_FORMAT = "jpg";
     public static final String VIDEO_FORMAT = "mp4";
+
+    private static final int IMAGE_COMPRESSION_WIDTH = 1200;
+    private static final int IMAGE_COMPRESSION_HEIGHT = 800;
+    private static final double IMAGE_COMPRESSION_QUALITY = 0.7;
 
     private String imagesPath;
     private String videosPath;
@@ -223,9 +228,9 @@ public class LocalMediaServiceImpl implements MediaService {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 
         Thumbnails.of(inputStream)
-                .size(1200, 800) // Resize to 800x600 (adjust as needed)
-                .outputQuality(0.7) // Reduce quality to 70%
-                .outputFormat("webp")
+                .size(IMAGE_COMPRESSION_WIDTH, IMAGE_COMPRESSION_HEIGHT)
+                .outputQuality(IMAGE_COMPRESSION_QUALITY)
+                .outputFormat(IMAGE_FORMAT)
                 .toOutputStream(outputStream);
         Path filePath = Files.write(Path.of(path), outputStream.toByteArray());
         return filePath.toFile().getAbsolutePath();
