@@ -1,6 +1,6 @@
 media:
   path:
-    root: /var/www/media
+    root: /opt/app/media
     images: /images
     videos: /videos
   upload-locally: true
