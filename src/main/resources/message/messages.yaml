@@ -31,22 +31,22 @@ validation:
       size: Currency must be exactly 3 characters.
       pattern: Currency must be uppercase and follow ISO 4217 format.
     in-stock-quantity:
-      blank: In-stock quantity cannot be blank.
-      min: In-stock quantity must be at least 0.
+      not-null: In-stock quantity cannot be null.
+      positive: In-stock quantity must be at least 0.
     in-sell-quantity:
-      blank: In-sell quantity cannot be blank.
-      min: In-sell quantity must be at least 0.
+      not-null: In-sell quantity cannot be null.
+      positive: In-sell quantity must be greater 0.
     price:
-      blank: Price cannot be blank.
+      not-null: Price cannot be null.
       min: Price must be greater than 0.
-      digits: Price must be a valid monetary value with up to 99 digits and 2 decimal places.
     category-id:
-      blank: Category ID cannot be blank.
-      min: Category ID must be greater than 0.
+      not-null: Category ID cannot be null.
+      positive: Category ID must be greater than 0.
     images:
-      size: Require at least one image product.
+      not-null: Require at least one image product.
+      valid: Image must be in png, jpeg, jpg format.
     video:
-      format: Video must be in MP4 format.
+      valid: Video must be in MP4 format.
   spring-user:
     email:
       email: Invalid email format.

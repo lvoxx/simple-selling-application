@@ -14,14 +14,15 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.shitcode.demo1.annotation.logging.LogCollector;
 import com.shitcode.demo1.component.DatabaseLock;
 import com.shitcode.demo1.dto.DiscountDTO.ApplyToProductsRequest;
 import com.shitcode.demo1.dto.DiscountDTO.ApplyToProductsResponse;
+import com.shitcode.demo1.dto.ProductDTO;
 import com.shitcode.demo1.dto.ProductDTO.AdminResponse;
 import com.shitcode.demo1.dto.ProductDTO.InSellResponse;
-import com.shitcode.demo1.dto.ProductDTO.Request;
 import com.shitcode.demo1.dto.ProductInteractionDTO;
 import com.shitcode.demo1.entity.Category;
 import com.shitcode.demo1.entity.Product;
@@ -94,22 +95,21 @@ public class ProductServiceImpl implements ProductService {
             @CacheEvict(value = ProductCacheType.Fields.ADMIN_PRODUCTS, allEntries = true),
             @CacheEvict(value = ProductCacheType.Fields.INSELL_PRODUCTS, allEntries = true)
     })
-    public AdminResponse create(Request request) throws Exception {
-        log.debug("Creating product with name: {}", request.getName());
-
-        Optional.ofNullable(findEntityWithName(request.getName())).ifPresent(p -> {
-            log.warn("Product with name '{}' already exists.", request.getName());
+    public AdminResponse create(ProductDTO.Request jsonRequest, List<MultipartFile> images, MultipartFile video)
+            throws Exception {
+        Optional.ofNullable(findEntityWithName(jsonRequest.getName())).ifPresent(p -> {
+            log.warn("Product with name '{}' already exists.", jsonRequest.getName());
             throw new EntityExistsException("{exception.entity-exists.product}");
         });
         // Find Category
-        Category category = categoryService.findCategoryEntityById(request.getCategoryId());
+        Category category = categoryService.findCategoryEntityById(jsonRequest.getCategoryId());
 
         // Save media
-        List<String> imageUrls = mediaService.saveMediaFiles(request.getImages());
-        String videoUrl = mediaService.saveMediaFile(request.getVideo());
+        List<String> imageUrls = mediaService.saveMediaFiles(images);
+        String videoUrl = mediaService.saveMediaFile(video);
 
         // Set ref value
-        Product product = productMapper.toProduct(request);
+        Product product = productMapper.toProduct(jsonRequest);
         product.setCategory(category);
         product.setImages(imageUrls);
         product.setVideo(videoUrl);
@@ -128,16 +128,16 @@ public class ProductServiceImpl implements ProductService {
             @CacheEvict(value = ProductCacheType.Fields.ADMIN_PRODUCT_NAME, key = "#req.name"),
             @CacheEvict(value = ProductCacheType.Fields.INSELL_PRODUCT_NAME, key = "#req.name")
     })
-    public AdminResponse update(Request request, Long id) {
+    public AdminResponse update(ProductDTO.Request jsonRequest, List<MultipartFile> images, MultipartFile video, Long id) {
         log.debug("Updating product with ID: {}", id);
 
         Product product = findEntityWithId(id);
-        Category category = categoryService.findCategoryEntityById(request.getCategoryId());
+        Category category = categoryService.findCategoryEntityById(jsonRequest.getCategoryId());
         product.setCategory(category);
-        product.setName(request.getName());
-        product.setPrice(request.getPrice());
-        product.setInSellQuantity(request.getInSellQuantity());
-        product.setInStockQuantity(request.getInStockQuantity());
+        product.setName(jsonRequest.getName());
+        product.setPrice(jsonRequest.getPrice());
+        product.setInSellQuantity(jsonRequest.getInSellQuantity());
+        product.setInStockQuantity(jsonRequest.getInStockQuantity());
 
         AdminResponse response = databaseLock.doAndLock(KeyLock.PRODUCT,
                 () -> productMapper.toProductAdminResponse(productRepository.save(product)));

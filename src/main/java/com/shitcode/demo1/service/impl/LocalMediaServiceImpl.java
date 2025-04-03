@@ -13,6 +13,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -111,6 +112,11 @@ public class LocalMediaServiceImpl implements MediaService {
      */
     @Override
     public String saveMediaFile(MultipartFile file) throws Exception {
+        Optional<MultipartFile> fileChecker = Optional.ofNullable(file); 
+        if (fileChecker.isEmpty()) {
+            //throw new EmptyFileException();
+        }
+        
         String mimeType = MediaDetector.detect(file.getInputStream());
 
         if (!(mimeType.startsWith("image/")) || !(mimeType.startsWith("video/"))) {

@@ -1,13 +1,17 @@
 package com.shitcode.demo1.controller;
 
+import java.util.List;
+
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.shitcode.demo1.annotation.logging.LogCollector;
 import com.shitcode.demo1.dto.ProductDTO;
@@ -122,9 +126,13 @@ public class ProductController {
                         @ApiResponse(responseCode = "400", description = "Invalid request body", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorModel.class))),
                         @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorModel.class)))
         })
-        public ResponseEntity<?> createProduct(@ModelAttribute @Valid ProductDTO.Request request) throws Exception {
+        public ResponseEntity<?> createProduct(@RequestPart("json") @Valid ProductDTO.Request jsonRequest,
+                        @RequestPart("images") List<MultipartFile> imageRequests,
+                        @RequestPart("video") MultipartFile videoRequest) throws Exception {
                 return responseService.mapping(
-                                () -> ResponseEntity.ok().body(productService.create(request)),
+                                () -> new ResponseEntity<>(
+                                                productService.create(jsonRequest, imageRequests, videoRequest),
+                                                HttpStatus.CREATED),
                                 RateLimiterPlan.BASIC);
         }
 }

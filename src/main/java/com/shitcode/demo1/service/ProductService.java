@@ -1,8 +1,11 @@
 package com.shitcode.demo1.service;
 
+import java.util.List;
+
 import org.springframework.boot.context.properties.bind.DefaultValue;
 import org.springframework.data.domain.Page;
 import org.springframework.lang.Nullable;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.shitcode.demo1.annotation.validation.GreaterOrEquals;
 import com.shitcode.demo1.dto.DiscountDTO;
@@ -34,9 +37,11 @@ public interface ProductService {
 
         ProductDTO.InSellResponse findInSellWithName(String name);
 
-        ProductDTO.AdminResponse create(ProductDTO.Request request) throws Exception;
+        ProductDTO.AdminResponse create(ProductDTO.Request jsonRequest, List<MultipartFile> images, MultipartFile video)
+                        throws Exception;
 
-        ProductDTO.AdminResponse update(ProductDTO.Request request, Long id);
+        ProductDTO.AdminResponse update(ProductDTO.Request jsonRequest, List<MultipartFile> images, MultipartFile video,
+                        Long id);
 
         DiscountDTO.ApplyToProductsResponse putDiscountToProducts(DiscountDTO.ApplyToProductsRequest requests);
 

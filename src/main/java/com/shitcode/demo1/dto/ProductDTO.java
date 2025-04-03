@@ -3,15 +3,11 @@ package com.shitcode.demo1.dto;
 import java.math.BigDecimal;
 import java.util.List;
 
-import org.springframework.web.multipart.MultipartFile;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.shitcode.demo1.annotation.validation.ValidImages;
-import com.shitcode.demo1.annotation.validation.ValidVideo;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Positive;
@@ -30,49 +26,39 @@ public abstract class ProductDTO {
     @Schema(name = "Product Request", description = "Request payload for creating or updating a product")
     public static class Request {
 
-        @NotNull
+        @NotBlank(message = "{validation.product.name.blank}")
         @Size(max = 255, message = "{validation.product.name.size}")
         @Schema(description = "Name of the product", example = "Wireless Headphones", maxLength = 255, required = true)
         private String name;
 
-        @NotNull
+        @NotBlank(message = "{validation.product.currency.blank}")
         @Size(max = 3, message = "{validation.product.currency.size}")
         @Pattern(regexp = "^[A-Z]{3}$", message = "{validation.product.currency.pattern}")
         @Schema(description = "Currency code in ISO 4217 format (3 uppercase letters)", example = "USD")
         private String currency;
 
-        @NotNull
-        @Positive
+        @NotNull(message = "{validation.product.in-stock-quantity.not-null}")
+        @Positive(message = "{validation.product.in-stock-quantity.positive}")
         @Schema(description = "Quantity of the product available in stock", example = "100", minimum = "0", required = true)
+        @JsonProperty("in-stock-quantity")
         private Integer inStockQuantity;
 
-        @NotNull
-        @Positive
+        @NotNull(message = "{validation.product.in-sell-quantity.not-null}")
+        @Positive(message = "{validation.product.in-sell-quantity.positive}")
         @Schema(description = "Quantity of the product currently being sold", example = "50", minimum = "0", required = true)
+        @JsonProperty("in-sell-quantity")
         private Integer inSellQuantity;
 
-        @NotNull
-        @Positive
-        @DecimalMin(value = "0.0")
+        @NotNull(message = "{validation.product.price.not-null}")
+        @DecimalMin(value = "0.0", inclusive = false, message = "{validation.product.price.min}")
         @Schema(description = "Price of the product", example = "199.99", minimum = "0.01", required = true, format = "double")
         private BigDecimal price;
 
-        @NotNull
-        @Positive
+        @NotNull(message = "{validation.product.category-id.not-null}")
+        @Positive(message = "{validation.product.category-id.positive}")
         @Schema(description = "Identifier of the category the product belongs to", example = "3", minimum = "1", required = true)
+        @JsonProperty("category-id")
         private Long categoryId;
-
-        @Schema(description = "List of product images (JPEG, PNG only)", type = "array", format = "binary")
-        @ValidImages(nullable = false)
-        @NotNull
-        @JsonIgnore
-        private List<MultipartFile> images;
-
-        @Schema(description = "Product video (MP4 only)", format = "binary")
-        @ValidVideo(nullable = true)
-        @Nullable
-        @JsonIgnore
-        private MultipartFile video;
     }
 
     @Data
