@@ -1,8 +1,8 @@
 media:
   path:
-    root: /media
-    images: /images/
-    videos: /videos/
+    root: /var/www/media
+    images: /images
+    videos: /videos
   upload-locally: true
 
 spring:

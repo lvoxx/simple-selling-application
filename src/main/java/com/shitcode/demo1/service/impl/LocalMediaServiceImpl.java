@@ -167,7 +167,7 @@ public class LocalMediaServiceImpl implements MediaService {
         try {
             // C:/Users/${current_user_name}
             // /images(videos)/original(compressed)/01/01/2025/<file>.extension
-            Path filePath = Paths.get(getHomeDir().concat(mediaConfigData.getPath().getRoot()))
+            Path filePath = Paths.get(mediaConfigData.getPath().getRoot().concat(mediaConfigData.getPath().getRoot()))
                     .resolve(filePathAndNameWithExtension)
                     .normalize();
             resource = new UrlResource(filePath.toUri());
@@ -303,11 +303,11 @@ public class LocalMediaServiceImpl implements MediaService {
         // C:\Users\${current_user_name}/media/videos/compressed/31/3/2025
         String internalFolder = isCompress ? COMPRESSED_FOLDER : ORIGINAL_FOLDER;
         LocalDate now = LocalDate.now();
-        String dirPath = new StringBuilder(getHomeDir()).append(File.separator)
+        String dirPath = new StringBuilder(mediaConfigData.getPath().getRoot()).append(File.separator)
                 .append(getPath(type)).append(File.separator)
                 .append(internalFolder).append(File.separator)
                 .append(now.getDayOfMonth()).append(File.separator)
-                .append(now.getMonth()).append(File.separator)
+                .append(now.getMonthValue()).append(File.separator)
                 .append(now.getYear())
                 .toString();
 
@@ -329,14 +329,10 @@ public class LocalMediaServiceImpl implements MediaService {
         Images, Videos
     }
 
-    private static String getHomeDir() {
-        return System.getProperty("user.home");
-    }
-
     // /media/images/compressed/31/3/2025/{uuid}.webp
     // /media/video/compressed/31/3/2025/{uuid}.mp4
     public String extractCompressPath(String fullPath) {
-        return fullPath.replace(getHomeDir(), "");
+        return fullPath.replace(mediaConfigData.getPath().getRoot(), "");
     }
 
     public String generateMediaUrl(String mediaPath) {
