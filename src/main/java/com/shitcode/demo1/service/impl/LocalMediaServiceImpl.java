@@ -231,8 +231,7 @@ public class LocalMediaServiceImpl implements MediaService {
     public Resource findFile(String filePathAndNameWithExtension) throws FileNotFoundException, FileReadException {
         Resource resource = null;
         try {
-            Path filePath = Paths.get(mediaConfigData.getPath().getRoot())
-                    .resolve(filePathAndNameWithExtension)
+            Path filePath = Paths.get(mediaConfigData.getPath().getRoot().concat(filePathAndNameWithExtension))
                     .normalize();
 
             LogPrinter.printLog(Type.INFO, Flag.SERVICE_FLAG,
