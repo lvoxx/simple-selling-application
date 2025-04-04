@@ -22,10 +22,11 @@ import com.shitcode.demo1.service.MailService;
 import com.shitcode.demo1.service.RegistrationTokenService;
 import com.shitcode.demo1.service.SpringUserService;
 import com.shitcode.demo1.utils.LogPrinter;
+import com.shitcode.demo1.utils.LoggingModel;
 
 @Service
 @Transactional
-@LogCollector
+@LogCollector(loggingModel = LoggingModel.SERVICE)
 public class SpringUserServiceImpl implements SpringUserService {
 
     private final SpringUserRepository springUserRepository;

@@ -28,11 +28,12 @@ import com.shitcode.demo1.mapper.DiscountMapper;
 import com.shitcode.demo1.repository.DiscountRepository;
 import com.shitcode.demo1.service.DiscountService;
 import com.shitcode.demo1.utils.KeyLock;
+import com.shitcode.demo1.utils.LoggingModel;
 import com.shitcode.demo1.utils.cache.DiscountCacheType;
 
 @Service
 @Transactional
-@LogCollector
+@LogCollector(loggingModel = LoggingModel.SERVICE)
 public class DiscountServiceImpl implements DiscountService {
     private final DiscountMapper discountMapper = DiscountMapper.INSTANCE;
     private final DiscountRepository discountRepository;

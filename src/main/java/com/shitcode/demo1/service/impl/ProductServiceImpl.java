@@ -38,11 +38,12 @@ import com.shitcode.demo1.service.InterationEventService;
 import com.shitcode.demo1.service.MediaService;
 import com.shitcode.demo1.service.ProductService;
 import com.shitcode.demo1.utils.KeyLock;
+import com.shitcode.demo1.utils.LoggingModel;
 import com.shitcode.demo1.utils.cache.ProductCacheType;
 
 @Service
 @Transactional
-@LogCollector
+@LogCollector(loggingModel = LoggingModel.SERVICE)
 public class ProductServiceImpl implements ProductService {
     private static final Logger log = LoggerFactory.getLogger(ProductServiceImpl.class);
     private final ProductMapper productMapper = ProductMapper.INSTANCE;
