@@ -16,5 +16,5 @@ public interface MediaService {
 
     Resource findFile(String filePathAndNameWithExtension) throws FileNotFoundException;
 
-    String saveFileToServer(MultipartFile file, TypeOfMedia type) throws IOException;
+    String saveFileToServer(MultipartFile file, TypeOfMedia type, boolean isCompressed) throws IOException;
 }

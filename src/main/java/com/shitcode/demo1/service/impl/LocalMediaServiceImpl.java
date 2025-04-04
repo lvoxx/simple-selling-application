@@ -29,6 +29,7 @@ import com.shitcode.demo1.annotation.logging.LogCollector;
 import com.shitcode.demo1.component.MediaDetector;
 import com.shitcode.demo1.exception.model.EmptyFileException;
 import com.shitcode.demo1.exception.model.UnknownFileExtension;
+import com.shitcode.demo1.helper.CustomMultipartFile;
 import com.shitcode.demo1.properties.LvoxxServerConfigData;
 import com.shitcode.demo1.properties.MediaConfigData;
 import com.shitcode.demo1.service.MediaService;
@@ -74,12 +75,13 @@ public class LocalMediaServiceImpl implements MediaService {
     private String videosPath;
 
     /**
-     * Constructs LocalMediaServiceImpl with dependencies.
-     *
-     * @param mediaConfigData Media configuration data
-     * @param ffmpegPath      Path to FFmpeg binary
-     * @param ffprobePath     Path to FFprobe binary
-     * @throws IOException If FFmpeg or FFprobe initialization fails
+     * Constructor for LocalMediaServiceImpl.
+     * 
+     * @param mediaConfigData       The media configuration data
+     * @param ffmpegPath            The path to the FFmpeg executable
+     * @param ffprobePath           The path to the FFprobe executable
+     * @param lvoxxServerConfigData The Lvoxx server configuration data
+     * @throws IOException If the FFmpeg or FFprobe path is not found
      */
     public LocalMediaServiceImpl(MediaConfigData mediaConfigData,
             @Value("${server.compression.ffmpeg}") String ffmpegPath,
@@ -108,10 +110,26 @@ public class LocalMediaServiceImpl implements MediaService {
      */
     @PostConstruct
     void setUp() {
-        imagesPath = mediaConfigData.getPath().getRoot().concat(mediaConfigData.getPath().getImages());
-        videosPath = mediaConfigData.getPath().getRoot().concat(mediaConfigData.getPath().getVideos());
+        imagesPath = mediaConfigData.getPath().getImages();
+        videosPath = mediaConfigData.getPath().getVideos();
     }
 
+    /**
+     * Saves a list of image files to the server and returns their URLs.
+     * 
+     * This method iterates over the list of provided image files, detects their
+     * MIME type, and
+     * ensures they are valid images. It then saves each image to the server,
+     * compresses it if necessary,
+     * and generates a URL for the compressed image. The URLs of the compressed
+     * images are returned
+     * as a list.
+     * 
+     * @param images A list of image files to be saved
+     * @return A list of URLs pointing to the saved and compressed images
+     * @throws Exception If any error occurs during the saving or compression
+     *                   process
+     */
     @Override
     public List<String> saveImagesFile(List<MultipartFile> images) throws Exception {
         if (images.isEmpty()) {
@@ -124,16 +142,29 @@ public class LocalMediaServiceImpl implements MediaService {
             if (!(mimeType.startsWith("image/"))) {
                 throw new UnknownFileExtension("{validation.product.images.valid}");
             }
-            String location = saveFileToServer(image, TypeOfMedia.Images);
-            // C:/Users/${current_user_name}/user/media/images/compressed/31/3/2025/{uuid}.webp
+            String originalLocation = saveFileToServer(image, TypeOfMedia.Images, false);
             imageUrls.add(
                     generateMediaUrl(
-                            extractCompressPath(compressImage(location))));
+                            extractCompressPath(compressImage(originalLocation))));
         }
 
         return imageUrls;
     }
 
+    /**
+     * Saves a video file to the server and returns its URL.
+     * 
+     * This method detects the MIME type of the provided video file and ensures it
+     * is a valid video.
+     * It then saves the video to the server, compresses it if necessary, and
+     * generates a URL for the
+     * compressed video. The URL of the compressed video is returned.
+     * 
+     * @param video The video file to be saved
+     * @return The URL pointing to the saved and compressed video
+     * @throws Exception If any error occurs during the saving or compression
+     *                   process
+     */
     @Override
     public String saveVideoFile(MultipartFile video) throws Exception {
         if (video == null) {
@@ -144,29 +175,25 @@ public class LocalMediaServiceImpl implements MediaService {
         if (!(mimeType.startsWith("video/"))) {
             throw new UnknownFileExtension("{validation.product.video.valid}");
         }
-        // C:/Users/${current_user_name}/user/media/videos/original/31/3/2025/{UUID}.mp4
-        String location = saveFileToServer(video, TypeOfMedia.Videos);
-        // C:/Users/${current_user_name}/user/media/videos/compressed/31/3/2025/{uuid}.mp4
+        String location = saveFileToServer(video, TypeOfMedia.Videos, false);
+
         return generateMediaUrl(extractCompressPath(compressVideo(location)));
     }
 
     /**
-     * Retrieves a media file as a Resource.
-     * Example: Home user's path + rootMedia + filePathAndNameWithExtension
-     * Equivalent: C:/Users/${current_user_name} + /media +
-     * /images(videos)/original(compressed)/01/01/2025/<file>.extension
-     * 
-     * @param filePathAndNameWithExtension The relative path to the file
-     * @return An Optional containing the file resource if found
-     * @throws FileNotFoundException If the file does not exist
+     * Finds a file in the local media storage by its path and name with extension.
+     *
+     * @param filePathAndNameWithExtension The path and name of the file with its
+     *                                     extension
+     * @return The resource representing the file if found, otherwise throws a
+     *         FileNotFoundException
+     * @throws FileNotFoundException If the file is not found or is not readable
      */
     @SuppressWarnings("null")
     @Override
     public Resource findFile(String filePathAndNameWithExtension) throws FileNotFoundException {
         Resource resource = null;
         try {
-            // C:/Users/${current_user_name}
-            // /images(videos)/original(compressed)/01/01/2025/<file>.extension
             Path filePath = Paths.get(mediaConfigData.getPath().getRoot().concat(mediaConfigData.getPath().getRoot()))
                     .resolve(filePathAndNameWithExtension)
                     .normalize();
@@ -194,37 +221,47 @@ public class LocalMediaServiceImpl implements MediaService {
      * @throws IOException If the file cannot be saved
      */
     @Override
-    public String saveFileToServer(MultipartFile file, TypeOfMedia type) throws IOException {
-        // C:/Users/${current_user_name}/images(videos)/original(compressed)/01/01/2025/<file>.extension
-        String dirPath = makeMediaPath(type, false);
-        String fileName = String.format(
-                "%s.%s",
+    public String saveFileToServer(MultipartFile file, TypeOfMedia type, boolean isCompressed) throws IOException {
+        // Get the absolute directory path
+        String dirPath = makeMediaPath(type, isCompressed);
+
+        // Generate unique filename with extension
+        String fileName = String.format("%s.%s",
                 UUID.randomUUID().toString(),
                 FilenameUtils.getExtension(file.getOriginalFilename()));
-        File dir = new File(dirPath);
-        if (!dir.exists()) {
-            dir.mkdirs();
-        }
 
-        String location = new StringBuilder(dirPath).append(File.separator).append(fileName).toString();
-        Path path = Paths.get(location);
-        Files.write(path, file.getBytes());
+        // Create directory if it doesn't exist
+        Path directoryPath = Paths.get(dirPath);
+        Files.createDirectories(directoryPath);
 
-        return location;
+        // Create absolute path by combining directory and filename
+        Path absolutePath = directoryPath.resolve(fileName);
+
+        // Write the file
+        Files.write(absolutePath, file.getBytes());
+
+        // Return the absolute path as string
+        return absolutePath.toAbsolutePath().normalize().toString();
     }
 
     /**
-     * Compresses an image and saves it as webp.
+     * Compresses an image and saves it in JPG format with optimized settings.
+     * The compression process includes:
+     * <ul>
+     *   <li>Resizing to {@value #IMAGE_COMPRESSION_WIDTH}x{@value #IMAGE_COMPRESSION_HEIGHT} pixels</li>
+     *   <li>Quality reduction to {@value #IMAGE_COMPRESSION_QUALITY}</li>
+     *   <li>Conversion to {@value #IMAGE_FORMAT} format</li>
+     * </ul>
      *
-     * @param originalLocation Path to the original image
-     * @return Path to the compressed image
-     * @throws IOException If compression fails
+     * @param originalLocation The absolute path to the original image file
+     * @return The absolute path to the compressed image file
+     * @throws IOException If the original file cannot be read, or if compression/saving fails
+     * @throws FileNotFoundException If the original file does not exist
+     * @see #saveFileToServer(MultipartFile, TypeOfMedia, boolean)
      */
     private String compressImage(String originalLocation) throws IOException {
-        // C:/Users/${current_user_name}/images(videos)/compressed/01/01/2025/<file>.extension
-        String path = makeMediaPath(TypeOfMedia.Images, true);
-
-        InputStream inputStream = new FileInputStream(originalLocation);
+        File originalImage = new File(originalLocation);
+        InputStream inputStream = new FileInputStream(originalImage);
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 
         Thumbnails.of(inputStream)
@@ -232,8 +269,9 @@ public class LocalMediaServiceImpl implements MediaService {
                 .outputQuality(IMAGE_COMPRESSION_QUALITY)
                 .outputFormat(IMAGE_FORMAT)
                 .toOutputStream(outputStream);
-        Path filePath = Files.write(Path.of(path), outputStream.toByteArray());
-        return filePath.toFile().getAbsolutePath();
+        MultipartFile compressFile = new CustomMultipartFile(outputStream.toByteArray(), originalImage.getName());
+        String compressPath = saveFileToServer(compressFile, TypeOfMedia.Images, true);
+        return compressPath;
     }
 
     /**
@@ -244,7 +282,6 @@ public class LocalMediaServiceImpl implements MediaService {
      * @throws IOException If compression fails
      */
     private String compressVideo(String originalLocation) throws IOException {
-        // C:/Users/${current_user_name}/images(videos)/compressed/01/01/2025/<file>.extension
         String dirPath = makeMediaPath(TypeOfMedia.Videos, true);
         String filePath = new StringBuilder(dirPath)
                 .append(File.separator).append(UUID.randomUUID().toString()).append(".").append(VIDEO_FORMAT)
@@ -299,8 +336,16 @@ public class LocalMediaServiceImpl implements MediaService {
         return filePath;
     }
 
+    /**
+     * This method generates the media path based on the type of media and
+     * compression status.
+     * 
+     * @param type       The type of media (Images or Videos).
+     * @param isCompress The compression status (true for compressed, false for
+     *                   original).
+     * @return The generated media path.
+     */
     private String makeMediaPath(TypeOfMedia type, boolean isCompress) {
-        // C:\Users\${current_user_name}/media/videos/compressed/31/3/2025
         String internalFolder = isCompress ? COMPRESSED_FOLDER : ORIGINAL_FOLDER;
         LocalDate now = LocalDate.now();
         String dirPath = new StringBuilder(mediaConfigData.getPath().getRoot()).append(File.separator)
@@ -314,6 +359,12 @@ public class LocalMediaServiceImpl implements MediaService {
         return dirPath;
     }
 
+    /**
+     * This method gets the path based on the type of media.
+     * 
+     * @param type The type of media (Images or Videos).
+     * @return The path of the media.
+     */
     private String getPath(TypeOfMedia type) {
         if (type == null) {
             throw new IllegalArgumentException("Media type and compression status cannot be null");
@@ -329,12 +380,16 @@ public class LocalMediaServiceImpl implements MediaService {
         Images, Videos
     }
 
-    // /media/images/compressed/31/3/2025/{uuid}.webp
-    // /media/video/compressed/31/3/2025/{uuid}.mp4
     public String extractCompressPath(String fullPath) {
         return fullPath.replace(mediaConfigData.getPath().getRoot(), "");
     }
 
+    /**
+     * This method generates the media URL based on the media path.
+     * 
+     * @param mediaPath The media path.
+     * @return The generated media URL.
+     */
     public String generateMediaUrl(String mediaPath) {
         boolean isDeploy = lvoxxServerConfigData.isProductDeploy();
         String mediaMap = "/media";
