@@ -222,8 +222,8 @@ public class LocalMediaServiceImpl implements MediaService {
      * Example valid paths:
      * </p>
      * <ul>
-     * <li>{@code /images/compressed/4/4/2025/image-uuid.jpg}</li>
-     * <li>{@code /videos/original/4/4/2025/video-uuid.mp4}</li>
+     * <li>{@code /images/compressed/2025/4/4/image-uuid.jpg}</li>
+     * <li>{@code /videos/original/2025/4/4/video-uuid.mp4}</li>
      * </ul>
      *
      * @param filePathAndNameWithExtension The relative path to the media file,
@@ -481,13 +481,23 @@ public class LocalMediaServiceImpl implements MediaService {
     }
 
     /**
-     * This method generates the media path based on the type of media and
-     * compression status.
+     * Generates a media path based on the specified media type and compression status.
      * 
-     * @param type       The type of media (Images or Videos).
-     * @param isCompress The compression status (true for compressed, false for
-     *                   original).
-     * @return The generated media path.
+     * This method constructs a path for storing media files based on the type of media (Images or Videos) and
+     * whether the media is compressed or not. The path includes the root directory, media type directory, compression
+     * status directory, and the current date. The structure of the folder is as follows:
+     * 
+     * Root Directory
+     * |--- Media Type Directory (Images or Videos)
+     * |    |--- Compression Status Directory (Compressed or Original)
+     * |    |    |--- Year
+     * |    |    |    |--- Month
+     * |    |    |    |    |--- Day
+     * 
+     * @param type       The type of media to be stored. This can be either Images or Videos.
+     * @param isCompress Indicates if the media is compressed or not. If true, the path will point to the compressed media
+     *                   directory; otherwise, it will point to the original media directory.
+     * @return A string representing the generated media path.
      */
     private String makeMediaPath(TypeOfMedia type, boolean isCompress) {
         String internalFolder = isCompress ? COMPRESSED_FOLDER : ORIGINAL_FOLDER;
@@ -502,9 +512,10 @@ public class LocalMediaServiceImpl implements MediaService {
                 rootPath,
                 getPath(type),
                 internalFolder,
-                String.valueOf(now.getDayOfMonth()),
+                String.valueOf(now.getYear()),
                 String.valueOf(now.getMonthValue()),
-                String.valueOf(now.getYear())).toString();
+                String.valueOf(now.getDayOfMonth()))
+                .toString();
 
         return dirPath;
     }
