@@ -30,6 +30,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.shitcode.demo1.annotation.logging.LogCollector;
 import com.shitcode.demo1.component.MediaDetector;
 import com.shitcode.demo1.exception.model.EmptyFileException;
+import com.shitcode.demo1.exception.model.FileReadException;
 import com.shitcode.demo1.exception.model.UnknownFileExtension;
 import com.shitcode.demo1.helper.CustomMultipartFile;
 import com.shitcode.demo1.properties.LvoxxServerConfigData;
@@ -65,6 +66,7 @@ public class LocalMediaServiceImpl implements MediaService {
 
     private final FFmpeg ffmpeg;
     private final FFprobe ffprobe;
+    private final String servletContextPath;
 
     public static final String ORIGINAL_FOLDER = "original";
     public static final String COMPRESSED_FOLDER = "compressed";
@@ -89,12 +91,15 @@ public class LocalMediaServiceImpl implements MediaService {
      */
     public LocalMediaServiceImpl(MediaConfigData mediaConfigData,
             @Value("${server.compression.ffmpeg}") String ffmpegPath,
-            @Value("${server.compression.ffprobe}") String ffprobePath, LvoxxServerConfigData lvoxxServerConfigData,
+            @Value("${server.compression.ffprobe}") String ffprobePath,
+            @Value("${server.servlet.context-path}")String servletContextPath,
+            LvoxxServerConfigData lvoxxServerConfigData,
             MessageSource messageSource)
             throws IOException {
         this.mediaConfigData = mediaConfigData;
         this.lvoxxServerConfigData = lvoxxServerConfigData;
         this.messageSource = messageSource;
+        this.servletContextPath = servletContextPath;
         if (!StringUtils.isEmpty(ffmpegPath)) {
             this.ffmpeg = new FFmpeg(ffmpegPath);
             LogPrinter.printLog(Type.INFO, Flag.START_UP, "Found FFmpeg path. Init FFmpeg.");
@@ -118,10 +123,10 @@ public class LocalMediaServiceImpl implements MediaService {
     void setUp() {
         imagesPath = mediaConfigData.getPath().getImages();
         videosPath = mediaConfigData.getPath().getVideos();
-        
+
         // Log the media root path for verification
-        LogPrinter.printLog(Type.INFO, "MEDIA_CONFIG", 
-            String.format("Media root path: %s", mediaConfigData.getPath().getRoot()));
+        LogPrinter.printLog(Type.INFO, "MEDIA_CONFIG",
+                String.format("Media root path: %s", mediaConfigData.getPath().getRoot()));
     }
 
     /**
@@ -197,35 +202,42 @@ public class LocalMediaServiceImpl implements MediaService {
     /**
      * Retrieves a media file from the local storage system as a Spring Resource.
      * 
-     * <p>This method attempts to locate and return a media file based on its relative path
+     * <p>
+     * This method attempts to locate and return a media file based on its relative
+     * path
      * within the media storage directory. The path should be in the format:
-     * {@code /images|videos/original|compressed/day/month/year/filename.extension}</p>
+     * {@code /images|videos/original|compressed/day/month/year/filename.extension}
+     * </p>
      * 
-     * <p>Example valid paths:</p>
+     * <p>
+     * Example valid paths:
+     * </p>
      * <ul>
-     *   <li>{@code /images/compressed/4/4/2025/image-uuid.jpg}</li>
-     *   <li>{@code /videos/original/4/4/2025/video-uuid.mp4}</li>
+     * <li>{@code /images/compressed/4/4/2025/image-uuid.jpg}</li>
+     * <li>{@code /videos/original/4/4/2025/video-uuid.mp4}</li>
      * </ul>
      *
-     * @param filePathAndNameWithExtension The relative path to the media file, including filename and extension.
+     * @param filePathAndNameWithExtension The relative path to the media file,
+     *                                     including filename and extension.
      *                                     Must start with a forward slash.
      * @return A Spring {@link Resource} object representing the found media file
-     * @throws FileNotFoundException if the file doesn't exist, is not readable, or the path is invalid
+     * @throws FileNotFoundException    if the file doesn't exist, is not readable,
+     *                                  or the path is invalid
      * @throws IllegalArgumentException if the provided path is null or empty
      * @see org.springframework.core.io.Resource
      * @see #saveFileToServer(MultipartFile, TypeOfMedia, boolean)
      */
     @Override
-    public Resource findFile(String filePathAndNameWithExtension) throws FileNotFoundException {
+    public Resource findFile(String filePathAndNameWithExtension) throws FileNotFoundException, FileReadException {
         Resource resource = null;
         try {
             Path filePath = Paths.get(mediaConfigData.getPath().getRoot())
                     .resolve(filePathAndNameWithExtension)
                     .normalize();
-                
-            LogPrinter.printLog(Type.INFO, "FILE_PATH", 
-                String.format("Attempting to find file at: %s", filePath));
-            
+
+            LogPrinter.printLog(Type.INFO, Flag.SERVICE_FLAG,
+                    String.format("Attempting to find file at: %s", filePath));
+
             resource = new UrlResource(filePath.toUri());
 
         } catch (Exception e) {
@@ -233,7 +245,7 @@ public class LocalMediaServiceImpl implements MediaService {
                     "LocalMediaServiceImpl",
                     "findFile", LocalDateTime.now().toString(),
                     e.getMessage());
-            throw new FileNotFoundException(messageSource.getMessage("exception.media.file-not-found",
+            throw new FileReadException(messageSource.getMessage("exception.media.file-not-found",
                     new Object[] { filePathAndNameWithExtension }, Locale.getDefault()));
         }
 
@@ -431,7 +443,7 @@ public class LocalMediaServiceImpl implements MediaService {
         String baseMediaUrl = isDeploy ? lvoxxServerConfigData.getProdServer().getBaseUrl()
                 : lvoxxServerConfigData.getDevServer().getBaseUrl();
 
-        return baseMediaUrl.concat(mediaMap).concat(mediaPath);
+        return baseMediaUrl.concat(servletContextPath).concat(mediaMap).concat(mediaPath);
     }
 
 }

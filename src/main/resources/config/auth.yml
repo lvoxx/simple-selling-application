@@ -22,7 +22,9 @@ security-path:
       /auth,
       /auth/**,
       /product-interaction,
-      /product-interaction/**
+      /product-interaction/**,
+      /media,
+      /media/**
     ]
   user: [/users/**, /dashboard/user, /dashboard/user/**]
   super-user:

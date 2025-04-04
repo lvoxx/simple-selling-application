@@ -15,6 +15,7 @@ import com.shitcode.demo1.exception.model.EntityExistsException;
 import com.shitcode.demo1.exception.model.EntityNotChangedException;
 import com.shitcode.demo1.exception.model.EntityNotFoundException;
 import com.shitcode.demo1.exception.model.ErrorModel;
+import com.shitcode.demo1.exception.model.FileReadException;
 import com.shitcode.demo1.exception.model.KeyLockMissedException;
 import com.shitcode.demo1.exception.model.ResourceNotFoundException;
 import com.shitcode.demo1.exception.model.RevokeTokenException;
@@ -26,7 +27,7 @@ import com.shitcode.demo1.exception.model.WorkerBusyException;
 public class ApplicationExceptionHandler {
 
     @ExceptionHandler({ KeyLockMissedException.class, WorkerBusyException.class, InvalidParameterException.class,
-            SendingMailException.class
+            SendingMailException.class, FileReadException.class
     })
     public ResponseEntity<ErrorModel> handleDataOperationException(RuntimeException ex) {
         ErrorModel errorResponse = ErrorModel.of(HttpStatus.INTERNAL_SERVER_ERROR, ex.getMessage(), null);

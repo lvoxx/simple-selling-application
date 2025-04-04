@@ -1,6 +1,11 @@
 package com.shitcode.demo1.controller;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
+import org.apache.commons.io.FilenameUtils;
 import org.springframework.core.io.Resource;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -15,6 +20,10 @@ import com.shitcode.demo1.utils.RateLimiterPlan;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.PostConstruct;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import lombok.Data;
 
 @Data
@@ -41,9 +50,40 @@ public class MediaController {
         ID_PLAN = rateLimiterConfigData.getRateLimiterPlan("media", "id");
     }
 
-    @GetMapping(path = "/{mediaPath}", produces = "application/vnd.lvoxx.app-v1+json")
-    public ResponseEntity<Resource> findMediaByPath(@PathVariable String mediaPath) throws Exception {
-        return ResponseEntity.ok().body(mediaService.findFile("/".concat(mediaPath)));
+    @GetMapping("/{type}/{size}/{day}/{month}/{year}/{fileName:.+}")
+    public ResponseEntity<Resource> findLocalMediaByPath(
+            @PathVariable @Pattern(regexp = "^(images|videos)$", message = "Invalid media type") String type,
+            @PathVariable @Pattern(regexp = "^(original|compressed)$", message = "Invalid size type") String size,
+            @PathVariable @Min(1) @Max(31) Integer day,
+            @PathVariable @Min(1) @Max(12) Integer month,
+            @PathVariable @Min(2000) @Max(2100) Integer year,
+            @PathVariable @NotBlank String fileName) throws Exception {
+        String mediaPath = Paths.get(type, size,
+                String.valueOf(day),
+                String.valueOf(month),
+                String.valueOf(year),
+                fileName)
+                .normalize().toString();
+
+        Resource resource = mediaService.findFile("/".concat(mediaPath));
+
+        // Determine content type
+        String contentType = determineContentType(mediaPath);
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(contentType))
+                .body(resource);
     }
 
+    private String determineContentType(String mediaPath) {
+        String extension = FilenameUtils.getExtension(mediaPath).toLowerCase();
+        return switch (extension) {
+            case "jpg", "jpeg" -> "image/jpeg";
+            case "png" -> "image/png";
+            case "gif" -> "image/gif";
+            case "mp4" -> "video/mp4";
+            case "webm" -> "video/webm";
+            default -> "application/octet-stream";
+        };
+    }
 }
