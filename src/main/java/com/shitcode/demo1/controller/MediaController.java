@@ -41,7 +41,7 @@ public class MediaController {
         ID_PLAN = rateLimiterConfigData.getRateLimiterPlan("media", "id");
     }
 
-    @GetMapping("/{mediaPath}")
+    @GetMapping(path = "/{mediaPath}", produces = "application/vnd.lvoxx.app-v1+json")
     public ResponseEntity<Resource> findMediaByPath(@PathVariable String mediaPath) throws Exception {
         return ResponseEntity.ok().body(mediaService.findFile("/".concat(mediaPath)));
     }

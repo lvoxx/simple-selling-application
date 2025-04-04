@@ -118,6 +118,10 @@ public class LocalMediaServiceImpl implements MediaService {
     void setUp() {
         imagesPath = mediaConfigData.getPath().getImages();
         videosPath = mediaConfigData.getPath().getVideos();
+        
+        // Log the media root path for verification
+        LogPrinter.printLog(Type.INFO, "MEDIA_CONFIG", 
+            String.format("Media root path: %s", mediaConfigData.getPath().getRoot()));
     }
 
     /**
@@ -191,22 +195,37 @@ public class LocalMediaServiceImpl implements MediaService {
     }
 
     /**
-     * Finds a file in the local media storage by its path and name with extension.
+     * Retrieves a media file from the local storage system as a Spring Resource.
+     * 
+     * <p>This method attempts to locate and return a media file based on its relative path
+     * within the media storage directory. The path should be in the format:
+     * {@code /images|videos/original|compressed/day/month/year/filename.extension}</p>
+     * 
+     * <p>Example valid paths:</p>
+     * <ul>
+     *   <li>{@code /images/compressed/4/4/2025/image-uuid.jpg}</li>
+     *   <li>{@code /videos/original/4/4/2025/video-uuid.mp4}</li>
+     * </ul>
      *
-     * @param filePathAndNameWithExtension The path and name of the file with its
-     *                                     extension
-     * @return The resource representing the file if found, otherwise throws a
-     *         FileNotFoundException
-     * @throws FileNotFoundException If the file is not found or is not readable
+     * @param filePathAndNameWithExtension The relative path to the media file, including filename and extension.
+     *                                     Must start with a forward slash.
+     * @return A Spring {@link Resource} object representing the found media file
+     * @throws FileNotFoundException if the file doesn't exist, is not readable, or the path is invalid
+     * @throws IllegalArgumentException if the provided path is null or empty
+     * @see org.springframework.core.io.Resource
+     * @see #saveFileToServer(MultipartFile, TypeOfMedia, boolean)
      */
-    @SuppressWarnings("null")
     @Override
     public Resource findFile(String filePathAndNameWithExtension) throws FileNotFoundException {
         Resource resource = null;
         try {
-            Path filePath = Paths.get(mediaConfigData.getPath().getRoot().concat(mediaConfigData.getPath().getRoot()))
+            Path filePath = Paths.get(mediaConfigData.getPath().getRoot())
                     .resolve(filePathAndNameWithExtension)
                     .normalize();
+                
+            LogPrinter.printLog(Type.INFO, "FILE_PATH", 
+                String.format("Attempting to find file at: %s", filePath));
+            
             resource = new UrlResource(filePath.toUri());
 
         } catch (Exception e) {
@@ -214,8 +233,10 @@ public class LocalMediaServiceImpl implements MediaService {
                     "LocalMediaServiceImpl",
                     "findFile", LocalDateTime.now().toString(),
                     e.getMessage());
-            e.printStackTrace();
+            throw new FileNotFoundException(messageSource.getMessage("exception.media.file-not-found",
+                    new Object[] { filePathAndNameWithExtension }, Locale.getDefault()));
         }
+
         if (!(resource.exists()) || !(resource.isReadable())) {
             throw new FileNotFoundException(messageSource.getMessage("exception.media.file-not-found",
                     new Object[] { filePathAndNameWithExtension }, Locale.getDefault()));
