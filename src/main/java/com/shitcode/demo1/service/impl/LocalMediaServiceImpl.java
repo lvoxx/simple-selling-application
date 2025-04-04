@@ -1,5 +1,6 @@
 package com.shitcode.demo1.service.impl;
 
+import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -16,6 +17,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+
+import javax.imageio.ImageIO;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -49,6 +52,7 @@ import net.bramp.ffmpeg.FFmpegUtils;
 import net.bramp.ffmpeg.FFprobe;
 import net.bramp.ffmpeg.builder.FFmpegBuilder;
 import net.bramp.ffmpeg.probe.FFmpegProbeResult;
+import net.bramp.ffmpeg.probe.FFmpegStream;
 import net.bramp.ffmpeg.progress.Progress;
 import net.bramp.ffmpeg.progress.ProgressListener;
 import net.coobird.thumbnailator.Thumbnails;
@@ -74,9 +78,13 @@ public class LocalMediaServiceImpl implements MediaService {
     public static final String IMAGE_FORMAT = "jpg";
     public static final String VIDEO_FORMAT = "mp4";
 
+    // Image Compress Config
     private static final int IMAGE_COMPRESSION_WIDTH = 1920; // Full HD width
     private static final int IMAGE_COMPRESSION_HEIGHT = 1080; // Full HD height
-    private static final double IMAGE_COMPRESSION_QUALITY = 0.85; // Higher quality (0.0-1.0)
+    private static final double IMAGE_COMPRESSION_QUALITY = 0.8; // Higher quality (0.0-1.0)
+
+    // Video Compress Config
+    private static final double VIDEO_COMPRESSION_RESOLUTION = 0.75;
 
     private String imagesPath;
     private String videosPath;
@@ -345,6 +353,23 @@ public class LocalMediaServiceImpl implements MediaService {
 
         FFmpegProbeResult input = ffprobe.probe(originalLocation);
 
+        // Get original video dimensions
+        int originalWidth = input.streams.stream()
+                .filter(stream -> stream.codec_type == FFmpegStream.CodecType.VIDEO)
+                .findFirst()
+                .map(stream -> stream.width)
+                .orElse(1920); // default to 1920 if can't determine
+
+        int originalHeight = input.streams.stream()
+                .filter(stream -> stream.codec_type == FFmpegStream.CodecType.VIDEO)
+                .findFirst()
+                .map(stream -> stream.height)
+                .orElse(1080); // default to 1080 if can't determine
+
+        // Calculate new dimensions (75% of original)
+        int newWidth = (int) (originalWidth * VIDEO_COMPRESSION_RESOLUTION);
+        int newHeight = (int) (originalHeight * VIDEO_COMPRESSION_RESOLUTION);
+
         FFmpegBuilder builder = new FFmpegBuilder()
                 .setInput(input)
                 .overrideOutputFiles(true)
@@ -361,7 +386,7 @@ public class LocalMediaServiceImpl implements MediaService {
                 // Video Configuration (optimized for high requests)
                 .setVideoCodec("libx264")
                 .setVideoFrameRate(42, 1)
-                .setVideoResolution(1280, 720)
+                .setVideoResolution(newWidth, newHeight)
 
                 // Extra Process Configuration
                 .addExtraArgs("-crf", "26") // Lower CRF for better quality (22-28 range)
