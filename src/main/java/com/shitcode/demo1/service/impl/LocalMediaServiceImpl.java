@@ -175,9 +175,10 @@ public class LocalMediaServiceImpl implements MediaService {
      */
     @Override
     public String saveVideoFile(MultipartFile video) throws Exception {
-        if (video == null) {
+        if (video == null || video.isEmpty()) {
             return null;
         }
+
         String mimeType = MediaDetector.detect(video.getInputStream());
 
         if (!(mimeType.startsWith("video/"))) {
