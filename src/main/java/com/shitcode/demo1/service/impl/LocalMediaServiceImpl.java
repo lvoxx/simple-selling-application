@@ -73,8 +73,8 @@ public class LocalMediaServiceImpl implements MediaService {
     public static final String IMAGE_FORMAT = "jpg";
     public static final String VIDEO_FORMAT = "mp4";
 
-    private static final int IMAGE_COMPRESSION_WIDTH = 1920;    // Full HD width
-    private static final int IMAGE_COMPRESSION_HEIGHT = 1080;   // Full HD height
+    private static final int IMAGE_COMPRESSION_WIDTH = 1920; // Full HD width
+    private static final int IMAGE_COMPRESSION_HEIGHT = 1080; // Full HD height
     private static final double IMAGE_COMPRESSION_QUALITY = 0.85; // Higher quality (0.0-1.0)
 
     private String imagesPath;
@@ -332,11 +332,21 @@ public class LocalMediaServiceImpl implements MediaService {
                 .append(File.separator).append(UUID.randomUUID().toString()).append(".").append(VIDEO_FORMAT)
                 .toString();
 
+        // Create all necessary parent directories
+        Path directory = Paths.get(dirPath);
+        Files.createDirectories(directory);
+
+        LogPrinter.printServiceLog(LogPrinter.Type.INFO,
+                "LocalMediaServiceImpl",
+                "compressVideo",
+                LocalDateTime.now().toString(),
+                String.format("Compressed video path: %s", filePath));
+
         FFmpegProbeResult input = ffprobe.probe(originalLocation);
 
         FFmpegBuilder builder = new FFmpegBuilder()
-                .setInput(input).overrideOutputFiles(true)
-
+                .setInput(input)
+                .overrideOutputFiles(true)
                 .addOutput(filePath)
                 .setFormat(VIDEO_FORMAT)
                 .disableSubtitle()
@@ -351,6 +361,8 @@ public class LocalMediaServiceImpl implements MediaService {
                 .setVideoCodec("libx264")
                 .setVideoFrameRate(42, 1)
                 .setVideoResolution(1280, 720)
+
+                // Extra Process Configuration
                 .addExtraArgs("-crf", "26") // Lower CRF for better quality (22-28 range)
                 .addExtraArgs("-preset", "faster") // Faster encoding, slight file size tradeoff
                 .addExtraArgs("-tune", "zerolatency") // Low-latency tuning for fast processing
@@ -358,25 +370,29 @@ public class LocalMediaServiceImpl implements MediaService {
                 .setStrict(FFmpegBuilder.Strict.EXPERIMENTAL)
                 .done();
 
-        FFmpegExecutor executor = new FFmpegExecutor(ffmpeg, ffprobe);
-        executor.createJob(builder, new ProgressListener() {
+        try {
+            FFmpegExecutor executor = new FFmpegExecutor(ffmpeg, ffprobe);
+            executor.createJob(builder, new ProgressListener() {
 
-            final double duration_ns = input.getFormat().duration * TimeUnit.SECONDS.toNanos(1);
+                final double duration_ns = input.getFormat().duration * TimeUnit.SECONDS.toNanos(1);
 
-            @Override
-            public void progress(Progress progress) {
-                double percentage = (double) progress.out_time_ns / duration_ns;
-                LogPrinter.printServiceLog(LogPrinter.Type.INFO,
-                        "MediaServiceImpl",
-                        "compressVideo",
-                        LocalDateTime.now().toString(),
-                        String.format("filename: %s -> %d status: %s time: %d ms",
-                                input.getFormat().filename, // Correctly referenced
-                                String.format("%.0f", percentage * 100), // Properly formatted percentage
-                                progress.status,
-                                FFmpegUtils.toTimecode(progress.out_time_ns, TimeUnit.NANOSECONDS)));
-            }
-        }).run();
+                @Override
+                public void progress(Progress progress) {
+                    double percentage = (double) progress.out_time_ns / duration_ns;
+                    LogPrinter.printServiceLog(LogPrinter.Type.INFO,
+                            "MediaServiceImpl",
+                            "compressVideo",
+                            LocalDateTime.now().toString(),
+                            String.format("filename: %s -> %d status: %s time: %d ms",
+                                    input.getFormat().filename, // Correctly referenced
+                                    String.format("%.0f", percentage * 100), // Properly formatted percentage
+                                    progress.status,
+                                    FFmpegUtils.toTimecode(progress.out_time_ns, TimeUnit.NANOSECONDS)));
+                }
+            }).run();
+        } catch (Exception e) {
+            LogPrinter.printLog(Type.ERROR, Flag.SERVICE_FLAG, e.getMessage());
+        }
 
         return filePath;
     }
@@ -393,13 +409,19 @@ public class LocalMediaServiceImpl implements MediaService {
     private String makeMediaPath(TypeOfMedia type, boolean isCompress) {
         String internalFolder = isCompress ? COMPRESSED_FOLDER : ORIGINAL_FOLDER;
         LocalDate now = LocalDate.now();
-        String dirPath = new StringBuilder(mediaConfigData.getPath().getRoot()).append(File.separator)
-                .append(getPath(type)).append(File.separator)
-                .append(internalFolder).append(File.separator)
-                .append(now.getDayOfMonth()).append(File.separator)
-                .append(now.getMonthValue()).append(File.separator)
-                .append(now.getYear())
-                .toString();
+
+        // Normalize the root path first
+        String rootPath = mediaConfigData.getPath().getRoot().endsWith(File.separator)
+                ? mediaConfigData.getPath().getRoot().substring(0, mediaConfigData.getPath().getRoot().length() - 1)
+                : mediaConfigData.getPath().getRoot();
+
+        String dirPath = Paths.get(
+                rootPath,
+                getPath(type),
+                internalFolder,
+                String.valueOf(now.getDayOfMonth()),
+                String.valueOf(now.getMonthValue()),
+                String.valueOf(now.getYear())).toString();
 
         return dirPath;
     }
