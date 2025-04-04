@@ -73,9 +73,9 @@ public class LocalMediaServiceImpl implements MediaService {
     public static final String IMAGE_FORMAT = "jpg";
     public static final String VIDEO_FORMAT = "mp4";
 
-    private static final int IMAGE_COMPRESSION_WIDTH = 1200;
-    private static final int IMAGE_COMPRESSION_HEIGHT = 800;
-    private static final double IMAGE_COMPRESSION_QUALITY = 0.7;
+    private static final int IMAGE_COMPRESSION_WIDTH = 1920;    // Full HD width
+    private static final int IMAGE_COMPRESSION_HEIGHT = 1080;   // Full HD height
+    private static final double IMAGE_COMPRESSION_QUALITY = 0.85; // Higher quality (0.0-1.0)
 
     private String imagesPath;
     private String videosPath;
