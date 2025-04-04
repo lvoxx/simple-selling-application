@@ -32,6 +32,7 @@ import com.shitcode.demo1.component.MediaDetector;
 import com.shitcode.demo1.exception.model.EmptyFileException;
 import com.shitcode.demo1.exception.model.FileReadException;
 import com.shitcode.demo1.exception.model.UnknownFileExtension;
+import com.shitcode.demo1.exception.model.VideoEncodeException;
 import com.shitcode.demo1.helper.CustomMultipartFile;
 import com.shitcode.demo1.properties.LvoxxServerConfigData;
 import com.shitcode.demo1.properties.MediaConfigData;
@@ -392,6 +393,8 @@ public class LocalMediaServiceImpl implements MediaService {
             }).run();
         } catch (Exception e) {
             LogPrinter.printLog(Type.ERROR, Flag.SERVICE_FLAG, e.getMessage());
+            throw new VideoEncodeException(messageSource.getMessage("exception.media.video-encode",
+                    new Object[] {}, Locale.getDefault()));
         }
 
         return filePath;

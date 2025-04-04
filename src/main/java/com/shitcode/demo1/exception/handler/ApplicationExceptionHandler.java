@@ -21,13 +21,14 @@ import com.shitcode.demo1.exception.model.ResourceNotFoundException;
 import com.shitcode.demo1.exception.model.RevokeTokenException;
 import com.shitcode.demo1.exception.model.SendingMailException;
 import com.shitcode.demo1.exception.model.TokenExpiredException;
+import com.shitcode.demo1.exception.model.VideoEncodeException;
 import com.shitcode.demo1.exception.model.WorkerBusyException;
 
 @RestControllerAdvice
 public class ApplicationExceptionHandler {
 
     @ExceptionHandler({ KeyLockMissedException.class, WorkerBusyException.class, InvalidParameterException.class,
-            SendingMailException.class, FileReadException.class
+            SendingMailException.class, FileReadException.class, VideoEncodeException.class
     })
     public ResponseEntity<ErrorModel> handleDataOperationException(RuntimeException ex) {
         ErrorModel errorResponse = ErrorModel.of(HttpStatus.INTERNAL_SERVER_ERROR, ex.getMessage(), null);

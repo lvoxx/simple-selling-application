@@ -121,3 +121,4 @@ exception:
     missed: Error while executing task with lock on key [{0}].
   media:
     file-not-found: File not found with path [{0}].
+    video-encode: An error occured during encode video.
