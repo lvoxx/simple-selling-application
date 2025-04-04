@@ -264,7 +264,7 @@ public class LocalMediaServiceImpl implements MediaService {
     }
 
     @Override
-    public void deleteFile(String filePathAndNameWithExtension) throws IOException {
+    public void deleteFile(String filePathAndNameWithExtension) throws IOException, FileNotFoundException {
 
         Path filePath = Paths.get(mediaConfigData.getPath().getRoot().concat(filePathAndNameWithExtension))
                 .normalize();
@@ -293,18 +293,9 @@ public class LocalMediaServiceImpl implements MediaService {
     }
 
     @Override
-    public void deleteFiles(List<String> filePathsAndNamesWithExtensions) throws IOException {
+    public void deleteFiles(List<String> filePathsAndNamesWithExtensions) throws IOException, FileNotFoundException {
         for (String filePathAndNameWithExtension : filePathsAndNamesWithExtensions) {
-            try {
-                deleteFile(filePathAndNameWithExtension);
-            } catch (IOException e) {
-                LogPrinter.printServiceLog(Type.ERROR,
-                        "LocalMediaServiceImpl",
-                        "deleteFiles", LocalDateTime.now().toString(),
-                        e.getMessage());
-                throw new IOException(messageSource.getMessage("exception.media.file-delete-failed",
-                        new Object[] { filePathAndNameWithExtension }, Locale.getDefault()));
-            }
+            deleteFile(filePathAndNameWithExtension);
         }
     }
 

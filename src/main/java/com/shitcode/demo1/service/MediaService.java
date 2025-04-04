@@ -18,8 +18,8 @@ public interface MediaService {
     Resource findFile(String filePathAndNameWithExtension) throws FileNotFoundException, FileReadException;
 
     String saveFileToServer(MultipartFile file, TypeOfMedia type, boolean isCompressed) throws IOException;
-    
-    void deleteFile(String filePathAndNameWithExtension) throws IOException;
 
-    void deleteFiles(List<String> filePathsAndNamesWithExtensions) throws IOException;
+    void deleteFile(String filePathAndNameWithExtension) throws IOException, FileNotFoundException;
+
+    void deleteFiles(List<String> filePathsAndNamesWithExtensions) throws IOException, FileNotFoundException;
 }
