@@ -34,6 +34,7 @@ import com.shitcode.demo1.annotation.logging.LogCollector;
 import com.shitcode.demo1.component.MediaDetector;
 import com.shitcode.demo1.exception.model.EmptyFileException;
 import com.shitcode.demo1.exception.model.FileReadException;
+import com.shitcode.demo1.exception.model.ImageEncodeException;
 import com.shitcode.demo1.exception.model.UnknownFileExtension;
 import com.shitcode.demo1.exception.model.VideoEncodeException;
 import com.shitcode.demo1.helper.CustomMultipartFile;
@@ -318,11 +319,20 @@ public class LocalMediaServiceImpl implements MediaService {
         InputStream inputStream = new FileInputStream(originalImage);
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 
-        Thumbnails.of(inputStream)
-                .size(IMAGE_COMPRESSION_WIDTH, IMAGE_COMPRESSION_HEIGHT)
-                .outputQuality(IMAGE_COMPRESSION_QUALITY)
-                .outputFormat(IMAGE_FORMAT)
-                .toOutputStream(outputStream);
+        try {
+            Thumbnails.of(inputStream)
+                    .size(IMAGE_COMPRESSION_WIDTH, IMAGE_COMPRESSION_HEIGHT)
+                    .outputQuality(IMAGE_COMPRESSION_QUALITY)
+                    .outputFormat(IMAGE_FORMAT)
+                    .toOutputStream(outputStream);
+        } catch (IOException e) {
+            LogPrinter.printServiceLog(LogPrinter.Type.ERROR,
+                    "LocalMediaServiceImpl",
+                    "compressImage",
+                    LocalDateTime.now().toString(),
+                    String.format("Error compressing image: %s", e.getMessage()));
+            throw new ImageEncodeException(e.getMessage());
+        }
         MultipartFile compressFile = new CustomMultipartFile(outputStream.toByteArray(), originalImage.getName());
         String compressPath = saveFileToServer(compressFile, TypeOfMedia.Images, true);
         return compressPath;
