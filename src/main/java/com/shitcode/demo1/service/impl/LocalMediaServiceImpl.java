@@ -1,13 +1,14 @@
 package com.shitcode.demo1.service.impl;
 
-import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.DirectoryNotEmptyException;
 import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
@@ -17,8 +18,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
-
-import javax.imageio.ImageIO;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -244,7 +243,7 @@ public class LocalMediaServiceImpl implements MediaService {
             Path filePath = Paths.get(mediaConfigData.getPath().getRoot().concat(filePathAndNameWithExtension))
                     .normalize();
 
-            LogPrinter.printLog(Type.INFO, Flag.SERVICE_FLAG,
+            LogPrinter.printLog(Type.DEBUG, Flag.SERVICE_FLAG,
                     String.format("Attempting to find file at: %s", filePath));
 
             resource = new UrlResource(filePath.toUri());
@@ -264,13 +263,68 @@ public class LocalMediaServiceImpl implements MediaService {
         return resource;
     }
 
+    @Override
+    public void deleteFile(String filePathAndNameWithExtension) throws IOException {
+
+        Path filePath = Paths.get(mediaConfigData.getPath().getRoot().concat(filePathAndNameWithExtension))
+                .normalize();
+
+        LogPrinter.printLog(Type.DEBUG, Flag.SERVICE_FLAG,
+                String.format("Attempting to delete file at: %s", filePath));
+
+        try {
+            Files.delete(filePath);
+            LogPrinter.printLog(Type.DEBUG, Flag.SERVICE_FLAG,
+                    String.format("File at %s has been successfully deleted", filePath));
+        } catch (NoSuchFileException e) {
+            throw new FileNotFoundException(messageSource.getMessage("exception.media.file-not-found",
+                    new Object[] { filePathAndNameWithExtension }, Locale.getDefault()));
+        } catch (DirectoryNotEmptyException e) {
+            throw new IOException(messageSource.getMessage("exception.media.directory-not-empty",
+                    new Object[] { filePath }, Locale.getDefault()));
+        } catch (IOException e) {
+            LogPrinter.printServiceLog(Type.ERROR,
+                    "LocalMediaServiceImpl",
+                    "deleteFile", LocalDateTime.now().toString(),
+                    e.getMessage());
+            throw new IOException(messageSource.getMessage("exception.media.file-delete-failed",
+                    new Object[] { filePathAndNameWithExtension }, Locale.getDefault()));
+        }
+    }
+
+    @Override
+    public void deleteFiles(List<String> filePathsAndNamesWithExtensions) throws IOException {
+        for (String filePathAndNameWithExtension : filePathsAndNamesWithExtensions) {
+            try {
+                deleteFile(filePathAndNameWithExtension);
+            } catch (IOException e) {
+                LogPrinter.printServiceLog(Type.ERROR,
+                        "LocalMediaServiceImpl",
+                        "deleteFiles", LocalDateTime.now().toString(),
+                        e.getMessage());
+                throw new IOException(messageSource.getMessage("exception.media.file-delete-failed",
+                        new Object[] { filePathAndNameWithExtension }, Locale.getDefault()));
+            }
+        }
+    }
+
     /**
-     * Saves a file to the local media storage.
-     *
-     * @param file The file to save
-     * @param type The type of media (image or video)
-     * @return The full path to the saved file
-     * @throws IOException If the file cannot be saved
+     * Saves a file to the local media storage directory based on the specified
+     * media type.
+     * This method generates a unique filename for the file, creates the necessary
+     * directory structure
+     * if it doesn't exist, and writes the file to the specified location.
+     * 
+     * @param file         The file to be saved, which must be a valid
+     *                     MultipartFile.
+     * @param type         The type of media to be saved, which can be either
+     *                     TypeOfMedia.IMAGE or TypeOfMedia.VIDEO.
+     * @param isCompressed Indicates if the file is compressed or not. This affects
+     *                     the directory structure.
+     * @return The full path to the saved file, including the filename and
+     *         extension.
+     * @throws IOException If the file cannot be saved due to an I/O error, such as
+     *                     a disk full or file system read-only.
      */
     @Override
     public String saveFileToServer(MultipartFile file, TypeOfMedia type, boolean isCompressed) throws IOException {
