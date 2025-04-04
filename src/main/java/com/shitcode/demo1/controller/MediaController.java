@@ -1,6 +1,5 @@
 package com.shitcode.demo1.controller;
 
-import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import org.apache.commons.io.FilenameUtils;

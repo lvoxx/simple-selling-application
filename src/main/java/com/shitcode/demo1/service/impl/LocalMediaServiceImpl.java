@@ -92,7 +92,7 @@ public class LocalMediaServiceImpl implements MediaService {
     public LocalMediaServiceImpl(MediaConfigData mediaConfigData,
             @Value("${server.compression.ffmpeg}") String ffmpegPath,
             @Value("${server.compression.ffprobe}") String ffprobePath,
-            @Value("${server.servlet.context-path}")String servletContextPath,
+            @Value("${server.servlet.context-path}") String servletContextPath,
             LvoxxServerConfigData lvoxxServerConfigData,
             MessageSource messageSource)
             throws IOException {
@@ -239,7 +239,10 @@ public class LocalMediaServiceImpl implements MediaService {
                     String.format("Attempting to find file at: %s", filePath));
 
             resource = new UrlResource(filePath.toUri());
-
+            if (!(resource.exists()) || !(resource.isReadable())) {
+                throw new FileNotFoundException(messageSource.getMessage("exception.media.file-not-found",
+                        new Object[] { filePathAndNameWithExtension }, Locale.getDefault()));
+            }
         } catch (Exception e) {
             LogPrinter.printServiceLog(Type.ERROR,
                     "LocalMediaServiceImpl",
@@ -249,10 +252,6 @@ public class LocalMediaServiceImpl implements MediaService {
                     new Object[] { filePathAndNameWithExtension }, Locale.getDefault()));
         }
 
-        if (!(resource.exists()) || !(resource.isReadable())) {
-            throw new FileNotFoundException(messageSource.getMessage("exception.media.file-not-found",
-                    new Object[] { filePathAndNameWithExtension }, Locale.getDefault()));
-        }
         return resource;
     }
 
