@@ -118,6 +118,6 @@ exception:
     thread: Server is not responding correctly. Try again later.
     db-lock: Service is busy at the moment. Try again later.
   key-lock:
-    missed: Error while executing task with lock on key [%s].
+    missed: Error while executing task with lock on key [{0}].
   media:
-    file-not-found: File not found with path [%s].
+    file-not-found: File not found with path [{0}].

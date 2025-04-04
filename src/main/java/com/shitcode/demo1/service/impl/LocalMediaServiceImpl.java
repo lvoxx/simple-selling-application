@@ -13,6 +13,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -20,6 +21,7 @@ import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.context.MessageSource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
@@ -59,6 +61,8 @@ import net.coobird.thumbnailator.Thumbnails;
 public class LocalMediaServiceImpl implements MediaService {
     private final MediaConfigData mediaConfigData;
     private final LvoxxServerConfigData lvoxxServerConfigData;
+    private final MessageSource messageSource;
+
     private final FFmpeg ffmpeg;
     private final FFprobe ffprobe;
 
@@ -85,10 +89,12 @@ public class LocalMediaServiceImpl implements MediaService {
      */
     public LocalMediaServiceImpl(MediaConfigData mediaConfigData,
             @Value("${server.compression.ffmpeg}") String ffmpegPath,
-            @Value("${server.compression.ffprobe}") String ffprobePath, LvoxxServerConfigData lvoxxServerConfigData)
+            @Value("${server.compression.ffprobe}") String ffprobePath, LvoxxServerConfigData lvoxxServerConfigData,
+            MessageSource messageSource)
             throws IOException {
         this.mediaConfigData = mediaConfigData;
         this.lvoxxServerConfigData = lvoxxServerConfigData;
+        this.messageSource = messageSource;
         if (!StringUtils.isEmpty(ffmpegPath)) {
             this.ffmpeg = new FFmpeg(ffmpegPath);
             LogPrinter.printLog(Type.INFO, Flag.START_UP, "Found FFmpeg path. Init FFmpeg.");
@@ -133,14 +139,16 @@ public class LocalMediaServiceImpl implements MediaService {
     @Override
     public List<String> saveImagesFile(List<MultipartFile> images) throws Exception {
         if (images.isEmpty()) {
-            throw new EmptyFileException("{validation.product.images.not-null}");
+            throw new EmptyFileException(messageSource.getMessage("validation.product.images.not-null",
+                    new Object[] {}, Locale.getDefault()));
         }
         List<String> imageUrls = new ArrayList<>();
         for (MultipartFile image : images) {
             String mimeType = MediaDetector.detect(image.getInputStream());
 
             if (!(mimeType.startsWith("image/"))) {
-                throw new UnknownFileExtension("{validation.product.images.valid}");
+                throw new UnknownFileExtension(messageSource.getMessage("validation.product.images.valid",
+                        new Object[] {}, Locale.getDefault()));
             }
             String originalLocation = saveFileToServer(image, TypeOfMedia.Images, false);
             imageUrls.add(
@@ -173,7 +181,8 @@ public class LocalMediaServiceImpl implements MediaService {
         String mimeType = MediaDetector.detect(video.getInputStream());
 
         if (!(mimeType.startsWith("video/"))) {
-            throw new UnknownFileExtension("{validation.product.video.valid}");
+            throw new UnknownFileExtension(messageSource.getMessage("validation.product.video.valid",
+                    new Object[] {}, Locale.getDefault()));
         }
         String location = saveFileToServer(video, TypeOfMedia.Videos, false);
 
@@ -207,7 +216,8 @@ public class LocalMediaServiceImpl implements MediaService {
             e.printStackTrace();
         }
         if (!(resource.exists()) || !(resource.isReadable())) {
-            throw new FileNotFoundException("{exception.media.file-not-found}");
+            throw new FileNotFoundException(messageSource.getMessage("exception.media.file-not-found",
+                    new Object[] { filePathAndNameWithExtension }, Locale.getDefault()));
         }
         return resource;
     }
@@ -248,14 +258,17 @@ public class LocalMediaServiceImpl implements MediaService {
      * Compresses an image and saves it in JPG format with optimized settings.
      * The compression process includes:
      * <ul>
-     *   <li>Resizing to {@value #IMAGE_COMPRESSION_WIDTH}x{@value #IMAGE_COMPRESSION_HEIGHT} pixels</li>
-     *   <li>Quality reduction to {@value #IMAGE_COMPRESSION_QUALITY}</li>
-     *   <li>Conversion to {@value #IMAGE_FORMAT} format</li>
+     * <li>Resizing to
+     * {@value #IMAGE_COMPRESSION_WIDTH}x{@value #IMAGE_COMPRESSION_HEIGHT}
+     * pixels</li>
+     * <li>Quality reduction to {@value #IMAGE_COMPRESSION_QUALITY}</li>
+     * <li>Conversion to {@value #IMAGE_FORMAT} format</li>
      * </ul>
      *
      * @param originalLocation The absolute path to the original image file
      * @return The absolute path to the compressed image file
-     * @throws IOException If the original file cannot be read, or if compression/saving fails
+     * @throws IOException           If the original file cannot be read, or if
+     *                               compression/saving fails
      * @throws FileNotFoundException If the original file does not exist
      * @see #saveFileToServer(MultipartFile, TypeOfMedia, boolean)
      */
