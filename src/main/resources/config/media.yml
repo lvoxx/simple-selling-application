@@ -6,15 +6,27 @@ media:
     compressed: /compressed
     original: /original
   upload-locally: true
-  image-compress:
-    format: jpg
-    height: 1920
-    width: 1080
-    quality: 0.8
-  video-compress:
-    format: mp4
-    resolution: 0.75
-
+  compress:
+    image:
+      format: jpg
+      width: 1920
+      height: 1080
+      quality: 0.75
+    video:
+      format: mp4
+      resolution: 0.8
+      # Audio settings
+      audio-channel: 1
+      audio-codec: aac
+      audio-sample-rate: 44100
+      audio-bit-rate: 48000
+      # Video settings
+      video-codec: libx264
+      video-frame-rate: 42
+      # Extra configuration
+      extra-args-crf: "26"
+      extra-args-preset: "faster"
+      extra-args-tune: "zerolatency"
 spring:
   servlet:
     multipart:

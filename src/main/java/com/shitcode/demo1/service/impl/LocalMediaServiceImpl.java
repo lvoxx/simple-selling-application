@@ -75,19 +75,10 @@ public class LocalMediaServiceImpl implements MediaService {
     private final FFprobe ffprobe;
     private final String servletContextPath;
 
-    public static final String IMAGE_FORMAT = "jpg";
-    public static final String VIDEO_FORMAT = "mp4";
-
-    // Image Compress Config
-    private static final int IMAGE_COMPRESSION_WIDTH = 1920; // Full HD width
-    private static final int IMAGE_COMPRESSION_HEIGHT = 1080; // Full HD height
-    private static final double IMAGE_COMPRESSION_QUALITY = 0.8; // Higher quality (0.0-1.0)
-
-    // Video Compress Config
-    private static final double VIDEO_COMPRESSION_RESOLUTION = 0.75;
-
     private String imagesPath;
     private String videosPath;
+    private MediaConfigData.ImageCompressConfig imageCompressConfig;
+    private MediaConfigData.VideoCompressConfig videoCompressConfig;
 
     /**
      * Constructor for LocalMediaServiceImpl.
@@ -136,6 +127,9 @@ public class LocalMediaServiceImpl implements MediaService {
         // Log the media root path for verification
         LogPrinter.printLog(Type.INFO, "MEDIA_CONFIG",
                 String.format("Media root path: %s", mediaConfigData.getPath().getRoot()));
+
+        imageCompressConfig = mediaConfigData.getCompress().getImage();
+        videoCompressConfig = mediaConfigData.getCompress().getVideo();
     }
 
     /**
@@ -449,9 +443,9 @@ public class LocalMediaServiceImpl implements MediaService {
 
         try {
             Thumbnails.of(inputStream)
-                    .size(IMAGE_COMPRESSION_WIDTH, IMAGE_COMPRESSION_HEIGHT)
-                    .outputQuality(IMAGE_COMPRESSION_QUALITY)
-                    .outputFormat(IMAGE_FORMAT)
+                    .size(imageCompressConfig.getWidth(), imageCompressConfig.getHeight())
+                    .outputQuality(imageCompressConfig.getQuality())
+                    .outputFormat(imageCompressConfig.getFormat())
                     .toOutputStream(outputStream);
         } catch (IOException e) {
             LogPrinter.printServiceLog(LogPrinter.Type.ERROR,
@@ -476,7 +470,8 @@ public class LocalMediaServiceImpl implements MediaService {
     private String compressVideo(String originalLocation) throws IOException {
         String dirPath = makeMediaPath(TypeOfMedia.Videos, true);
         String filePath = new StringBuilder(dirPath)
-                .append(File.separator).append(UUID.randomUUID().toString()).append(".").append(VIDEO_FORMAT)
+                .append(File.separator).append(UUID.randomUUID().toString()).append(".")
+                .append(videoCompressConfig.getFormat())
                 .toString();
 
         // Create all necessary parent directories
@@ -505,31 +500,33 @@ public class LocalMediaServiceImpl implements MediaService {
                 .orElse(1080); // default to 1080 if can't determine
 
         // Calculate new dimensions (75% of original)
-        int newWidth = (int) (originalWidth * VIDEO_COMPRESSION_RESOLUTION);
-        int newHeight = (int) (originalHeight * VIDEO_COMPRESSION_RESOLUTION);
+        int newWidth = (int) (originalWidth * videoCompressConfig.getResolution());
+        int newHeight = (int) (originalHeight * videoCompressConfig.getResolution());
 
         FFmpegBuilder builder = new FFmpegBuilder()
                 .setInput(input)
                 .overrideOutputFiles(true)
                 .addOutput(filePath)
-                .setFormat(VIDEO_FORMAT)
+                .setFormat(videoCompressConfig.getFormat())
                 .disableSubtitle()
 
                 // Audio Configuration (lightweight)
-                .setAudioChannels(1)
-                .setAudioCodec("aac")
-                .setAudioSampleRate(44_100) // Lower sample rate to save space
-                .setAudioBitRate(48_000) // Slightly higher bitrate for clarity
+                .setAudioChannels(videoCompressConfig.getAudioChannel())
+                .setAudioCodec(videoCompressConfig.getAudioCodec())
+                .setAudioSampleRate(videoCompressConfig.getAudioSampleRate()) // Lower sample rate to save space
+                .setAudioBitRate(videoCompressConfig.getAudioBitRate()) // Slightly higher bitrate for clarity
 
                 // Video Configuration (optimized for high requests)
-                .setVideoCodec("libx264")
-                .setVideoFrameRate(42, 1)
+                .setVideoCodec(videoCompressConfig.getAudioCodec())
+                .setVideoFrameRate(videoCompressConfig.getVideoFrameRate(), 1)
                 .setVideoResolution(newWidth, newHeight)
 
                 // Extra Process Configuration
-                .addExtraArgs("-crf", "26") // Lower CRF for better quality (22-28 range)
-                .addExtraArgs("-preset", "faster") // Faster encoding, slight file size tradeoff
-                .addExtraArgs("-tune", "zerolatency") // Low-latency tuning for fast processing
+                .addExtraArgs("-crf", videoCompressConfig.getExtraArgsCrf()) // Lower CRF for better quality (22-28
+                                                                             // range)
+                .addExtraArgs("-preset", videoCompressConfig.getExtraArgsPreset()) // Faster encoding, slight file size
+                                                                                   // tradeoff
+                .addExtraArgs("-tune", videoCompressConfig.getExtraArgsTune()) // Low-latency tuning for fast processing
 
                 .setStrict(FFmpegBuilder.Strict.EXPERIMENTAL)
                 .done();
@@ -547,7 +544,7 @@ public class LocalMediaServiceImpl implements MediaService {
                             "MediaServiceImpl",
                             "compressVideo",
                             LocalDateTime.now().toString(),
-                            String.format("filename: %s -> %d status: %s time: %d ms",
+                            String.format("Filename: %s -> %d status: %s time: %d ms",
                                     input.getFormat().filename, // Correctly referenced
                                     String.format("%.0f", percentage * 100), // Properly formatted percentage
                                     progress.status,
@@ -590,7 +587,8 @@ public class LocalMediaServiceImpl implements MediaService {
      * @return A string representing the generated media path.
      */
     private String makeMediaPath(TypeOfMedia type, boolean isCompress) {
-        String internalFolder = isCompress ? mediaConfigData.getPath().getCompressed() : mediaConfigData.getPath().getOriginal();
+        String internalFolder = isCompress ? mediaConfigData.getPath().getCompressed()
+                : mediaConfigData.getPath().getOriginal();
         LocalDate now = LocalDate.now();
 
         // Normalize the root path first
