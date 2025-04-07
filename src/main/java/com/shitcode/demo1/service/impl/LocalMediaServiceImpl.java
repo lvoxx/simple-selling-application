@@ -19,6 +19,7 @@ import java.util.Locale;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
@@ -33,6 +34,7 @@ import com.shitcode.demo1.annotation.logging.LogCollector;
 import com.shitcode.demo1.component.MediaDetector;
 import com.shitcode.demo1.exception.model.EmptyFileException;
 import com.shitcode.demo1.exception.model.FileReadException;
+import com.shitcode.demo1.exception.model.FolderNotFoundException;
 import com.shitcode.demo1.exception.model.ImageEncodeException;
 import com.shitcode.demo1.exception.model.UnknownFileExtension;
 import com.shitcode.demo1.exception.model.VideoEncodeException;
@@ -292,11 +294,94 @@ public class LocalMediaServiceImpl implements MediaService {
         }
     }
 
+    /**
+     * Deletes multiple media files from the local storage system.
+     * 
+     * <p>
+     * This implementation processes each file deletion sequentially. For each file:
+     * </p>
+     * <ul>
+     * <li>Validates the file path</li>
+     * <li>Attempts to delete the file</li>
+     * <li>Continues to next file even if one fails</li>
+     * </ul>
+     * 
+     * <p>
+     * <b>Note:</b> This method:
+     * </p>
+     * <ul>
+     * <li>Processes deletions one at a time</li>
+     * <li>Will attempt to delete all files even if some fail</li>
+     * <li>Throws an exception on the first encountered error</li>
+     * </ul>
+     * 
+     * <p>
+     * <b>Example path format:</b>
+     * {@code /images|videos/original|compressed/day/month/year/filename.ext}
+     * </p>
+     *
+     * @param filePathsAndNamesWithExtensions List of relative paths to files to be
+     *                                        deleted.
+     *                                        Each path should be relative to the
+     *                                        media root directory.
+     * 
+     * @throws FileNotFoundException if any file in the list doesn't exist
+     * @throws IOException           if any deletion operation fails (e.g.,
+     *                               permission issues)
+     * 
+     * @see #deleteFile(String) for single file deletion
+     * @see MediaService#deleteFiles(List) for the interface specification
+     * 
+     * @implNote Consider implementing batch deletion or parallel processing for
+     *           better performance
+     *           with large numbers of files in future versions.
+     */
     @Override
     public void deleteFiles(List<String> filePathsAndNamesWithExtensions) throws IOException, FileNotFoundException {
         for (String filePathAndNameWithExtension : filePathsAndNamesWithExtensions) {
             deleteFile(filePathAndNameWithExtension);
         }
+    }
+
+    /**
+     * Deletes a single directory and all its contents from the storage system.
+     * 
+     * <p>
+     * Uses Apache Commons IO for recursive directory deletion.
+     * </p>
+     *
+     * @param folderName The absolute or relative path to the folder
+     * @throws FolderNotFoundException if the folder doesn't exist or deletion fails
+     * 
+     * @see org.apache.commons.io.FileUtils#deleteDirectory(File)
+     */
+    @Override
+    public void deleteFolder(String folderName) throws FolderNotFoundException {
+        try {
+            FileUtils.deleteDirectory(new File(folderName));
+        } catch (IOException e) {
+            throw new FolderNotFoundException(e.getMessage());
+        }
+    }
+
+    /**
+     * Deletes multiple directories and their contents from the storage system.
+     * 
+     * <p>
+     * Processes each folder sequentially. Continues to next folder even if one
+     * fails.
+     * </p>
+     *
+     * @param folderNames List of folder paths to delete
+     * @throws FolderNotFoundException if any folder doesn't exist or deletion fails
+     * 
+     * @see #deleteFolder(String) for single folder deletion
+     */
+    @Override
+    public void deleteFolder(List<String> folderNames) throws FolderNotFoundException {
+        folderNames.forEach(folder -> {
+            deleteFolder(folder);
+        });
     }
 
     /**
@@ -481,22 +566,29 @@ public class LocalMediaServiceImpl implements MediaService {
     }
 
     /**
-     * Generates a media path based on the specified media type and compression status.
+     * Generates a media path based on the specified media type and compression
+     * status.
      * 
-     * This method constructs a path for storing media files based on the type of media (Images or Videos) and
-     * whether the media is compressed or not. The path includes the root directory, media type directory, compression
-     * status directory, and the current date. The structure of the folder is as follows:
+     * This method constructs a path for storing media files based on the type of
+     * media (Images or Videos) and
+     * whether the media is compressed or not. The path includes the root directory,
+     * media type directory, compression
+     * status directory, and the current date. The structure of the folder is as
+     * follows:
      * 
      * Root Directory
      * |--- Media Type Directory (Images or Videos)
-     * |    |--- Compression Status Directory (Compressed or Original)
-     * |    |    |--- Year
-     * |    |    |    |--- Month
-     * |    |    |    |    |--- Day
+     * | |--- Compression Status Directory (Compressed or Original)
+     * | | |--- Year
+     * | | | |--- Month
+     * | | | | |--- Day
      * 
-     * @param type       The type of media to be stored. This can be either Images or Videos.
-     * @param isCompress Indicates if the media is compressed or not. If true, the path will point to the compressed media
-     *                   directory; otherwise, it will point to the original media directory.
+     * @param type       The type of media to be stored. This can be either Images
+     *                   or Videos.
+     * @param isCompress Indicates if the media is compressed or not. If true, the
+     *                   path will point to the compressed media
+     *                   directory; otherwise, it will point to the original media
+     *                   directory.
      * @return A string representing the generated media path.
      */
     private String makeMediaPath(TypeOfMedia type, boolean isCompress) {
