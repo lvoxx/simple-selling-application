@@ -3,7 +3,17 @@ media:
     root: /opt/app/media
     images: /images
     videos: /videos
+    compressed: /compressed
+    original: /original
   upload-locally: true
+  image-compress:
+    format: jpg
+    height: 1920
+    width: 1080
+    quality: 0.8
+  video-compress:
+    format: mp4
+    resolution: 0.75
 
 spring:
   servlet:

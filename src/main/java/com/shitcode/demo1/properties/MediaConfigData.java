@@ -17,5 +17,7 @@ public class MediaConfigData {
         private String root;
         private String images;
         private String videos;
+        private String compressed;
+        private String original;
     }
 }

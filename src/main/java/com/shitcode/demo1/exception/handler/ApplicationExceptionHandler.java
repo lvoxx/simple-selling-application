@@ -16,6 +16,7 @@ import com.shitcode.demo1.exception.model.EntityNotChangedException;
 import com.shitcode.demo1.exception.model.EntityNotFoundException;
 import com.shitcode.demo1.exception.model.ErrorModel;
 import com.shitcode.demo1.exception.model.FileReadException;
+import com.shitcode.demo1.exception.model.FolderNotFoundException;
 import com.shitcode.demo1.exception.model.ImageEncodeException;
 import com.shitcode.demo1.exception.model.KeyLockMissedException;
 import com.shitcode.demo1.exception.model.ResourceNotFoundException;
@@ -54,7 +55,8 @@ public class ApplicationExceptionHandler {
         return new ResponseEntity<>(errorResponse, HttpStatus.GONE);
     }
 
-    @ExceptionHandler({ EntityNotFoundException.class, ResourceNotFoundException.class, FileNotFoundException.class
+    @ExceptionHandler({ EntityNotFoundException.class, ResourceNotFoundException.class, FileNotFoundException.class,
+            FolderNotFoundException.class
     })
     public ResponseEntity<ErrorModel> handleDataNotFoundOperationException(RuntimeException ex) {
         ErrorModel errorResponse = ErrorModel.of(HttpStatus.NOT_FOUND, ex.getMessage(), null);

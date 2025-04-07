@@ -75,8 +75,6 @@ public class LocalMediaServiceImpl implements MediaService {
     private final FFprobe ffprobe;
     private final String servletContextPath;
 
-    public static final String ORIGINAL_FOLDER = "original";
-    public static final String COMPRESSED_FOLDER = "compressed";
     public static final String IMAGE_FORMAT = "jpg";
     public static final String VIDEO_FORMAT = "mp4";
 
@@ -592,7 +590,7 @@ public class LocalMediaServiceImpl implements MediaService {
      * @return A string representing the generated media path.
      */
     private String makeMediaPath(TypeOfMedia type, boolean isCompress) {
-        String internalFolder = isCompress ? COMPRESSED_FOLDER : ORIGINAL_FOLDER;
+        String internalFolder = isCompress ? mediaConfigData.getPath().getCompressed() : mediaConfigData.getPath().getOriginal();
         LocalDate now = LocalDate.now();
 
         // Normalize the root path first
