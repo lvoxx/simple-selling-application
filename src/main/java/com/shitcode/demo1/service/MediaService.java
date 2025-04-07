@@ -7,8 +7,10 @@ import java.util.List;
 import org.springframework.core.io.Resource;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.shitcode.demo1.exception.model.EmptyFileException;
 import com.shitcode.demo1.exception.model.FileReadException;
 import com.shitcode.demo1.exception.model.FolderNotFoundException;
+import com.shitcode.demo1.exception.model.UnknownFileExtension;
 import com.shitcode.demo1.service.impl.LocalMediaServiceImpl.TypeOfMedia;
 
 /**
@@ -45,7 +47,8 @@ public interface MediaService {
      * @return List of URLs or paths to access the saved images
      * @throws Exception if validation fails or storage operations encounter errors
      */
-    List<String> saveImagesFile(List<MultipartFile> images) throws Exception;
+    List<String> saveImagesFile(List<MultipartFile> images)
+            throws EmptyFileException, UnknownFileExtension, IOException;
 
     /**
      * Saves a video file to the storage system and returns its access URL.
@@ -61,7 +64,7 @@ public interface MediaService {
      * @return URL or path to access the saved video
      * @throws Exception if validation fails or storage operations encounter errors
      */
-    String saveVideoFile(MultipartFile video) throws Exception;
+    String saveVideoFile(MultipartFile video) throws EmptyFileException, UnknownFileExtension, IOException;
 
     /**
      * Retrieves a media file from the storage system.
@@ -101,14 +104,64 @@ public interface MediaService {
     String saveFileToServer(MultipartFile file, TypeOfMedia type, boolean isCompressed) throws IOException;
 
     /**
-     * Deletes a single media file from the storage system.
-     * The implementation should handle:
-     * <ul>
-     * <li>Path validation</li>
-     * <li>Permission checking</li>
-     * <li>Resource cleanup</li>
-     * <li>Associated metadata removal</li>
-     * </ul>
+     * Updates the list of image files by replacing old image URLs with newly
+     * uploaded images.
+     * <p>
+     * This method is intended to be used in both cloud and local environments. It
+     * uploads the new
+     * image files and returns a list of updated URLs. The old image URLs will be
+     * used to identify and
+     * remove or replace previously stored images as needed.
+     *
+     * @param images  the list of new image files to upload
+     * @param oldUrls the list of old image URLs to be replaced or removed
+     * @return a list of URLs pointing to the newly uploaded images
+     * @throws FileNotFoundException if any file is not found during processing
+     * @throws IOException           if an I/O error occurs during file upload or
+     *                               deletion
+     */
+    List<String> updateImages(List<MultipartFile> images, List<String> oldUrls)
+            throws FileNotFoundException, IOException;
+
+    /**
+     * Updates the video file by replacing the old video URL with the newly uploaded
+     * video.
+     * <p>
+     * This method is designed for both cloud and local file systems. It uploads the
+     * new video file,
+     * removes or replaces the video at the old URL if necessary, and returns the
+     * URL of the updated video.
+     *
+     * @param video  the new video file to upload
+     * @param oldUrl the old video URL to be replaced or removed
+     * @return the URL pointing to the newly uploaded video
+     * @throws FileNotFoundException if the video file is not found during
+     *                               processing
+     * @throws IOException           if an I/O error occurs during file upload or
+     *                               deletion
+     */
+    String updateVideo(MultipartFile video, String oldUrl)
+            throws FileNotFoundException, IOException;
+
+    /**
+     * Updates a single video file by processing and storing it either locally or in
+     * the cloud.
+     * 
+     * @param video A single video file to be updated, represented by a
+     *              {@link MultipartFile}.
+     * @return The URL or path where the video has been successfully stored.
+     *         This could be a local file path or a URL to cloud storage.
+     * 
+     * 
+     *         /**
+     *         Deletes a single media file from the storage system.
+     *         The implementation should handle:
+     *         <ul>
+     *         <li>Path validation</li>
+     *         <li>Permission checking</li>
+     *         <li>Resource cleanup</li>
+     *         <li>Associated metadata removal</li>
+     *         </ul>
      *
      * @param filePathAndNameWithExtension The path to the file to delete
      * @throws IOException           if deletion operation fails
@@ -137,7 +190,8 @@ public interface MediaService {
      * Handles recursive deletion and resource cleanup.
      *
      * @param folderName Path or identifier of the folder to delete
-     * @throws FolderNotFoundException if the folder cannot be deleted or doesn't exist
+     * @throws FolderNotFoundException if the folder cannot be deleted or doesn't
+     *                                 exist
      */
     void deleteFolder(String folderName) throws FolderNotFoundException;
 

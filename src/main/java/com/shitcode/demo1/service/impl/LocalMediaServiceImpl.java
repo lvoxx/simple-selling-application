@@ -67,6 +67,7 @@ import net.coobird.thumbnailator.Thumbnails;
 @LogCollector(loggingModel = LoggingModel.SERVICE)
 @ConditionalOnProperty(havingValue = "true", matchIfMissing = true, name = "upload-locally", prefix = "media.path")
 public class LocalMediaServiceImpl implements MediaService {
+    private static final String MEDIA_ROUTE = "/media";
     private final MediaConfigData mediaConfigData;
     private final LvoxxServerConfigData lvoxxServerConfigData;
     private final MessageSource messageSource;
@@ -79,6 +80,7 @@ public class LocalMediaServiceImpl implements MediaService {
     private String videosPath;
     private MediaConfigData.ImageCompressConfig imageCompressConfig;
     private MediaConfigData.VideoCompressConfig videoCompressConfig;
+    private MediaConfigData.PathConfig pathConfig;
 
     /**
      * Constructor for LocalMediaServiceImpl.
@@ -121,12 +123,13 @@ public class LocalMediaServiceImpl implements MediaService {
      */
     @PostConstruct
     void setUp() {
-        imagesPath = mediaConfigData.getPath().getImages();
-        videosPath = mediaConfigData.getPath().getVideos();
+        pathConfig = mediaConfigData.getPath();
+        imagesPath = pathConfig.getImages();
+        videosPath = pathConfig.getVideos();
 
         // Log the media root path for verification
         LogPrinter.printLog(Type.INFO, "MEDIA_CONFIG",
-                String.format("Media root path: %s", mediaConfigData.getPath().getRoot()));
+                String.format("Media root path: %s", pathConfig.getRoot()));
 
         imageCompressConfig = mediaConfigData.getCompress().getImage();
         videoCompressConfig = mediaConfigData.getCompress().getVideo();
@@ -149,7 +152,8 @@ public class LocalMediaServiceImpl implements MediaService {
      *                   process
      */
     @Override
-    public List<String> saveImagesFile(List<MultipartFile> images) throws Exception {
+    public List<String> saveImagesFile(List<MultipartFile> images)
+            throws EmptyFileException, UnknownFileExtension, IOException {
         if (images.isEmpty()) {
             throw new EmptyFileException(messageSource.getMessage("validation.product.images.not-null",
                     new Object[] {}, Locale.getDefault()));
@@ -165,7 +169,7 @@ public class LocalMediaServiceImpl implements MediaService {
             String originalLocation = saveFileToServer(image, TypeOfMedia.Images, false);
             imageUrls.add(
                     generateMediaUrl(
-                            extractCompressPath(compressImage(originalLocation))));
+                            removeRootPath(compressImage(originalLocation))));
         }
 
         return imageUrls;
@@ -186,7 +190,7 @@ public class LocalMediaServiceImpl implements MediaService {
      *                   process
      */
     @Override
-    public String saveVideoFile(MultipartFile video) throws Exception {
+    public String saveVideoFile(MultipartFile video) throws EmptyFileException, UnknownFileExtension, IOException {
         if (video == null || video.isEmpty()) {
             return null;
         }
@@ -199,7 +203,7 @@ public class LocalMediaServiceImpl implements MediaService {
         }
         String location = saveFileToServer(video, TypeOfMedia.Videos, false);
 
-        return generateMediaUrl(extractCompressPath(compressVideo(location)));
+        return generateMediaUrl(removeRootPath(compressVideo(location)));
     }
 
     /**
@@ -234,7 +238,7 @@ public class LocalMediaServiceImpl implements MediaService {
     public Resource findFile(String filePathAndNameWithExtension) throws FileNotFoundException, FileReadException {
         Resource resource = null;
         try {
-            Path filePath = Paths.get(mediaConfigData.getPath().getRoot().concat(filePathAndNameWithExtension))
+            Path filePath = Paths.get(pathConfig.getRoot().concat(filePathAndNameWithExtension))
                     .normalize();
 
             LogPrinter.printLog(Type.DEBUG, Flag.SERVICE_FLAG,
@@ -257,32 +261,57 @@ public class LocalMediaServiceImpl implements MediaService {
         return resource;
     }
 
+    @Override
+    public List<String> updateImages(List<MultipartFile> images, List<String> oldUrls)
+            throws FileNotFoundException, IOException {
+        // Map url to folder paths
+        List<String> imageFolderPaths = oldUrls.stream().map(url -> removeBaseServerUrlThenChangeToRootPath(url))
+                .toList();
+        // Delete old image from folder paths
+        deleteFiles(imageFolderPaths);
+        // Upload new images
+        return saveImagesFile(images);
+    }
+
+    @Override
+    public String updateVideo(MultipartFile video, String oldUrl) throws FileNotFoundException, IOException {
+        // Map url to folder path
+        String videoFolderPath = removeBaseServerUrlThenChangeToRootPath(oldUrl);
+        // Delete old video from folder path
+        deleteFile(videoFolderPath);
+        // Upload new video
+        return saveVideoFile(video);
+    }
+
     /**
      * Deletes a media file from the local storage system.
      * 
      * <p>
-     * This implementation first validates the file path, then attempts to delete the file.
+     * This implementation first validates the file path, then attempts to delete
+     * the file.
      * If the file does not exist, a {@link FileNotFoundException} is thrown.
      * If the file is a directory and not empty, a {@link IOException} is thrown.
-     * If the file cannot be deleted for any other reason, a {@link IOException} is thrown.
+     * If the file cannot be deleted for any other reason, a {@link IOException} is
+     * thrown.
      * </p>
      * 
      * @param filePathAndNameWithExtension The relative path to the media file,
      *                                     including filename and extension.
      *                                     Must start with a forward slash.
-     * @throws IOException               if the file cannot be deleted due to an I/O error, such as
-     *                                   a disk full or file system read-only.
-     * @throws FileNotFoundException     if the file doesn't exist, is not readable,
-     *                                   or the path is invalid
-     * @throws IllegalArgumentException  if the provided path is null or empty
-     * @throws EmptyFileException        if the file is empty
-     * @throws FolderNotFoundException   if the directory of the file does not exist
+     * @throws IOException              if the file cannot be deleted due to an I/O
+     *                                  error, such as
+     *                                  a disk full or file system read-only.
+     * @throws FileNotFoundException    if the file doesn't exist, is not readable,
+     *                                  or the path is invalid
+     * @throws IllegalArgumentException if the provided path is null or empty
+     * @throws EmptyFileException       if the file is empty
+     * @throws FolderNotFoundException  if the directory of the file does not exist
      * @see #saveFileToServer(MultipartFile, TypeOfMedia, boolean)
      */
     @Override
     public void deleteFile(String filePathAndNameWithExtension) throws IOException, FileNotFoundException {
 
-        Path filePath = Paths.get(mediaConfigData.getPath().getRoot().concat(filePathAndNameWithExtension))
+        Path filePath = Paths.get(pathConfig.getRoot().concat(filePathAndNameWithExtension))
                 .normalize();
 
         LogPrinter.printLog(Type.DEBUG, Flag.SERVICE_FLAG,
@@ -609,14 +638,14 @@ public class LocalMediaServiceImpl implements MediaService {
      * @return A string representing the generated media path.
      */
     private String makeMediaPath(TypeOfMedia type, boolean isCompress) {
-        String internalFolder = isCompress ? mediaConfigData.getPath().getCompressed()
-                : mediaConfigData.getPath().getOriginal();
+        String internalFolder = isCompress ? pathConfig.getCompressed()
+                : pathConfig.getOriginal();
         LocalDate now = LocalDate.now();
 
         // Normalize the root path first
-        String rootPath = mediaConfigData.getPath().getRoot().endsWith(File.separator)
-                ? mediaConfigData.getPath().getRoot().substring(0, mediaConfigData.getPath().getRoot().length() - 1)
-                : mediaConfigData.getPath().getRoot();
+        String rootPath = pathConfig.getRoot().endsWith(File.separator)
+                ? pathConfig.getRoot().substring(0, pathConfig.getRoot().length() - 1)
+                : pathConfig.getRoot();
 
         String dirPath = Paths.get(
                 rootPath,
@@ -651,8 +680,16 @@ public class LocalMediaServiceImpl implements MediaService {
         Images, Videos
     }
 
-    public String extractCompressPath(String fullPath) {
-        return fullPath.replace(mediaConfigData.getPath().getRoot(), "");
+    public String removeRootPath(String fullPath) {
+        return fullPath.replace(pathConfig.getRoot(), "");
+    }
+
+    public String removeBaseServerUrl(String fullUrl) {
+        return fullUrl.replace(getMediaRequestRoute(), "");
+    }
+
+    public String removeBaseServerUrlThenChangeToRootPath(String fullUrl) {
+        return pathConfig.getRoot().concat(removeBaseServerUrl(fullUrl));
     }
 
     /**
@@ -662,12 +699,16 @@ public class LocalMediaServiceImpl implements MediaService {
      * @return The generated media URL.
      */
     public String generateMediaUrl(String mediaPath) {
+        String baseMediaUrl = getMediaRequestRoute();
+
+        return baseMediaUrl.concat(mediaPath);
+    }
+
+    private String getMediaRequestRoute() {
         boolean isDeploy = lvoxxServerConfigData.isProductDeploy();
-        String mediaMap = "/media";
         String baseMediaUrl = isDeploy ? lvoxxServerConfigData.getProdServer().getBaseUrl()
                 : lvoxxServerConfigData.getDevServer().getBaseUrl();
-
-        return baseMediaUrl.concat(servletContextPath).concat(mediaMap).concat(mediaPath);
+        return baseMediaUrl.concat(servletContextPath).concat(MEDIA_ROUTE);
     }
 
 }
