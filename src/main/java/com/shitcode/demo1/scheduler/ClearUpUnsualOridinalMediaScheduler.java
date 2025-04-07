@@ -40,6 +40,16 @@ public class ClearUpUnsualOridinalMediaScheduler {
         VIDEO_PATHS = rootPath.concat(mediaConfigData.getPath().getVideos()).concat(compressedPath);
     }
 
+    /**
+     * Clears old media folders on the original folder.
+     * 
+     * This method is scheduled to run every Monday at 10:00 AM. It calculates the
+     * dates between the last Monday and the current date,
+     * then iterates through each date to construct the path for both image and
+     * video folders. It calls the deleteMediaFolder method to remove these folders.
+     * 
+     * @see #deleteMediaFolder(String, String)
+     */
     @Scheduled(cron = "0 0 10 ? * MON")
     void clearOldMediaFoldersOnOriginalFolder() {
         OffsetDateTime lastMonday = OffsetDateTime.now().minusDays(DAYS_BETWEEN);
@@ -62,25 +72,21 @@ public class ClearUpUnsualOridinalMediaScheduler {
             // Folder path (e.g., /media/compressed/videos/2024/3/15)
             String videoFolderToBeDeleted = dateBuilder.insert(0, VIDEO_PATHS).toString();
 
-            try {
-                mediaService.deleteFolder(imageFolderToBeDeleted);
-            } catch (FolderNotFoundException e) {
-                LogPrinter.printSchedulerLog(LogPrinter.Type.INFO,
-                        "ClearUpUnsualOridinalMediaScheduler",
-                        "clearOldMediaFoldersOnOriginalFolder",
-                        LocalDateTime.now().toString(),
-                        e.getMessage());
-            }
-            
-            try {
-                mediaService.deleteFolder(videoFolderToBeDeleted);
-            } catch (FolderNotFoundException e) {
-                LogPrinter.printSchedulerLog(LogPrinter.Type.INFO,
-                        "ClearUpUnsualOridinalMediaScheduler",
-                        "clearOldMediaFoldersOnOriginalFolder",
-                        LocalDateTime.now().toString(),
-                        e.getMessage());
-            }
+            deleteMediaFolder(imageFolderToBeDeleted, "image");
+            deleteMediaFolder(videoFolderToBeDeleted, "video");
+        }
+    }
+
+    private void deleteMediaFolder(String folderPath, String mediaType) {
+        try {
+            mediaService.deleteFolder(folderPath);
+        } catch (FolderNotFoundException e) {
+            LogPrinter.printSchedulerLog(
+                    LogPrinter.Type.INFO,
+                    "ClearUpUnsualOridinalMediaScheduler",
+                    "clearOldMediaFoldersOnOriginalFolder",
+                    LocalDateTime.now().toString(),
+                    String.format("No %s folder found to delete: %s", mediaType, e.getMessage()));
         }
     }
 }

@@ -257,6 +257,28 @@ public class LocalMediaServiceImpl implements MediaService {
         return resource;
     }
 
+    /**
+     * Deletes a media file from the local storage system.
+     * 
+     * <p>
+     * This implementation first validates the file path, then attempts to delete the file.
+     * If the file does not exist, a {@link FileNotFoundException} is thrown.
+     * If the file is a directory and not empty, a {@link IOException} is thrown.
+     * If the file cannot be deleted for any other reason, a {@link IOException} is thrown.
+     * </p>
+     * 
+     * @param filePathAndNameWithExtension The relative path to the media file,
+     *                                     including filename and extension.
+     *                                     Must start with a forward slash.
+     * @throws IOException               if the file cannot be deleted due to an I/O error, such as
+     *                                   a disk full or file system read-only.
+     * @throws FileNotFoundException     if the file doesn't exist, is not readable,
+     *                                   or the path is invalid
+     * @throws IllegalArgumentException  if the provided path is null or empty
+     * @throws EmptyFileException        if the file is empty
+     * @throws FolderNotFoundException   if the directory of the file does not exist
+     * @see #saveFileToServer(MultipartFile, TypeOfMedia, boolean)
+     */
     @Override
     public void deleteFile(String filePathAndNameWithExtension) throws IOException, FileNotFoundException {
 
