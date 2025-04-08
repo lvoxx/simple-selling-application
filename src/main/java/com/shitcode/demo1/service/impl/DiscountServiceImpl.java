@@ -85,7 +85,7 @@ public class DiscountServiceImpl implements DiscountService {
                 .orElseGet(() -> request.getType().getSalesPercentAmount()));
         discount.setExpDate(DiscountDateTimeConverter.convert(request.getType()));
 
-        ManageResponse response = databaseLock.doAndLock(KeyLock.DISCOUNT,
+        ManageResponse response = databaseLock.doAndLock(KeyLock.DISCOUNT, id,
                 () -> discountMapper.toManageResponse(discountRepository.save(discount)));
 
         return response;
