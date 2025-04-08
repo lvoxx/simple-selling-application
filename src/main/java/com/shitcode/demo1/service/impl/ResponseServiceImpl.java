@@ -82,8 +82,9 @@ public class ResponseServiceImpl implements ResponseService {
 
         private String getFullRefillTime(Bucket bucket, RateLimiterPlan plan) {
                 long missingTokens = plan.getLimit().getCapacity() - bucket.getAvailableTokens();
-                return DatetimeFormat.format(Long.valueOf(plan.getLimit().getRefillPeriodNanos() * missingTokens),
-                                TimeConversionMode.NANO, Format.SHORT);
+                // Convert to seconds to avoid overflow
+                long refillSeconds = (plan.getLimit().getRefillPeriodNanos() * missingTokens) / 1_000_000_000L;
+                return DatetimeFormat.format(refillSeconds, TimeConversionMode.SECOND, Format.SHORT);
         }
 
 }

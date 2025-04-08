@@ -26,9 +26,6 @@ public abstract class DatetimeFormat {
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(formatter).withZone(ZoneId.systemDefault());
 
         switch (mode) {
-            case NANO:
-                return LocalTime.ofNanoOfDay(time).format(dateTimeFormatter);
-
             case INSTANT:
                 Instant instant = Instant.ofEpochSecond(time);
                 // If the format includes date components, use ZonedDateTime
@@ -50,7 +47,6 @@ public abstract class DatetimeFormat {
     }
 
     public enum TimeConversionMode {
-        NANO, // Use LocalTime.ofNanoOfDay(time)
         INSTANT, // Use LocalTime.ofInstant(Instant.ofEpochSecond(time), ZoneId.systemDefault())
         SECOND // Use LocalTime.ofSecondOfDay(time)
     }
