@@ -49,18 +49,18 @@ public class MediaController {
         ID_PLAN = rateLimiterConfigData.getRateLimiterPlan("media", "id");
     }
 
-    @GetMapping("/{type}/{size}/{day}/{month}/{year}/{fileName:.+}")
+    @GetMapping("/{type}/{size}/{year}/{month}/{day}/{fileName:.+}")
     public ResponseEntity<Resource> findLocalMediaByPath(
             @PathVariable @Pattern(regexp = "^(images|videos)$", message = "Invalid media type") String type,
             @PathVariable @Pattern(regexp = "^(original|compressed)$", message = "Invalid size type") String size,
-            @PathVariable @Min(1) @Max(31) Integer day,
-            @PathVariable @Min(1) @Max(12) Integer month,
             @PathVariable @Min(2000) @Max(2100) Integer year,
+            @PathVariable @Min(1) @Max(12) Integer month,
+            @PathVariable @Min(1) @Max(31) Integer day,
             @PathVariable @NotBlank String fileName) throws Exception {
         String mediaPath = Paths.get(type, size,
-                String.valueOf(day),
-                String.valueOf(month),
                 String.valueOf(year),
+                String.valueOf(month),
+                String.valueOf(day),
                 fileName)
                 .normalize().toString();
 
