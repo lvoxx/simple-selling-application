@@ -1,5 +1,7 @@
 package com.shitcode.demo1.service.impl;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.time.Instant;
 import java.util.List;
 import java.util.Locale;
@@ -136,23 +138,96 @@ public class ProductServiceImpl implements ProductService {
             @CacheEvict(value = ProductCacheType.Fields.ADMIN_PRODUCT_NAME, key = "#req.name"),
             @CacheEvict(value = ProductCacheType.Fields.INSELL_PRODUCT_NAME, key = "#req.name")
     })
-    public AdminResponse update(ProductDTO.Request jsonRequest, List<MultipartFile> images, MultipartFile video,
-            Long id) {
+    public AdminResponse update(ProductDTO.Request request, Long id) {
         log.debug("Updating product with ID: {}", id);
 
         Product product = findEntityWithId(id);
-        Category category = categoryService.findCategoryEntityById(jsonRequest.getCategoryId());
+        Category category = categoryService.findCategoryEntityById(request.getCategoryId());
         product.setCategory(category);
-        product.setName(jsonRequest.getName());
-        product.setPrice(jsonRequest.getPrice());
-        product.setInSellQuantity(jsonRequest.getInSellQuantity());
-        product.setInStockQuantity(jsonRequest.getInStockQuantity());
+        product.setName(request.getName());
+        product.setPrice(request.getPrice());
+        product.setInSellQuantity(request.getInSellQuantity());
+        product.setInStockQuantity(request.getInStockQuantity());
 
-        AdminResponse response = databaseLock.doAndLock(KeyLock.PRODUCT,
+        AdminResponse response = databaseLock.doAndLock(KeyLock.PRODUCT, id,
                 () -> productMapper.toProductAdminResponse(productRepository.save(product)));
 
         log.debug("Updated product successfully: {}", response);
         return response;
+    }
+
+    /**
+     * Updates the list of images of a product with the given id.
+     * The images already stored in the server are deleted and replaced with the new
+     * ones.
+     * The urls of the new images are stored in the database.
+     * 
+     * @param images the list of new images to update
+     * @param id     the id of the product to update
+     * @return the list of urls of the new images
+     * @throws FileNotFoundException if any file is not found during processing
+     * @throws IOException           if an I/O error occurs during file upload or
+     *                               deletion
+     */
+    @Override
+    @Caching(evict = {
+            @CacheEvict(value = ProductCacheType.Fields.ADMIN_PRODUCT_ID, key = "#id"),
+            @CacheEvict(value = ProductCacheType.Fields.INSELL_PRODUCT_ID, key = "#id")
+    })
+    public synchronized List<String> update(List<MultipartFile> images, Long id)
+            throws FileNotFoundException, IOException {
+        // Get old urls from database to delete old images
+        List<String> imageUrls = productRepository.findImagesById(id);
+
+        // Update new images in system folder
+        List<String> uploadImageUrls = mediaService.updateImages(images, imageUrls);
+
+        List<String> newImageUrls = List.copyOf(uploadImageUrls);
+
+        // Update url in database
+        databaseLock.doAndLock(KeyLock.PRODUCT, id,
+                () -> productRepository.updateImagesById(newImageUrls, id));
+
+        return newImageUrls;
+    }
+
+    /**
+     * Updates the video of a product with the given id.
+     * If the product doesn't have a video, a new one is created.
+     * If the product already has a video, the new one replaces the old one.
+     * The url of the new video is stored in the database.
+     * 
+     * @param video the new video to update
+     * @param id    the id of the product to update
+     * @return the url of the new video
+     * @throws FileNotFoundException if any file is not found during processing
+     * @throws IOException           if an I/O error occurs during file upload or
+     *                               deletion
+     */
+    @Override
+    @Caching(evict = {
+            @CacheEvict(value = ProductCacheType.Fields.ADMIN_PRODUCT_ID, key = "#id"),
+            @CacheEvict(value = ProductCacheType.Fields.INSELL_PRODUCT_ID, key = "#id")
+    })
+    public synchronized String update(MultipartFile video, Long id) throws FileNotFoundException, IOException {
+        Optional<String> videoUrl = productRepository.findVideoById(id);
+
+        // If there is no video present, create a new one
+        String uploadVideoUrl = null;
+        if (!videoUrl.isPresent()) {
+            // Make new video
+            uploadVideoUrl = mediaService.saveVideoFile(video);
+        } else {
+            // Update new video and remove old video
+            uploadVideoUrl = mediaService.updateVideo(video, videoUrl.get());
+        }
+        final String newVideoUrl = uploadVideoUrl;
+        // Update url in database
+        databaseLock.doAndLock(KeyLock.PRODUCT, id,
+                () -> productRepository.updateVideoUrlById(newVideoUrl, id));
+
+        return newVideoUrl;
+
     }
 
     @Override
@@ -195,7 +270,7 @@ public class ProductServiceImpl implements ProductService {
             @CacheEvict(value = ProductCacheType.Fields.ADMIN_PRODUCT_ID, key = "#id"),
             @CacheEvict(value = ProductCacheType.Fields.INSELL_PRODUCT_ID, key = "#id")
     })
-    public InSellResponse importWith(Integer quantity, Long id) {
+    public synchronized InSellResponse importWith(Integer quantity, Long id) {
         log.debug("Importing {} units for product ID: {}", quantity, id);
 
         Product product = findEntityWithId(id);
@@ -214,7 +289,7 @@ public class ProductServiceImpl implements ProductService {
             @CacheEvict(value = ProductCacheType.Fields.ADMIN_PRODUCT_ID, key = "#id"),
             @CacheEvict(value = ProductCacheType.Fields.INSELL_PRODUCT_ID, key = "#id")
     })
-    public InSellResponse exportWith(Integer quantity, Long id) {
+    public synchronized InSellResponse exportWith(Integer quantity, Long id) {
         log.debug("Exporting {} units from product ID: {}", quantity, id);
 
         Product product = findEntityWithId(id);
@@ -233,7 +308,7 @@ public class ProductServiceImpl implements ProductService {
             @CacheEvict(value = ProductCacheType.Fields.ADMIN_PRODUCT_ID, key = "#id"),
             @CacheEvict(value = ProductCacheType.Fields.INSELL_PRODUCT_ID, key = "#id")
     })
-    public void delete(Long id) {
+    public synchronized void delete(Long id) {
         log.debug("Deleting product with ID: {}", id);
 
         findEntityWithId(id);

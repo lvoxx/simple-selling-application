@@ -1,6 +1,7 @@
 package com.shitcode.demo1.exception.handler;
 
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.security.InvalidParameterException;
 
 import org.springframework.http.HttpStatus;
@@ -30,7 +31,7 @@ import com.shitcode.demo1.exception.model.WorkerBusyException;
 public class ApplicationExceptionHandler {
 
     @ExceptionHandler({ KeyLockMissedException.class, WorkerBusyException.class, InvalidParameterException.class,
-            SendingMailException.class, FileReadException.class, VideoEncodeException.class, ImageEncodeException.class
+            SendingMailException.class, FileReadException.class, VideoEncodeException.class, ImageEncodeException.class, IOException.class
     })
     public ResponseEntity<ErrorModel> handleDataOperationException(RuntimeException ex) {
         ErrorModel errorResponse = ErrorModel.of(HttpStatus.INTERNAL_SERVER_ERROR, ex.getMessage(), null);

@@ -30,6 +30,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.Data;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.PutMapping;
 
 @Data
 @RestController
@@ -47,9 +49,9 @@ public class ProductController {
 
         @GetMapping("/insell")
         @Operation(summary = "Retrieve in-sell products with pagination", description = "Fetches a paginated list of in-sell products, allowing sorting and ordering.", responses = {
-                        @ApiResponse(responseCode = "200", description = "Successful retrieval of in-sell products", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseDTO.class))),
-                        @ApiResponse(responseCode = "400", description = "Invalid request parameters", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorModel.class))),
-                        @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorModel.class)))
+                        @ApiResponse(responseCode = "200", description = "Successful retrieval of in-sell products", content = @Content(mediaType = "application/vnd.lvoxx.app-v1+json", schema = @Schema(implementation = ResponseDTO.class))),
+                        @ApiResponse(responseCode = "400", description = "Invalid request parameters", content = @Content(mediaType = "application/vnd.lvoxx.app-v1+json", schema = @Schema(implementation = ErrorModel.class))),
+                        @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content(mediaType = "application/vnd.lvoxx.app-v1+json", schema = @Schema(implementation = ErrorModel.class)))
         })
         public ResponseEntity<?> getInSellProducts(
                         @Parameter(description = "Number of insell products per page", example = "30") @RequestParam(defaultValue = "30") int size,
@@ -68,9 +70,9 @@ public class ProductController {
 
         @GetMapping("/admin")
         @Operation(summary = "Retrieve admin products with pagination", description = "Fetches a paginated list of admin products, allowing sorting and ordering.", responses = {
-                        @ApiResponse(responseCode = "200", description = "Successful retrieval of admin products", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseDTO.class))),
-                        @ApiResponse(responseCode = "400", description = "Invalid request parameters", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorModel.class))),
-                        @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorModel.class)))
+                        @ApiResponse(responseCode = "200", description = "Successful retrieval of admin products", content = @Content(mediaType = "application/vnd.lvoxx.app-v1+json", schema = @Schema(implementation = ResponseDTO.class))),
+                        @ApiResponse(responseCode = "400", description = "Invalid request parameters", content = @Content(mediaType = "application/vnd.lvoxx.app-v1+json", schema = @Schema(implementation = ErrorModel.class))),
+                        @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content(mediaType = "application/vnd.lvoxx.app-v1+json", schema = @Schema(implementation = ErrorModel.class)))
         })
         public ResponseEntity<?> getAdminProducts(
                         @Parameter(description = "Number of insell products per page", example = "30") @RequestParam(defaultValue = "30") int size,
@@ -89,10 +91,10 @@ public class ProductController {
 
         @Operation(summary = "Find an admin product by ID", description = "Retrieves detailed information of an admin product by its ID.")
         @ApiResponses(value = {
-                        @ApiResponse(responseCode = "200", description = "Product found successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseDTO.class))),
-                        @ApiResponse(responseCode = "400", description = "Invalid product ID supplied", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorModel.class))),
-                        @ApiResponse(responseCode = "404", description = "Product not found", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorModel.class))),
-                        @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorModel.class)))
+                        @ApiResponse(responseCode = "200", description = "Product found successfully", content = @Content(mediaType = "application/vnd.lvoxx.app-v1+json", schema = @Schema(implementation = ResponseDTO.class))),
+                        @ApiResponse(responseCode = "400", description = "Invalid product ID supplied", content = @Content(mediaType = "application/vnd.lvoxx.app-v1+json", schema = @Schema(implementation = ErrorModel.class))),
+                        @ApiResponse(responseCode = "404", description = "Product not found", content = @Content(mediaType = "application/vnd.lvoxx.app-v1+json", schema = @Schema(implementation = ErrorModel.class))),
+                        @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content(mediaType = "application/vnd.lvoxx.app-v1+json", schema = @Schema(implementation = ErrorModel.class)))
         })
         @GetMapping("/admin/{id}")
         public ResponseEntity<?> findAdminProductById(
@@ -105,10 +107,10 @@ public class ProductController {
 
         @Operation(summary = "Find an in-sell product by ID", description = "Retrieves detailed information of an in-sell product by its ID.")
         @ApiResponses(value = {
-                        @ApiResponse(responseCode = "200", description = "Product found successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseDTO.class))),
-                        @ApiResponse(responseCode = "400", description = "Invalid product ID supplied", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorModel.class))),
-                        @ApiResponse(responseCode = "404", description = "Product not found", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorModel.class))),
-                        @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorModel.class)))
+                        @ApiResponse(responseCode = "200", description = "Product found successfully", content = @Content(mediaType = "application/vnd.lvoxx.app-v1+json", schema = @Schema(implementation = ResponseDTO.class))),
+                        @ApiResponse(responseCode = "400", description = "Invalid product ID supplied", content = @Content(mediaType = "application/vnd.lvoxx.app-v1+json", schema = @Schema(implementation = ErrorModel.class))),
+                        @ApiResponse(responseCode = "404", description = "Product not found", content = @Content(mediaType = "application/vnd.lvoxx.app-v1+json", schema = @Schema(implementation = ErrorModel.class))),
+                        @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content(mediaType = "application/vnd.lvoxx.app-v1+json", schema = @Schema(implementation = ErrorModel.class)))
         })
         @GetMapping("/insell/{id}")
         public ResponseEntity<?> findInSellProductById(
@@ -122,9 +124,9 @@ public class ProductController {
         @PostMapping("/admin")
         @Operation(summary = "Create a new product", description = "Creates a new product with the provided details.")
         @ApiResponses(value = {
-                        @ApiResponse(responseCode = "201", description = "Product created successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseDTO.class))),
-                        @ApiResponse(responseCode = "400", description = "Invalid request body", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorModel.class))),
-                        @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorModel.class)))
+                        @ApiResponse(responseCode = "201", description = "Product created successfully", content = @Content(mediaType = "application/vnd.lvoxx.app-v1+json", schema = @Schema(implementation = ResponseDTO.class))),
+                        @ApiResponse(responseCode = "400", description = "Invalid request body", content = @Content(mediaType = "application/vnd.lvoxx.app-v1+json", schema = @Schema(implementation = ErrorModel.class))),
+                        @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content(mediaType = "application/vnd.lvoxx.app-v1+json", schema = @Schema(implementation = ErrorModel.class)))
         })
         public ResponseEntity<?> createProduct(@RequestPart("json") @Valid ProductDTO.Request jsonRequest,
                         @RequestPart("images") List<MultipartFile> imageRequests,
@@ -135,4 +137,47 @@ public class ProductController {
                                                 HttpStatus.CREATED),
                                 RateLimiterPlan.BASIC);
         }
+
+        @PutMapping("/admin/{id}")
+        @Operation(summary = "Update product information", description = "Updates the details of a product by its ID.")
+        @ApiResponses(value = {
+                        @ApiResponse(responseCode = "200", description = "Product updated successfully", content = @Content(mediaType = "application/vnd.lvoxx.app-v1+json", schema = @Schema(implementation = ResponseDTO.class))),
+                        @ApiResponse(responseCode = "400", description = "Invalid request body", content = @Content(mediaType = "application/vnd.lvoxx.app-v1+json", schema = @Schema(implementation = ErrorModel.class))),
+                        @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content(mediaType = "application/vnd.lvoxx.app-v1+json", schema = @Schema(implementation = ErrorModel.class)))
+        })
+        public ResponseEntity<?> updateProductInformation(@PathVariable Long id,
+                        @RequestBody ProductDTO.Request request) throws Exception {
+                return responseService.mapping(() -> ResponseEntity.ok().body(productService.update(request, id)),
+                                RateLimiterPlan.MEDIUM);
+        }
+
+        @PutMapping("/admin/{id}/image")
+        @Operation(summary = "Update product images", description = "Updates the list of images of a product by its ID.")
+        @ApiResponses(value = {
+                        @ApiResponse(responseCode = "200", description = "Product images updated successfully", content = @Content(mediaType = "application/vnd.lvoxx.app-v1+json", schema = @Schema(implementation = ResponseDTO.class))),
+                        @ApiResponse(responseCode = "400", description = "Invalid request body", content = @Content(mediaType = "application/vnd.lvoxx.app-v1+json", schema = @Schema(implementation = ErrorModel.class))),
+                        @ApiResponse(responseCode = "404", description = "Product not found or images not found", content = @Content(mediaType = "application/vnd.lvoxx.app-v1+json", schema = @Schema(implementation = ErrorModel.class))),
+                        @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content(mediaType = "application/vnd.lvoxx.app-v1+json", schema = @Schema(implementation = ErrorModel.class)))
+        })
+        public ResponseEntity<?> updateProductImages(@PathVariable Long id, @RequestParam List<MultipartFile> images)
+                        throws Exception {
+                return responseService.mapping(
+                                () -> ResponseEntity.ok().body(productService.update(images, id)),
+                                RateLimiterPlan.HARD);
+        }
+
+        @PutMapping("/admin/{id}/video")
+        @Operation(summary = "Update product video", description = "Updates the video of a product by its ID.")
+        @ApiResponses(value = {
+                        @ApiResponse(responseCode = "200", description = "Product video updated successfully", content = @Content(mediaType = "application/vnd.lvoxx.app-v1+json", schema = @Schema(implementation = ResponseDTO.class))),
+                        @ApiResponse(responseCode = "400", description = "Invalid request body", content = @Content(mediaType = "application/vnd.lvoxx.app-v1+json", schema = @Schema(implementation = ErrorModel.class))),
+                        @ApiResponse(responseCode = "404", description = "Product not found or video not found", content = @Content(mediaType = "application/vnd.lvoxx.app-v1+json", schema = @Schema(implementation = ErrorModel.class))),
+                        @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content(mediaType = "application/vnd.lvoxx.app-v1+json", schema = @Schema(implementation = ErrorModel.class)))
+        })
+        public ResponseEntity<?> updateProductVideo(@PathVariable Long id, @RequestParam MultipartFile video)
+                        throws Exception {
+                return responseService.mapping(() -> ResponseEntity.ok().body(productService.update(video, id)),
+                                RateLimiterPlan.HARD);
+        }
+
 }

@@ -1,5 +1,7 @@
 package com.shitcode.demo1.service;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.List;
 
 import org.springframework.boot.context.properties.bind.DefaultValue;
@@ -40,8 +42,11 @@ public interface ProductService {
         ProductDTO.AdminResponse create(ProductDTO.Request jsonRequest, List<MultipartFile> images, MultipartFile video)
                         throws Exception;
 
-        ProductDTO.AdminResponse update(ProductDTO.Request jsonRequest, List<MultipartFile> images, MultipartFile video,
-                        Long id);
+        ProductDTO.AdminResponse update(ProductDTO.Request request, Long id);
+
+        List<String> update(List<MultipartFile> images, Long id) throws FileNotFoundException, IOException;
+
+        String update(MultipartFile video, Long id) throws FileNotFoundException, IOException;
 
         DiscountDTO.ApplyToProductsResponse putDiscountToProducts(DiscountDTO.ApplyToProductsRequest requests);
 
