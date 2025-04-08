@@ -568,7 +568,7 @@ public class LocalMediaServiceImpl implements MediaService {
                 .setAudioBitRate(videoCompressConfig.getAudioBitRate()) // Slightly higher bitrate for clarity
 
                 // Video Configuration (optimized for high requests)
-                .setVideoCodec(videoCompressConfig.getAudioCodec())
+                .setVideoCodec(videoCompressConfig.getVideoCodec())
                 .setVideoFrameRate(videoCompressConfig.getVideoFrameRate(), 1)
                 .setVideoResolution(newWidth, newHeight)
 
