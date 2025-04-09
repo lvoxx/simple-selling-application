@@ -4,12 +4,10 @@ import java.time.Instant;
 import java.util.UUID;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 public abstract class ProductInteractionDTO {
 
@@ -17,7 +15,6 @@ public abstract class ProductInteractionDTO {
     @Builder
     @NoArgsConstructor
     @AllArgsConstructor
-    @Setter(value = AccessLevel.PRIVATE)
     @Schema(name = "ProductInteractionRequest", description = "Represents a request to interact with a product.")
     public static class Request {
         @Schema(description = "ID of the product being interacted with", example = "69", required = false) // nullable =

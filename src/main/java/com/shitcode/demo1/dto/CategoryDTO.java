@@ -12,7 +12,6 @@ import lombok.Setter;
 public abstract class CategoryDTO {
     @Data
     @Builder
-    @Setter(value = AccessLevel.PRIVATE)
     @Schema(name = "Category Request", description = "Request payload for category management")
     public static class Request {
         @NotBlank(message = "{validation.category.name.blank}")

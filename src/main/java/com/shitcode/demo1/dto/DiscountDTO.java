@@ -7,16 +7,13 @@ import java.util.UUID;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.shitcode.demo1.utils.DiscountType;
 
-import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import lombok.Setter;
 
 public abstract class DiscountDTO {
     @Data
     @Builder
-    @Setter(value = AccessLevel.PRIVATE)
     public static class ManageRequest {
         private DiscountType type;
         private Double salesPercentAmount;
@@ -49,7 +46,6 @@ public abstract class DiscountDTO {
 
     @Data
     @Builder
-    @Setter(value = AccessLevel.PRIVATE)
     public static class ApplyToProductsRequest {
         private List<Long> productIds;
         private UUID discountId;

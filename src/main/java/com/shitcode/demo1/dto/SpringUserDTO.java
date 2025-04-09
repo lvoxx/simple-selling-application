@@ -23,7 +23,6 @@ import lombok.Setter;
 public abstract class SpringUserDTO {
     @Builder
     @AllArgsConstructor
-    @Setter(value = AccessLevel.PRIVATE)
     @Getter
     @Schema(name = "SpringUserDTORequest", description = "Request payload for user signup")
     public static class UserRequest {
@@ -56,7 +55,6 @@ public abstract class SpringUserDTO {
 
     @Builder
     @AllArgsConstructor
-    @Setter(value = AccessLevel.PRIVATE)
     @Getter
     public static class AdminRequest {
         @NotBlank(message = "{validation.spring-user.email.blank}")
@@ -105,7 +103,6 @@ public abstract class SpringUserDTO {
 
     @Builder
     @AllArgsConstructor
-    @Setter(value = AccessLevel.PRIVATE)
     @Getter
     @Schema(name = "SpringUserDTOResponse", description = "Response containing user details and roles")
     public static class Response extends AbstractAuditableEntity {

@@ -13,19 +13,18 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
-import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import lombok.Setter;
+import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
 public abstract class ProductDTO {
 
     @Data
     @SuperBuilder
+    @NoArgsConstructor
     @EqualsAndHashCode(callSuper = false)
-    @Setter(value = AccessLevel.PRIVATE)
     @Schema(name = "Product Create Request", description = "Request payload for creating or updating a product")
     public static class CreateRequest {
 
@@ -66,8 +65,8 @@ public abstract class ProductDTO {
 
     @Data
     @SuperBuilder
+    @NoArgsConstructor
     @EqualsAndHashCode(callSuper = true)
-    @Setter(value = AccessLevel.PRIVATE)
     @Schema(name = "Product Update Request", description = "Request payload for creating or updating a product")
     public static class UpdateRequest extends CreateRequest {
         // 'http://localhost:9090/...jpg': 'New Image Name.jpg'

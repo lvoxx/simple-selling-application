@@ -179,7 +179,8 @@ public class ProductServiceImpl implements ProductService {
             List<String> oldImageUrls,
             List<MultipartFile> newImages)
             throws IOException {
-
+        // Build a new oldImageUrls
+        List<String> newOldImageUrls = new ArrayList<>(oldImageUrls);
         // Build a map for quick lookup: image name -> MultipartFile
         Map<String, MultipartFile> newImageMap = newImages.stream()
                 .collect(Collectors.toMap(MultipartFile::getOriginalFilename, image -> image));
@@ -189,7 +190,7 @@ public class ProductServiceImpl implements ProductService {
             String newImageName = entry.getValue();
 
             // Remove old URL and delete the old image
-            oldImageUrls.remove(oldImageUrl);
+            newOldImageUrls.remove(oldImageUrl);
             mediaService.deleteFile(oldImageUrl);
 
             // Get corresponding new image file
@@ -202,10 +203,10 @@ public class ProductServiceImpl implements ProductService {
 
             // Save new image and update list
             String newImageUrl = mediaService.saveImageFile(newImage);
-            oldImageUrls.add(newImageUrl);
+            newOldImageUrls.add(newImageUrl);
         }
 
-        return oldImageUrls;
+        return newOldImageUrls;
     }
 
     @Override
