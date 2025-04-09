@@ -155,8 +155,8 @@ public class ProductServiceImpl implements ProductService {
         product.setInSellQuantity(request.getInSellQuantity());
         product.setInStockQuantity(request.getInStockQuantity());
 
-        if (request.getUpdateOldImageUrlToNewImageFile() != null && images != null) {
-            product.setImages(updateImagesFromProduct(request.getUpdateOldImageUrlToNewImageFile(), product.getImages(), images));
+        if (request.getUpdateOldImageUrlToNewImageFileName() != null && images != null) {
+            product.setImages(updateImagesFromProduct(request.getUpdateOldImageUrlToNewImageFileName(), product.getImages(), images));
         }
         if (video != null) {
             product.setVideo(updateVideoFromProduct(product.getVideo(), video));
