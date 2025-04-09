@@ -1,7 +1,5 @@
 package com.shitcode.demo1.service.impl;
 
-import java.time.LocalDateTime;
-
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
@@ -42,7 +40,6 @@ public class Ip2LocationServiceImpl implements Ip2LocationService {
             return ip2Location.IPQuery(ipAddress);
         } catch (Exception e) {
             LogPrinter.printServiceLog(LogPrinter.Type.ERROR, "Ip2LocationServiceImpl", "getLocation",
-                    LocalDateTime.now().toString(),
                     e.getMessage());
             return null;
         }

@@ -1,5 +1,7 @@
 package com.shitcode.demo1.utils;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 
 import org.slf4j.Logger;
@@ -11,7 +13,9 @@ import org.slf4j.LoggerFactory;
  */
 public class LogPrinter {
         private static final Logger logger = LoggerFactory.getLogger(LogPrinter.class);
-        private static final String PREFIX = "[%s] - ";
+        private static final String PREFIX = "[%s] ";
+        private static final String TIME_FORMAT = "at %s - ";
+
 
         /**
          * Constants representing different log flags used in categorizing logs.
@@ -31,13 +35,13 @@ public class LogPrinter {
          * Log message templates for different modules.
          */
         private static abstract class Log {
-                private static final String MISSED_CONTROLLER_LOG = "Handling request via %s.%s() at %s. %s";
-                private static final String CONTROLLER_LOG = "Handling request %s via %s.%s() at %s. %s";
-                private static final String SERVICE_LOG = "Executing %s.%s() at %s. %s";
-                private static final String REPOSITORY_LOG = "Accessing %s.%s() at %s. %s";
-                private static final String ASPECT_LOG = "Triggering %s.%s() at %s. %s";
-                private static final String UTILS_LOG = "Utilizing %s.%s() at %s. %s";
-                private static final String SCHEDULER_LOG = "Utilizing %s.%s() at %s. %s";
+                private static final String MISSED_CONTROLLER_LOG = "Missing controller mapping, handled by %s.%s(). %s";
+                private static final String CONTROLLER_LOG = "Handling request to path %s via %s.%s(). %s";
+                private static final String SERVICE_LOG = "Executing service %s.%s(). %s";
+                private static final String REPOSITORY_LOG = "Accessing repository %s.%s(). %s";
+                private static final String ASPECT_LOG = "Triggering aspect %s.%s(). %s";
+                private static final String UTILS_LOG = "Utilizing utility %s.%s(). %s";
+                private static final String SCHEDULER_LOG = "Utilizing scheduler %s.%s(). %s";
         }
 
         /**
@@ -54,75 +58,73 @@ public class LogPrinter {
          * @param requestPath  The request path.
          * @param className    The name of the class.
          * @param methodName   The method being invoked.
-         * @param time         The timestamp of the operation.
          * @param extraMessage Additional information to log.
          */
         public static void printControllerLog(Type type, String requestPath, String className, String methodName,
-                        String time, String extraMessage) {
+                        String extraMessage) {
                 if (requestPath != null) {
                         printLog(type, Flag.CONTROLLER_FLAG,
-                                        String.format(Log.CONTROLLER_LOG, requestPath, className, methodName, time,
+                                        String.format(Log.CONTROLLER_LOG, requestPath, className, methodName,
                                                         extraMessage));
                         return;
                 }
                 printLog(Type.WARM, Flag.MISSED_CONTROLLER_FLAG,
-                                String.format(Log.MISSED_CONTROLLER_LOG, className, methodName, time, extraMessage));
+                                String.format(Log.MISSED_CONTROLLER_LOG, className, methodName, extraMessage));
         }
 
         /**
          * Prints a log message for service operations.
          */
-        public static void printServiceLog(Type type, String className, String methodName, String time,
-                        String extraMessage) {
+        public static void printServiceLog(Type type, String className, String methodName, String extraMessage) {
                 printLog(type, Flag.SERVICE_FLAG,
-                                String.format(Log.SERVICE_LOG, className, methodName, time, extraMessage));
+                                String.format(Log.SERVICE_LOG, className, methodName, extraMessage));
         }
 
         /**
          * Prints a log message for repository operations.
          */
-        public static void printRepositoryLog(Type type, String className, String methodName, String time,
-                        String extraMessage) {
+        public static void printRepositoryLog(Type type, String className, String methodName, String extraMessage) {
                 printLog(type, Flag.REPOSITORY_FLAG,
-                                String.format(Log.REPOSITORY_LOG, className, methodName, time, extraMessage));
+                                String.format(Log.REPOSITORY_LOG, className, methodName, extraMessage));
         }
 
         /**
          * Prints a log message for aspect operations.
          */
-        public static void printAspectLog(Type type, String className, String methodName, String time,
-                        String extraMessage) {
+        public static void printAspectLog(Type type, String className, String methodName, String extraMessage) {
                 printLog(type, Flag.ASPECT_FLAG,
-                                String.format(Log.ASPECT_LOG, className, methodName, time, extraMessage));
+                                String.format(Log.ASPECT_LOG, className, methodName, extraMessage));
         }
 
         /**
          * Prints a log message for utility operations.
          */
-        public static void printUtilsLog(Type type, String className, String methodName, String time,
-                        String extraMessage) {
+        public static void printUtilsLog(Type type, String className, String methodName, String extraMessage) {
                 printLog(type, Flag.UTILS_FLAG,
-                                String.format(Log.UTILS_LOG, className, methodName, time, extraMessage));
+                                String.format(Log.UTILS_LOG, className, methodName, extraMessage));
         }
 
         /**
          * Prints a log message for scheduler operations.
          */
-        public static void printSchedulerLog(Type type, String className, String methodName, String time,
-                        String extraMessage) {
+        public static void printSchedulerLog(Type type, String className, String methodName, String extraMessage) {
                 printLog(type, Flag.SCHEDULER_FLAG,
-                                String.format(Log.SCHEDULER_LOG, className, methodName, time, extraMessage));
+                                String.format(Log.SCHEDULER_LOG, className, methodName, extraMessage));
         }
 
         /**
          * Prints a log message with a specified type, flag, and message.
          */
         public static void printLog(Type type, String flag, String message) {
+                String time = LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+                String timeFormat = String.format(TIME_FORMAT, time);
                 flag = Optional.ofNullable(flag).orElse("INFO");
                 type = Optional.ofNullable(type).orElse(LogPrinter.Type.INFO);
 
+                // [flag] at time - message
                 String logMessage = new StringBuilder()
                                 .append(String.format(PREFIX, flag.toUpperCase()))
+                                .append(timeFormat)
                                 .append(message)
                                 .toString();
                 switch (type) {

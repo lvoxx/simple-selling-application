@@ -2,7 +2,6 @@ package com.shitcode.demo1.scheduler;
 
 import java.io.File;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -85,7 +84,6 @@ public class ClearUpUnsualOridinalMediaScheduler {
                     LogPrinter.Type.INFO,
                     "ClearUpUnsualOridinalMediaScheduler",
                     "clearOldMediaFoldersOnOriginalFolder",
-                    LocalDateTime.now().toString(),
                     String.format("No %s folder found to delete: %s", mediaType, e.getMessage()));
         }
     }

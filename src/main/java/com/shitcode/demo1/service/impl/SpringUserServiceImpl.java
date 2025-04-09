@@ -1,7 +1,5 @@
 package com.shitcode.demo1.service.impl;
 
-import java.time.LocalDateTime;
-
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -54,7 +52,6 @@ public class SpringUserServiceImpl implements SpringUserService {
                 mailService.sendActivationEmail(result.getEmail(), token.getToken());
             } catch (Exception e) {
                 LogPrinter.printServiceLog(LogPrinter.Type.ERROR, "AuthServiceImpl", "signUp",
-                        LocalDateTime.now().toString(),
                         e.getMessage());
                 throw new SendingMailException(e.getMessage(), e.getCause());
             }

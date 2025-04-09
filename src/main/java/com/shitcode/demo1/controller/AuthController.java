@@ -1,7 +1,5 @@
 package com.shitcode.demo1.controller;
 
-import java.time.LocalDateTime;
-
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -138,7 +136,7 @@ public class AuthController {
                         }
                 } catch (Exception e) {
                         LogPrinter.printControllerLog(Type.ERROR, request.getContextPath(), "AuthController",
-                                        "activeUserV1", LocalDateTime.now().toString(), e.getMessage());
+                                        "activeUserV1", e.getMessage());
                         response.sendRedirect(String.format(fontendServerConfigData.getUnknown(), e.getMessage()));
                 }
                 response.sendRedirect(fontendServerConfigData.getActive().get("success"));

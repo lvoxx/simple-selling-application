@@ -12,7 +12,6 @@ import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -252,7 +251,7 @@ public class LocalMediaServiceImpl implements MediaService {
         } catch (Exception e) {
             LogPrinter.printServiceLog(Type.ERROR,
                     "LocalMediaServiceImpl",
-                    "findFile", LocalDateTime.now().toString(),
+                    "findFile",
                     e.getMessage());
             throw new FileReadException(messageSource.getMessage("exception.media.file-not-found",
                     new Object[] { filePathAndNameWithExtension }, Locale.getDefault()));
@@ -330,7 +329,7 @@ public class LocalMediaServiceImpl implements MediaService {
         } catch (IOException e) {
             LogPrinter.printServiceLog(Type.ERROR,
                     "LocalMediaServiceImpl",
-                    "deleteFile", LocalDateTime.now().toString(),
+                    "deleteFile",
                     e.getMessage());
             throw new IOException(messageSource.getMessage("exception.media.file-delete-failed",
                     new Object[] { filePathAndNameWithExtension }, Locale.getDefault()));
@@ -502,7 +501,6 @@ public class LocalMediaServiceImpl implements MediaService {
             LogPrinter.printServiceLog(LogPrinter.Type.ERROR,
                     "LocalMediaServiceImpl",
                     "compressImage",
-                    LocalDateTime.now().toString(),
                     String.format("Error compressing image: %s", e.getMessage()));
             throw new ImageEncodeException(e.getMessage());
         }
@@ -532,7 +530,6 @@ public class LocalMediaServiceImpl implements MediaService {
         LogPrinter.printServiceLog(LogPrinter.Type.INFO,
                 "LocalMediaServiceImpl",
                 "compressVideo",
-                LocalDateTime.now().toString(),
                 String.format("Compressed video path: %s", filePath));
 
         FFmpegProbeResult input = ffprobe.probe(originalLocation);
@@ -594,7 +591,6 @@ public class LocalMediaServiceImpl implements MediaService {
                     LogPrinter.printServiceLog(LogPrinter.Type.INFO,
                             "MediaServiceImpl",
                             "compressVideo",
-                            LocalDateTime.now().toString(),
                             String.format("Filename: %s -> %d status: %s time: %d ms",
                                     input.getFormat().filename, // Correctly referenced
                                     String.format("%.0f", percentage * 100), // Properly formatted percentage

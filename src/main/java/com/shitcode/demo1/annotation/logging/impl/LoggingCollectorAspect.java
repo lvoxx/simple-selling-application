@@ -1,7 +1,6 @@
 package com.shitcode.demo1.annotation.logging.impl;
 
 import java.lang.reflect.Method;
-import java.time.Instant;
 import java.util.Map;
 import java.util.function.Consumer;
 
@@ -15,9 +14,6 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import com.shitcode.demo1.annotation.logging.LogCollector;
-import com.shitcode.demo1.helper.DatetimeFormat;
-import com.shitcode.demo1.helper.DatetimeFormat.Format;
-import com.shitcode.demo1.helper.DatetimeFormat.TimeConversionMode;
 import com.shitcode.demo1.utils.LogPrinter;
 import com.shitcode.demo1.utils.LoggingModel;
 
@@ -57,30 +53,23 @@ public class LoggingCollectorAspect {
 
         String className = joinPoint.getTarget().getClass().getSimpleName();
         String methodName = joinPoint.getSignature().getName();
-        String time = DatetimeFormat.format(Instant.now().getEpochSecond(), TimeConversionMode.INSTANT, Format.FORMAL);
-
         String extraMessage = annotation.extraMessage();
         LoggingModel model = annotation.loggingModel();
 
         // Define logging behavior based on the LoggingModel
         Map<LoggingModel, Consumer<Void>> logResult = Map.<LoggingModel, Consumer<Void>>ofEntries(
                 Map.entry(LoggingModel.SERVICE,
-                        l -> LogPrinter.printServiceLog(LogPrinter.Type.INFO, className, methodName, time,
-                                extraMessage)),
+                        l -> LogPrinter.printServiceLog(LogPrinter.Type.INFO, className, methodName, extraMessage)),
                 Map.entry(LoggingModel.REPOSITORY,
-                        l -> LogPrinter.printRepositoryLog(LogPrinter.Type.INFO, className, methodName, time,
-                                extraMessage)),
+                        l -> LogPrinter.printRepositoryLog(LogPrinter.Type.INFO, className, methodName, extraMessage)),
                 Map.entry(LoggingModel.ASPECT,
-                        l -> LogPrinter.printAspectLog(LogPrinter.Type.INFO, className, methodName, time,
-                                extraMessage)),
+                        l -> LogPrinter.printAspectLog(LogPrinter.Type.INFO, className, methodName, extraMessage)),
                 Map.entry(LoggingModel.UTILS,
-                        l -> LogPrinter.printUtilsLog(LogPrinter.Type.INFO, className, methodName, time,
-                                extraMessage)),
+                        l -> LogPrinter.printUtilsLog(LogPrinter.Type.INFO, className, methodName, extraMessage)),
                 Map.entry(LoggingModel.CONTROLLER, l -> {
                     HttpServletRequest request = getCurrentHttpRequest();
                     LogPrinter.printControllerLog(LogPrinter.Type.INFO, request.getRequestURI(),
-                            className, methodName, time,
-                            extraMessage);
+                            className, methodName, extraMessage);
                 }));
 
         logResult.get(model).accept(null);

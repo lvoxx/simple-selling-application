@@ -1,6 +1,5 @@
 package com.shitcode.demo1.scheduler;
 
-import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Optional;
@@ -69,7 +68,6 @@ public class CheckingExpiredDiscountScheduler {
     void removeExpiredDiscounts() {
         if (discountIds.size() == 0) {
             LogPrinter.printSchedulerLog(Type.SCHEDULER, "CheckingExpiredDiscountScheduler", "removeExpiredDiscounts",
-                    Instant.now().toString(),
                     "No expired discounts found. Skip this job.");
             return;
         }
@@ -94,7 +92,6 @@ public class CheckingExpiredDiscountScheduler {
 
         // Log the number of removed expired discounts
         LogPrinter.printSchedulerLog(Type.SCHEDULER, "CheckingExpiredDiscountScheduler", "removeExpiredDiscounts",
-                Instant.now().toString(),
                 "Run scheduler job to remove expired discount from products with "
                         .concat(String.valueOf(numberOfExpiringDiscounts.get())).concat(" times."));
     }
