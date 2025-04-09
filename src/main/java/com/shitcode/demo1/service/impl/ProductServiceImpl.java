@@ -3,9 +3,12 @@ package com.shitcode.demo1.service.impl;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -103,11 +106,10 @@ public class ProductServiceImpl implements ProductService {
             @CacheEvict(value = ProductCacheType.Fields.ADMIN_PRODUCTS, allEntries = true),
             @CacheEvict(value = ProductCacheType.Fields.INSELL_PRODUCTS, allEntries = true)
     })
-    public AdminResponse create(ProductDTO.Request jsonRequest, List<MultipartFile> images, MultipartFile video)
-            throws Exception {
+    public AdminResponse create(ProductDTO.CreateRequest jsonRequest, List<MultipartFile> images, MultipartFile video)
+            throws FileNotFoundException, IOException {
         productRepository.findByName(jsonRequest.getName()).ifPresent(p -> {
             log.warn("Product with name '{}' already exists.", jsonRequest.getName());
-
             throw new EntityExistsException(messageSource.getMessage("exception.entity-exists.product",
                     new Object[] { jsonRequest.getName() }, Locale.getDefault()));
         });
@@ -115,7 +117,10 @@ public class ProductServiceImpl implements ProductService {
         Category category = categoryService.findCategoryEntityById(jsonRequest.getCategoryId());
 
         // Save media
-        List<String> imageUrls = mediaService.saveImagesFile(images);
+        List<String> imageUrls = new ArrayList<>();
+        for (MultipartFile image : images) {
+            imageUrls.add(mediaService.saveImageFile(image));
+        }
         String videoUrl = mediaService.saveVideoFile(video);
 
         // Set ref value
@@ -138,7 +143,8 @@ public class ProductServiceImpl implements ProductService {
             @CacheEvict(value = ProductCacheType.Fields.ADMIN_PRODUCT_NAME, key = "#req.name"),
             @CacheEvict(value = ProductCacheType.Fields.INSELL_PRODUCT_NAME, key = "#req.name")
     })
-    public AdminResponse update(ProductDTO.Request request, Long id) {
+    public AdminResponse update(ProductDTO.UpdateRequest request, List<MultipartFile> images, MultipartFile video,
+            Long id) throws FileNotFoundException, IOException {
         log.debug("Updating product with ID: {}", id);
 
         Product product = findEntityWithId(id);
@@ -149,6 +155,13 @@ public class ProductServiceImpl implements ProductService {
         product.setInSellQuantity(request.getInSellQuantity());
         product.setInStockQuantity(request.getInStockQuantity());
 
+        if (request.getUpdateOldImageUrlToNewImageFile() != null && images != null) {
+            product.setImages(updateImagesFromProduct(request.getUpdateOldImageUrlToNewImageFile(), product.getImages(), images));
+        }
+        if (video != null) {
+            product.setVideo(updateVideoFromProduct(product.getVideo(), video));
+        }
+
         AdminResponse response = databaseLock.doAndLock(KeyLock.PRODUCT, id,
                 () -> productMapper.toProductAdminResponse(productRepository.save(product)));
 
@@ -156,78 +169,43 @@ public class ProductServiceImpl implements ProductService {
         return response;
     }
 
-    /**
-     * Updates the list of images of a product with the given id.
-     * The images already stored in the server are deleted and replaced with the new
-     * ones.
-     * The urls of the new images are stored in the database.
-     * 
-     * @param images the list of new images to update
-     * @param id     the id of the product to update
-     * @return the list of urls of the new images
-     * @throws FileNotFoundException if any file is not found during processing
-     * @throws IOException           if an I/O error occurs during file upload or
-     *                               deletion
-     */
-    @Override
-    @Caching(evict = {
-            @CacheEvict(value = ProductCacheType.Fields.ADMIN_PRODUCT_ID, key = "#id"),
-            @CacheEvict(value = ProductCacheType.Fields.INSELL_PRODUCT_ID, key = "#id")
-    })
-    public synchronized List<String> update(List<MultipartFile> images, Long id)
-            throws FileNotFoundException, IOException {
-        // Get old urls from database to delete old images
-        List<String> imageUrls = productRepository.findImagesById(id);
-
-        // Update new images in system folder
-        List<String> uploadImageUrls = mediaService.updateImages(images, imageUrls);
-
-        List<String> newImageUrls = List.copyOf(uploadImageUrls);
-
-        // Update url in database
-        databaseLock.doAndLock(KeyLock.PRODUCT, id,
-                () -> productRepository.updateImagesById(newImageUrls, id));
-
-        return newImageUrls;
+    private String updateVideoFromProduct(String oldVideoUrl,
+            MultipartFile newVideo) throws IOException {
+        mediaService.deleteFile(oldVideoUrl);
+        return mediaService.saveVideoFile(newVideo);
     }
 
-    /**
-     * Updates the video of a product with the given id.
-     * If the product doesn't have a video, a new one is created.
-     * If the product already has a video, the new one replaces the old one.
-     * The url of the new video is stored in the database.
-     * 
-     * @param video the new video to update
-     * @param id    the id of the product to update
-     * @return the url of the new video
-     * @throws FileNotFoundException if any file is not found during processing
-     * @throws IOException           if an I/O error occurs during file upload or
-     *                               deletion
-     */
-    @Override
-    @Caching(evict = {
-            @CacheEvict(value = ProductCacheType.Fields.ADMIN_PRODUCT_ID, key = "#id"),
-            @CacheEvict(value = ProductCacheType.Fields.INSELL_PRODUCT_ID, key = "#id")
-    })
-    public synchronized String update(MultipartFile video, Long id) throws FileNotFoundException, IOException {
-        Optional<String> videoUrl = productRepository.findVideoById(id);
+    private List<String> updateImagesFromProduct(Map<String, String> oldImageUrlsAndNewImageNames,
+            List<String> oldImageUrls,
+            List<MultipartFile> newImages)
+            throws IOException {
 
-        // If there is no video present, create a new one
-        String uploadVideoUrl = null;
-        if (!videoUrl.isPresent()) {
-            // Make new video
-            uploadVideoUrl = mediaService.saveVideoFile(video);
-        } else {
-            // Update new video and remove old video
-            uploadVideoUrl = mediaService.updateVideo(video, videoUrl.get());
+        // Build a map for quick lookup: image name -> MultipartFile
+        Map<String, MultipartFile> newImageMap = newImages.stream()
+                .collect(Collectors.toMap(MultipartFile::getOriginalFilename, image -> image));
+
+        for (Map.Entry<String, String> entry : oldImageUrlsAndNewImageNames.entrySet()) {
+            String oldImageUrl = entry.getKey();
+            String newImageName = entry.getValue();
+
+            // Remove old URL and delete the old image
+            oldImageUrls.remove(oldImageUrl);
+            mediaService.deleteFile(oldImageUrl);
+
+            // Get corresponding new image file
+            MultipartFile newImage = newImageMap.get(newImageName);
+            if (newImage == null) {
+                throw new FileNotFoundException(messageSource.getMessage(
+                        "exception.entity-not-found.product-media",
+                        new Object[] { newImageName }, Locale.getDefault()));
+            }
+
+            // Save new image and update list
+            String newImageUrl = mediaService.saveImageFile(newImage);
+            oldImageUrls.add(newImageUrl);
         }
-        final String newVideoUrl = uploadVideoUrl;
-        // Update url in database
-        databaseLock.doAndLock(KeyLock.PRODUCT, id,
-                () -> productRepository.updateVideoUrlById(newVideoUrl, id));
 
-        return newVideoUrl;
-
+        return oldImageUrls;
     }
 
     @Override

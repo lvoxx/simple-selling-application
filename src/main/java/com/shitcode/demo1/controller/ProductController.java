@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
@@ -30,8 +31,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.Data;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.PutMapping;
 
 @Data
 @RestController
@@ -128,7 +127,7 @@ public class ProductController {
                         @ApiResponse(responseCode = "400", description = "Invalid request body", content = @Content(mediaType = "application/vnd.lvoxx.app-v1+json", schema = @Schema(implementation = ErrorModel.class))),
                         @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content(mediaType = "application/vnd.lvoxx.app-v1+json", schema = @Schema(implementation = ErrorModel.class)))
         })
-        public ResponseEntity<?> createProduct(@RequestPart("json") @Valid ProductDTO.Request jsonRequest,
+        public ResponseEntity<?> createProduct(@RequestPart("product") @Valid ProductDTO.CreateRequest jsonRequest,
                         @RequestPart("images") List<MultipartFile> imageRequests,
                         @RequestPart("video") MultipartFile videoRequest) throws Exception {
                 return responseService.mapping(
@@ -146,38 +145,13 @@ public class ProductController {
                         @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content(mediaType = "application/vnd.lvoxx.app-v1+json", schema = @Schema(implementation = ErrorModel.class)))
         })
         public ResponseEntity<?> updateProductInformation(@PathVariable Long id,
-                        @RequestBody ProductDTO.Request request) throws Exception {
-                return responseService.mapping(() -> ResponseEntity.ok().body(productService.update(request, id)),
-                                RateLimiterPlan.MEDIUM);
-        }
-
-        @PutMapping("/admin/{id}/image")
-        @Operation(summary = "Update product images", description = "Updates the list of images of a product by its ID.")
-        @ApiResponses(value = {
-                        @ApiResponse(responseCode = "200", description = "Product images updated successfully", content = @Content(mediaType = "application/vnd.lvoxx.app-v1+json", schema = @Schema(implementation = ResponseDTO.class))),
-                        @ApiResponse(responseCode = "400", description = "Invalid request body", content = @Content(mediaType = "application/vnd.lvoxx.app-v1+json", schema = @Schema(implementation = ErrorModel.class))),
-                        @ApiResponse(responseCode = "404", description = "Product not found or images not found", content = @Content(mediaType = "application/vnd.lvoxx.app-v1+json", schema = @Schema(implementation = ErrorModel.class))),
-                        @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content(mediaType = "application/vnd.lvoxx.app-v1+json", schema = @Schema(implementation = ErrorModel.class)))
-        })
-        public ResponseEntity<?> updateProductImages(@PathVariable Long id, @RequestParam List<MultipartFile> images)
-                        throws Exception {
+                        @RequestPart("product") @Valid ProductDTO.UpdateRequest request,
+                        @RequestPart("images") List<MultipartFile> newImageRequests,
+                        @RequestPart("video") MultipartFile newVideoRequest) throws Exception {
                 return responseService.mapping(
-                                () -> ResponseEntity.ok().body(productService.update(images, id)),
-                                RateLimiterPlan.HARD);
-        }
-
-        @PutMapping("/admin/{id}/video")
-        @Operation(summary = "Update product video", description = "Updates the video of a product by its ID.")
-        @ApiResponses(value = {
-                        @ApiResponse(responseCode = "200", description = "Product video updated successfully", content = @Content(mediaType = "application/vnd.lvoxx.app-v1+json", schema = @Schema(implementation = ResponseDTO.class))),
-                        @ApiResponse(responseCode = "400", description = "Invalid request body", content = @Content(mediaType = "application/vnd.lvoxx.app-v1+json", schema = @Schema(implementation = ErrorModel.class))),
-                        @ApiResponse(responseCode = "404", description = "Product not found or video not found", content = @Content(mediaType = "application/vnd.lvoxx.app-v1+json", schema = @Schema(implementation = ErrorModel.class))),
-                        @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content(mediaType = "application/vnd.lvoxx.app-v1+json", schema = @Schema(implementation = ErrorModel.class)))
-        })
-        public ResponseEntity<?> updateProductVideo(@PathVariable Long id, @RequestParam MultipartFile video)
-                        throws Exception {
-                return responseService.mapping(() -> ResponseEntity.ok().body(productService.update(video, id)),
-                                RateLimiterPlan.HARD);
+                                () -> ResponseEntity.ok().body(
+                                                productService.update(request, newImageRequests, newVideoRequest, id)),
+                                RateLimiterPlan.MEDIUM);
         }
 
 }

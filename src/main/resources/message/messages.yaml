@@ -99,6 +99,7 @@ exception:
     user-id: Can not found user with id [{0}]
     product-name: Can not found product with name [{0}]
     product-id: Can not found product with id [{0}]
+    product-media: Can not found media with name [{0}]. Please check your's file.
     discount-title: Can not found discount with title [{0}]
     discount-id: Can not found discount with id [{0}]
     registration-name: Can not found registration token with name [{0}]

@@ -2,6 +2,7 @@ package com.shitcode.demo1.dto;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -17,14 +18,16 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.Setter;
+import lombok.experimental.SuperBuilder;
 
 public abstract class ProductDTO {
 
     @Data
-    @Builder
+    @SuperBuilder
+    @EqualsAndHashCode(callSuper = false)
     @Setter(value = AccessLevel.PRIVATE)
-    @Schema(name = "Product Request", description = "Request payload for creating or updating a product")
-    public static class Request {
+    @Schema(name = "Product Create Request", description = "Request payload for creating or updating a product")
+    public static class CreateRequest {
 
         @NotBlank(message = "{validation.product.name.blank}")
         @Size(max = 255, message = "{validation.product.name.size}")
@@ -59,6 +62,16 @@ public abstract class ProductDTO {
         @Schema(description = "Identifier of the category the product belongs to", example = "3", minimum = "1", required = true)
         @JsonProperty("category-id")
         private Long categoryId;
+    }
+
+    @Data
+    @SuperBuilder
+    @EqualsAndHashCode(callSuper = true)
+    @Setter(value = AccessLevel.PRIVATE)
+    @Schema(name = "Product Update Request", description = "Request payload for creating or updating a product")
+    public static class UpdateRequest extends CreateRequest {
+        // 'http://localhost:9090/...jpg': 'New Image Name.jpg'
+        private Map<String, String> updateOldImageUrlToNewImageFile;
     }
 
     @Data

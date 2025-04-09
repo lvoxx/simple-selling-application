@@ -22,7 +22,7 @@ public interface ProductMapper {
                         @Mapping(target = "video", ignore = true),
                         @Mapping(target = "images", ignore = true)
         })
-        Product toProduct(ProductDTO.Request request);
+        Product toProduct(ProductDTO.CreateRequest request);
 
         // Map Product to ProductInSellResponse
         @Mappings({

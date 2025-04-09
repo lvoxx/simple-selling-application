@@ -12,7 +12,6 @@ import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
@@ -135,43 +134,36 @@ public class LocalMediaServiceImpl implements MediaService {
     }
 
     /**
-     * Saves a list of image files to the server and returns their URLs.
+     * Saves a single image file to the server and returns its URL.
      * 
-     * This method iterates over the list of provided image files, detects their
-     * MIME type, and
-     * ensures they are valid images. It then saves each image to the server,
-     * compresses it if necessary,
-     * and generates a URL for the compressed image. The URLs of the compressed
-     * images are returned
-     * as a list.
+     * This method detects the MIME type of the provided image file and ensures it
+     * is a valid image. It then saves the image to the server, compresses it if
+     * necessary, and generates a URL for the compressed image. The URL of the
+     * compressed image is returned.
      * 
-     * @param images A list of image files to be saved
-     * @return A list of URLs pointing to the saved and compressed images
+     * @param image A single image file to be saved
+     * @return The URL pointing to the saved and compressed image
      * @throws Exception If any error occurs during the saving or compression
      *                   process
      */
     @Override
-    public List<String> saveImagesFile(List<MultipartFile> images)
+    public String saveImageFile(MultipartFile image)
             throws EmptyFileException, UnknownFileExtension, IOException {
-        if (images.isEmpty()) {
+        if (image.isEmpty()) {
             throw new EmptyFileException(messageSource.getMessage("validation.product.images.not-null",
                     new Object[] {}, Locale.getDefault()));
         }
-        List<String> imageUrls = new ArrayList<>();
-        for (MultipartFile image : images) {
-            String mimeType = MediaDetector.detect(image.getInputStream());
 
-            if (!(mimeType.startsWith("image/"))) {
-                throw new UnknownFileExtension(messageSource.getMessage("validation.product.images.valid",
-                        new Object[] {}, Locale.getDefault()));
-            }
-            String originalLocation = saveFileToServer(image, TypeOfMedia.Images, false);
-            imageUrls.add(
-                    generateMediaUrl(
-                            removeRootPath(compressImage(originalLocation))));
+        String mimeType = MediaDetector.detect(image.getInputStream());
+
+        if (!(mimeType.startsWith("image/"))) {
+            throw new UnknownFileExtension(messageSource.getMessage("validation.product.images.valid",
+                    new Object[] {}, Locale.getDefault()));
         }
+        String originalLocation = saveFileToServer(image, TypeOfMedia.Images, false);;
 
-        return imageUrls;
+        return generateMediaUrl(
+            removeRootPath(compressImage(originalLocation)));
     }
 
     /**
@@ -261,15 +253,10 @@ public class LocalMediaServiceImpl implements MediaService {
     }
 
     @Override
-    public List<String> updateImages(List<MultipartFile> images, List<String> oldUrls)
-            throws FileNotFoundException, IOException {
-        // Map url to folder paths
-        List<String> imageFolderPaths = oldUrls.stream().map(url -> removeBaseServerUrlThenChangeToRootPath(url))
-                .toList();
-        // Delete old image from folder paths
-        deleteFiles(imageFolderPaths);
-        // Upload new images
-        return saveImagesFile(images);
+    public String updateImage(MultipartFile image, String oldUrl) throws FileNotFoundException, IOException {
+        String imageFolderPath = removeBaseServerUrlThenChangeToRootPath(oldUrl);
+        deleteFile(imageFolderPath);
+        return saveImageFile(image);
     }
 
     @Override
