@@ -71,7 +71,8 @@ public abstract class ProductDTO {
     @Schema(name = "Product Update Request", description = "Request payload for creating or updating a product")
     public static class UpdateRequest extends CreateRequest {
         // 'http://localhost:9090/...jpg': 'New Image Name.jpg'
-        private Map<String, String> updateOldImageUrlToNewImageFile;
+        @JsonProperty("old-image-urls-to-new-image-file-names")
+        private Map<String, String> updateOldImageUrlToNewImageFileName;
     }
 
     @Data
