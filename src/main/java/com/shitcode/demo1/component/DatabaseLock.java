@@ -48,7 +48,7 @@ public class DatabaseLock {
     // Generic method for Supplier<T>
     public <T> T doAndLock(KeyLock key, Object id, ThrowingSupplier<T> task) {
         int retriesLeft = TRY_TIMES;
-        String keyName = key.getKey().concat(id.toString());
+        String keyName = key.name().concat(id.toString());
         while (!tryLock(keyName)) {
             log.debug("[DEBUG] Key '{}' is already locked. Retrying in {} ms...", keyName, RETRY_PERIOD);
             if (--retriesLeft == 0) {
