@@ -14,11 +14,9 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
-import lombok.Setter;
 
 public abstract class SpringUserDTO {
     @Builder
@@ -48,7 +46,7 @@ public abstract class SpringUserDTO {
         private final String lastName;
 
         @Phone(message = "{validation.spring-user.phone-number.phone}")
-        @Size(min = 4, max = 14,message = "{validation.spring-user.phone-number.size}")
+        @Size(min = 4, max = 14, message = "{validation.spring-user.phone-number.size}")
         @Schema(description = "User's phone number", example = "+1-5551234567", required = true)
         private final String phoneNumber;
     }
@@ -79,7 +77,7 @@ public abstract class SpringUserDTO {
         private String lastName;
 
         @Phone(message = "{validation.spring-user.phone-number.phone}")
-        @Size(min = 4, max = 14,message = "{validation.spring-user.phone-number.size}")
+        @Size(min = 4, max = 14, message = "{validation.spring-user.phone-number.size}")
         @Schema(description = "User's phone number", example = "+1-5551234567", required = true)
         private final String phoneNumber;
 
