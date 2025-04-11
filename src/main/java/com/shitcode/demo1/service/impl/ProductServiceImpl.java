@@ -156,13 +156,13 @@ public class ProductServiceImpl implements ProductService {
         product.setInStockQuantity(request.getInStockQuantity());
 
         // If this field is not null, update images
-        if (request.getUpdateOldImageUrlAndNewImageFileName() != null || images != null) {
-            product.setImages(updateImagesFromProduct(request.getUpdateOldImageUrlAndNewImageFileName(),
+        if (!request.getUpdateOldImageUrlAndNewImageFileName().isEmpty() || !images.isEmpty()) {
+            product.setImages(processUpdatedImages(request.getUpdateOldImageUrlAndNewImageFileName(),
                     product.getImages(), images));
         }
         // If this field is not null, update video
-        if (request.getVideoUrlToBeDeleted() != null || video != null) {
-            product.setVideo(updateVideoFromProduct(request.getVideoUrlToBeDeleted(), video));
+        if (!request.getVideoUrlToBeDeleted().isEmpty() || !video.isEmpty()) {
+            product.setVideo(processUpdatedVideo(request.getVideoUrlToBeDeleted(), video));
         }
 
         AdminResponse response = databaseLock.doAndLock(KeyLock.PRODUCT, id,
@@ -172,66 +172,52 @@ public class ProductServiceImpl implements ProductService {
         return response;
     }
 
-    private String updateVideoFromProduct(String oldVideoUrl,
-            MultipartFile newVideo) throws IOException {
-        if (newVideo == null && oldVideoUrl.isEmpty()) {
-            return oldVideoUrl;
-        }
-        // Example map: 'http://localhost:9090/...mp4'
-        // If old video exists, delete old video
+    private String processUpdatedVideo(String oldVideoUrl, MultipartFile newVideo) throws IOException {
         if (!oldVideoUrl.isEmpty()) {
             mediaService.deleteFile(oldVideoUrl);
         }
-        // Save new video
-        return mediaService.saveVideoFile(newVideo);
+
+        return newVideo.isEmpty() ? null : mediaService.saveVideoFile(newVideo);
     }
 
-    private List<String> updateImagesFromProduct(Map<String, String> oldImageUrlsAndNewImageNames,
-            List<String> oldImageUrls,
-            List<MultipartFile> newImages)
-            throws IOException {
-        // Build a new oldImageUrls
-        List<String> oldImageUrlsClone = new ArrayList<>(oldImageUrls);
-        // Build a map for quick lookup: image name -> MultipartFile
-        Map<String, MultipartFile> newImageMap = newImages.stream()
-                .collect(Collectors.toMap(MultipartFile::getOriginalFilename, image -> image));
+    private List<String> processUpdatedImages(Map<String, String> updateMap, List<String> existingUrls,
+            List<MultipartFile> newImages) throws IOException {
+        List<String> updatedUrls = new ArrayList<>(existingUrls);
 
-        for (Map.Entry<String, String> entry : oldImageUrlsAndNewImageNames.entrySet()) {
-            String oldImageUrl = entry.getKey();
-            String newImageName = entry.getValue();
+        Map<String, MultipartFile> newImageLookup = newImages.stream()
+                .collect(Collectors.toMap(MultipartFile::getOriginalFilename, img -> img));
 
-            // Example map: '': 'Example_image.JPG'
-            if (oldImageUrl.isEmpty() && !newImageName.isEmpty()) {
-                // If old image is empty and new image is not empty, add new image
-                oldImageUrlsClone.add(mediaService.saveImageFile(newImageMap.get(newImageName)));
-                continue;
-            }
-            
-            // Remove old URL and delete the old image
-            oldImageUrlsClone.remove(oldImageUrl);
-            mediaService.deleteFile(oldImageUrl);
-            
-            // Example map: '': ''
-            // If verb is '', delete the image, skip update
-            if (newImageName.isEmpty()) {
+        for (Map.Entry<String, String> entry : updateMap.entrySet()) {
+            String oldUrl = entry.getKey();
+            String newFileName = entry.getValue();
+
+            // Case: add new image
+            if (oldUrl.isEmpty() && !newFileName.isEmpty()) {
+                updatedUrls.add(mediaService.saveImageFile(getOrThrow(newImageLookup, newFileName)));
                 continue;
             }
 
-            // Example map: 'http://localhost:9090/...jpg': 'Example_image.JPG'
-            // Get corresponding new image file
-            MultipartFile newImage = newImageMap.get(newImageName);
-            if (newImage == null) {
-                throw new FileNotFoundException(messageSource.getMessage(
-                        "exception.entity-not-found.product-media",
-                        new Object[] { newImageName }, Locale.getDefault()));
+            // Remove and delete old image
+            updatedUrls.remove(oldUrl);
+            mediaService.deleteFile(oldUrl);
+
+            // Case: delete without replacing
+            if (newFileName.isEmpty()) {
+                continue;
             }
 
-            // Save new image and update list
-            String newImageUrl = mediaService.saveImageFile(newImage);
-            oldImageUrlsClone.add(newImageUrl);
+            // Case: replace with new image
+            updatedUrls.add(mediaService.saveImageFile(getOrThrow(newImageLookup, newFileName)));
         }
 
-        return oldImageUrlsClone;
+        return updatedUrls;
+    }
+
+    private MultipartFile getOrThrow(Map<String, MultipartFile> fileMap, String fileName) throws FileNotFoundException {
+        return Optional.ofNullable(fileMap.get(fileName))
+                .orElseThrow(() -> new FileNotFoundException(
+                        messageSource.getMessage("exception.entity-not-found.product-media",
+                                new Object[] { fileName }, Locale.getDefault())));
     }
 
     @Override
