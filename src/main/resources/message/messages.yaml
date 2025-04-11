@@ -42,11 +42,10 @@ validation:
     category-id:
       not-null: Category ID cannot be null.
       positive: Category ID must be greater than 0.
-    images:
-      not-null: Require at least one image product.
-      valid: Image must be in png, jpeg, jpg format.
-    video:
-      valid: Video must be in MP4 format.
+    old-image-urls-and-new-image-file-names:
+      not-null: Require field 'old-image-urls-and-new-image-file-names'.
+    video-url-to-be-deleted:
+      not-null: Require field 'video-url-to-be-deleted'.
   spring-user:
     email:
       email: Invalid email format.

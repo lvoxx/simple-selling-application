@@ -296,8 +296,11 @@ public class LocalMediaServiceImpl implements MediaService {
      */
     @Override
     public void deleteFile(String filePathAndNameWithExtension) throws IOException, FileNotFoundException {
+        String realPathInServer = removeBaseServerUrlThenChangeToRootPath(filePathAndNameWithExtension);
+        LogPrinter.printLog(Type.DEBUG, Flag.SERVICE_FLAG,
+                String.format("Attempting to delete file at the real path in server: %s", realPathInServer));
 
-        Path filePath = Paths.get(pathConfig.getRoot().concat(filePathAndNameWithExtension))
+        Path filePath = Paths.get(realPathInServer)
                 .normalize();
 
         LogPrinter.printLog(Type.DEBUG, Flag.SERVICE_FLAG,
@@ -309,17 +312,17 @@ public class LocalMediaServiceImpl implements MediaService {
                     String.format("File at %s has been successfully deleted", filePath));
         } catch (NoSuchFileException e) {
             throw new FileNotFoundException(messageSource.getMessage("exception.media.file-not-found",
-                    new Object[] { filePathAndNameWithExtension }, Locale.getDefault()));
+                    new Object[] { realPathInServer }, Locale.getDefault()));
         } catch (DirectoryNotEmptyException e) {
             throw new IOException(messageSource.getMessage("exception.media.directory-not-empty",
-                    new Object[] { filePath }, Locale.getDefault()));
+                    new Object[] { realPathInServer }, Locale.getDefault()));
         } catch (IOException e) {
             LogPrinter.printServiceLog(Type.ERROR,
                     "LocalMediaServiceImpl",
                     "deleteFile",
                     e.getMessage());
             throw new IOException(messageSource.getMessage("exception.media.file-delete-failed",
-                    new Object[] { filePathAndNameWithExtension }, Locale.getDefault()));
+                    new Object[] { realPathInServer }, Locale.getDefault()));
         }
     }
 

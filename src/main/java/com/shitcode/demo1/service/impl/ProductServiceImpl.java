@@ -155,10 +155,13 @@ public class ProductServiceImpl implements ProductService {
         product.setInSellQuantity(request.getInSellQuantity());
         product.setInStockQuantity(request.getInStockQuantity());
 
-        if (request.getUpdateOldImageUrlToNewImageFileName() != null && images != null) {
-            product.setImages(updateImagesFromProduct(request.getUpdateOldImageUrlToNewImageFileName(), product.getImages(), images));
+        // If this field is not null, update images
+        if (request.getUpdateOldImageUrlAndNewImageFileName() != null || images != null) {
+            product.setImages(updateImagesFromProduct(request.getUpdateOldImageUrlAndNewImageFileName(),
+                    product.getImages(), images));
         }
-        if (video != null) {
+        // If this field is not null, update video
+        if (request.getVideoUrlToBeDeleted() != null || video != null) {
             product.setVideo(updateVideoFromProduct(product.getVideo(), video));
         }
 
@@ -171,7 +174,15 @@ public class ProductServiceImpl implements ProductService {
 
     private String updateVideoFromProduct(String oldVideoUrl,
             MultipartFile newVideo) throws IOException {
-        mediaService.deleteFile(oldVideoUrl);
+        if (newVideo == null && oldVideoUrl.isEmpty()) {
+            return oldVideoUrl;
+        }
+        // Example map: 'http://localhost:9090/...mp4'
+        // If old video exists, delete old video
+        if (!oldVideoUrl.isEmpty()) {
+            mediaService.deleteFile(oldVideoUrl);
+        }
+        // Save new video
         return mediaService.saveVideoFile(newVideo);
     }
 
@@ -189,10 +200,24 @@ public class ProductServiceImpl implements ProductService {
             String oldImageUrl = entry.getKey();
             String newImageName = entry.getValue();
 
+            // Example map: '': 'Example_image.JPG'
+            if (oldImageUrl.isEmpty() && !newImageName.isEmpty()) {
+                // If old image is empty and new image is not empty, add new image
+                oldImageUrlsClone.add(mediaService.saveImageFile(newImageMap.get(newImageName)));
+                continue;
+            }
+            
             // Remove old URL and delete the old image
             oldImageUrlsClone.remove(oldImageUrl);
             mediaService.deleteFile(oldImageUrl);
+            
+            // Example map: '': ''
+            // If verb is '', delete the image, skip update
+            if (newImageName.isEmpty()) {
+                continue;
+            }
 
+            // Example map: 'http://localhost:9090/...jpg': 'Example_image.JPG'
             // Get corresponding new image file
             MultipartFile newImage = newImageMap.get(newImageName);
             if (newImage == null) {

@@ -70,8 +70,12 @@ public abstract class ProductDTO {
     @Schema(name = "Product Update Request", description = "Request payload for creating or updating a product")
     public static class UpdateRequest extends CreateRequest {
         // 'http://localhost:9090/...jpg': 'New Image Name.jpg'
-        @JsonProperty("old-image-urls-to-new-image-file-names")
-        private Map<String, String> updateOldImageUrlToNewImageFileName;
+        @JsonProperty("old-image-urls-and-new-image-file-names")
+        @NotNull(message = "{validation.product.old-image-urls-and-new-image-file-names.not-null}")
+        private Map<String, String> updateOldImageUrlAndNewImageFileName;
+
+        @NotNull(message = "{validation.product.video-url-to-be-deleted.not-null}")
+        private String videoUrlToBeDeleted;
     }
 
     @Data
