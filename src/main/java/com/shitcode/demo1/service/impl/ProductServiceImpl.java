@@ -140,8 +140,8 @@ public class ProductServiceImpl implements ProductService {
             @CacheEvict(value = ProductCacheType.Fields.INSELL_PRODUCTS, allEntries = true),
             @CacheEvict(value = ProductCacheType.Fields.ADMIN_PRODUCT_ID, key = "#id"),
             @CacheEvict(value = ProductCacheType.Fields.INSELL_PRODUCT_ID, key = "#id"),
-            @CacheEvict(value = ProductCacheType.Fields.ADMIN_PRODUCT_NAME, key = "#req.name"),
-            @CacheEvict(value = ProductCacheType.Fields.INSELL_PRODUCT_NAME, key = "#req.name")
+            @CacheEvict(value = ProductCacheType.Fields.ADMIN_PRODUCT_NAME, key = "#result.name"),
+            @CacheEvict(value = ProductCacheType.Fields.INSELL_PRODUCT_NAME, key = "#result.name")
     })
     public AdminResponse update(ProductDTO.UpdateRequest request, List<MultipartFile> images, MultipartFile video,
             Long id) throws FileNotFoundException, IOException {
@@ -162,7 +162,7 @@ public class ProductServiceImpl implements ProductService {
         }
         // If this field is not null, update video
         if (request.getVideoUrlToBeDeleted() != null || video != null) {
-            product.setVideo(updateVideoFromProduct(product.getVideo(), video));
+            product.setVideo(updateVideoFromProduct(request.getVideoUrlToBeDeleted(), video));
         }
 
         AdminResponse response = databaseLock.doAndLock(KeyLock.PRODUCT, id,
