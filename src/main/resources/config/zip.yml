@@ -1,0 +1,4 @@
+zip:
+  max-size: 1GB
+  root-path: /opt/app/backups
+  format: "%s-%s-%03d.zip" # <Folder Name>-<date>T<time>Z-00<part number>.zip
