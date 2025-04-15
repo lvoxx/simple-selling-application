@@ -36,3 +36,6 @@ rate-limiter:
   media:
     id: SOFT
     manage: MEDIUM
+  backup:
+    media: HARD
+    sql: HARD
