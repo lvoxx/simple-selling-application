@@ -1,6 +1,7 @@
 package com.shitcode.demo1.service.impl;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -13,6 +14,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import net.lingala.zip4j.ZipFile;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 
@@ -48,12 +50,14 @@ public class BackupOnGoogleDriveServiceImple implements BackupService {
     private final ZipConfigData zipConfigData;
     private final MediaConfigData mediaConfigData;
     private final ClientConfigData clientConfigData;
+    private final String googleCredentialsPath;
 
     public BackupOnGoogleDriveServiceImple(ZipConfigData zipConfigData, MediaConfigData mediaConfigData,
-            ClientConfigData clientConfigData) {
+            ClientConfigData clientConfigData, @Value("googleapi.path") String googleCredentialsPath) {
         this.zipConfigData = zipConfigData;
         this.mediaConfigData = mediaConfigData;
         this.clientConfigData = clientConfigData;
+        this.googleCredentialsPath = googleCredentialsPath;
     }
 
     private MediaConfigData.PathConfig pathConfig;
@@ -133,7 +137,9 @@ public class BackupOnGoogleDriveServiceImple implements BackupService {
     private File zipPart(Path baseDir, List<Path> files, String folderName, String timestamp, int partNum)
             throws IOException {
         String fileName = String.format(ZIP_FILENAME_FORMAT, folderName, timestamp, partNum);
-        Path zipPath = Files.createTempFile(fileName, null);
+        // Create a temporary directory for zip files
+        Path tempDir = Files.createTempDirectory("backup_zips");
+        Path zipPath = tempDir.resolve(fileName);
         ZipFile zipFile = new ZipFile(zipPath.toFile());
 
         ZipParameters parameters = new ZipParameters();
@@ -147,6 +153,8 @@ public class BackupOnGoogleDriveServiceImple implements BackupService {
         }
         File result = zipPath.toFile();
         zipFile.close();
+        // Schedule the temp directory for deletion on JVM exit
+        tempDir.toFile().deleteOnExit();
         return result;
     }
 
@@ -164,9 +172,10 @@ public class BackupOnGoogleDriveServiceImple implements BackupService {
      */
     public String uploadBasic(File fileToBeUploaded) throws IOException {
         // Load pre-authorized user credentials from the environment.
-        // TODO(developer) - See https://developers.google.com/identity for
-        // guides on implementing OAuth2 for your application.
-        GoogleCredentials credentials = GoogleCredentials.getApplicationDefault()
+        // TODO(developer) - See https://developers.google.com/identity for guides on
+        // implementing OAuth2 for your application.
+        GoogleCredentials credentials = GoogleCredentials
+                .fromStream(new FileInputStream(new File(googleCredentialsPath)))
                 .createScoped(Arrays.asList(DriveScopes.DRIVE_FILE));
         HttpRequestInitializer requestInitializer = new HttpCredentialsAdapter(
                 credentials);

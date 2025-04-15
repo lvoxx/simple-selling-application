@@ -12,6 +12,7 @@ spring:
       - config/auth.yml
       - config/database.yml
       - config/email.yml
+      - config/google-api.yml
       - config/logging.yml
       - config/media.yml
       - config/rate-limiter.yml
