@@ -581,7 +581,7 @@ public class LocalMediaServiceImpl implements MediaService {
                     LogPrinter.printServiceLog(LogPrinter.Type.INFO,
                             "MediaServiceImpl",
                             "compressVideo",
-                            String.format("Filename: %s -> %d status: %s time: %d ms",
+                            String.format("Filename: %s -> %s status: %s time: %d ms",
                                     input.getFormat().filename, // Correctly referenced
                                     String.format("%.0f", percentage * 100), // Properly formatted percentage
                                     progress.status,

@@ -1,3 +1,4 @@
 logging:
   level:
     com.ulisesbocchio.jasyptspringboot: off
+    com.shitcode.demo1.service.impl: DEBUG

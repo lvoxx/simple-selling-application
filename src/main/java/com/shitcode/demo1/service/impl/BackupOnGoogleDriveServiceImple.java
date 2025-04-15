@@ -1,7 +1,6 @@
 package com.shitcode.demo1.service.impl;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -9,12 +8,9 @@ import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
-import net.lingala.zip4j.ZipFile;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 
@@ -24,10 +20,10 @@ import com.google.api.client.http.HttpRequestInitializer;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.gson.GsonFactory;
 import com.google.api.services.drive.Drive;
-import com.google.api.services.drive.DriveScopes;
 import com.google.auth.http.HttpCredentialsAdapter;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.shitcode.demo1.annotation.logging.LogCollector;
+import com.shitcode.demo1.exception.model.FolderNotFoundException;
 import com.shitcode.demo1.exception.model.UploadFileOnGoogleDriveException;
 import com.shitcode.demo1.helper.BitSizeConverter;
 import com.shitcode.demo1.properties.ClientConfigData;
@@ -35,9 +31,11 @@ import com.shitcode.demo1.properties.MediaConfigData;
 import com.shitcode.demo1.properties.ZipConfigData;
 import com.shitcode.demo1.service.BackupService;
 import com.shitcode.demo1.utils.LogPrinter;
+import com.shitcode.demo1.utils.LogPrinter.Type;
 import com.shitcode.demo1.utils.LoggingModel;
 
 import jakarta.annotation.PostConstruct;
+import net.lingala.zip4j.ZipFile;
 import net.lingala.zip4j.model.ZipParameters;
 import net.lingala.zip4j.model.enums.CompressionLevel;
 import net.lingala.zip4j.model.enums.CompressionMethod;
@@ -50,14 +48,14 @@ public class BackupOnGoogleDriveServiceImple implements BackupService {
     private final ZipConfigData zipConfigData;
     private final MediaConfigData mediaConfigData;
     private final ClientConfigData clientConfigData;
-    private final String googleCredentialsPath;
+    private final GoogleCredentials googleCredentials;
 
     public BackupOnGoogleDriveServiceImple(ZipConfigData zipConfigData, MediaConfigData mediaConfigData,
-            ClientConfigData clientConfigData, @Value("googleapi.path") String googleCredentialsPath) {
+            ClientConfigData clientConfigData, GoogleCredentials googleCredentials) {
         this.zipConfigData = zipConfigData;
         this.mediaConfigData = mediaConfigData;
         this.clientConfigData = clientConfigData;
-        this.googleCredentialsPath = googleCredentialsPath;
+        this.googleCredentials = googleCredentials;
     }
 
     private MediaConfigData.PathConfig pathConfig;
@@ -76,7 +74,14 @@ public class BackupOnGoogleDriveServiceImple implements BackupService {
         // These are folder to be backed up.
         Path imageFolderToBeBackedUp = getBackupFolder(true, date);
         // Zip files will be uploaded to Google Drive.
-        List<File> imageZipFiles = splitFolderIntoZips(imageFolderToBeBackedUp);
+        List<File> imageZipFiles;
+        try {
+            imageZipFiles = splitFolderIntoZips(imageFolderToBeBackedUp);
+        } catch (IllegalArgumentException e) {
+            LogPrinter.printServiceLog(Type.ERROR, "BackupOnGoogleDriveServiceImple", "backupVideoFolderToCloud",
+                    e.getMessage());
+            throw new FolderNotFoundException(e.getMessage());
+        }
         List<String> result = new ArrayList<String>();
         for (File videoZip : imageZipFiles) {
             result.add(uploadBasic(videoZip));
@@ -89,7 +94,14 @@ public class BackupOnGoogleDriveServiceImple implements BackupService {
         // These are folder to be backed up.
         Path videoFolderToBeBackedUp = getBackupFolder(false, date);
         // Zip files will be uploaded to Google Drive.
-        List<File> videoZipFiles = splitFolderIntoZips(videoFolderToBeBackedUp);
+        List<File> videoZipFiles;
+        try {
+            videoZipFiles = splitFolderIntoZips(videoFolderToBeBackedUp);
+        } catch (IllegalArgumentException e) {
+            LogPrinter.printServiceLog(Type.ERROR, "BackupOnGoogleDriveServiceImple", "backupVideoFolderToCloud",
+                    e.getMessage());
+            throw new FolderNotFoundException(e.getMessage());
+        }
         List<String> result = new ArrayList<String>();
         for (File videoZip : videoZipFiles) {
             result.add(uploadBasic(videoZip));
@@ -99,9 +111,8 @@ public class BackupOnGoogleDriveServiceImple implements BackupService {
 
     private List<File> splitFolderIntoZips(Path folderPath) throws IOException {
         if (!Files.isDirectory(folderPath)) {
-            throw new IllegalArgumentException("Path must be a directory");
+            throw new IllegalArgumentException(String.format("Path [%s] must be a directory", folderPath));
         }
-
         String folderName = folderPath.getFileName().toString();
         String timestamp = ZonedDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH-mm-ss'Z'"));
         // Get all files in the folder.
@@ -174,11 +185,8 @@ public class BackupOnGoogleDriveServiceImple implements BackupService {
         // Load pre-authorized user credentials from the environment.
         // TODO(developer) - See https://developers.google.com/identity for guides on
         // implementing OAuth2 for your application.
-        GoogleCredentials credentials = GoogleCredentials
-                .fromStream(new FileInputStream(new File(googleCredentialsPath)))
-                .createScoped(Arrays.asList(DriveScopes.DRIVE_FILE));
         HttpRequestInitializer requestInitializer = new HttpCredentialsAdapter(
-                credentials);
+                googleCredentials);
 
         // Build a new authorized API client service.
         Drive service = new Drive.Builder(new NetHttpTransport(),
@@ -205,13 +213,18 @@ public class BackupOnGoogleDriveServiceImple implements BackupService {
     }
 
     private Path getBackupFolder(boolean isImage, LocalDate date) {
-        Path rootPath = Path.of(pathConfig.getRoot());
-        Path mediaPath = isImage ? rootPath.resolve(pathConfig.getImages()) : rootPath.resolve(pathConfig.getVideos());
-        Path datePath = Path.of(File.separator.concat(String.valueOf(date.getYear()))
+        Path mediaPath = Path.of(pathConfig.getRoot()
+                .concat(isImage ? pathConfig.getImages() : pathConfig.getVideos())
+                .concat(pathConfig.getCompressed())
+                .concat(File.separator)
+                .concat(String.valueOf(date.getYear()))
                 .concat(File.separator)
                 .concat(String.valueOf(date.getMonthValue()))
                 .concat(File.separator)
                 .concat(String.valueOf(date.getDayOfMonth())));
-        return mediaPath.resolve(datePath);
+        LogPrinter.printServiceLog(LogPrinter.Type.DEBUG, "BackupOnGoogleDriveServiceImple", "getBackupFolder",
+                "Result path: " + mediaPath);
+
+        return mediaPath;
     }
 }
