@@ -19,6 +19,5 @@ description = "global allow list"
 paths = [
   '''mailserver.env''',
   '''.env.dev''',
-  '''.env.prod''',
   '''target'''
 ]
