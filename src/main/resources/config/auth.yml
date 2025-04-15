@@ -24,7 +24,9 @@ security-path:
       /product-interaction,
       /product-interaction/**,
       /media,
-      /media/**
+      /media/**,
+      /backup,
+      /backup/**
     ]
   user: [/users/**, /dashboard/user, /dashboard/user/**]
   super-user:
