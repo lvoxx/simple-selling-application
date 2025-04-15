@@ -4,6 +4,9 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.format.annotation.DateTimeFormat.ISO;
+import jakarta.validation.constraints.Pattern;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -57,15 +60,15 @@ public class BackupController {
             @ApiResponse(responseCode = "200", description = "Media files backed up successfully", content = @Content(mediaType = "application/vnd.lvoxx.app-v1+json", schema = @Schema(implementation = List.class))),
             @ApiResponse(responseCode = "500", description = "Internal server error during backup", content = @Content)
     })
-    @GetMapping(produces = "application/vnd.lvoxx.app-v1+json")
+    @GetMapping(name = "/media", produces = "application/vnd.lvoxx.app-v1+json")
     public ResponseEntity<?> backupMedia(
-            @Parameter(description = "Date for which to backup files (defaults to current date)") @RequestParam(name = "d", required = false) LocalDate date,
-            @Parameter(description = "Whether to backup images (true) or videos (false)") @RequestParam(name = "i", required = false, defaultValue = "true") Boolean isImage)
+            @Parameter(description = "Date for which to backup files (defaults to current date)") @RequestParam(name = "d", required = false) @DateTimeFormat(iso = ISO.DATE) LocalDate date,
+            @Parameter(description = "Type of media to backup (image/video)") @Pattern(regexp = "^(image|video)$", message = "Type must be either 'image' or 'video'") @RequestParam(name = "t", required = false, defaultValue = "image") String type)
             throws Exception {
         return responseService.mapping(
                 () -> {
                     LocalDate time = Optional.ofNullable(date).orElse(LocalDate.now());
-                    List<String> result = isImage
+                    List<String> result = type.equals("image")
                             ? backupService.backupImageFolderToCloud(time)
                             : backupService.backupVideoFolderToCloud(time);
                     return ResponseEntity.ok().body(result);
