@@ -33,4 +33,5 @@ build/
 .vscode/
 
 .env.dev
+.env.prod
 simple-selling-application/
