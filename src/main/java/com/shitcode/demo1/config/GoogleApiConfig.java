@@ -15,7 +15,7 @@ import com.google.auth.oauth2.GoogleCredentials;
 @Configuration
 public class GoogleApiConfig {
     private final ResourceLoader resourceLoader;
-    private final String googleCredentialsPath;
+    private String googleCredentialsPath;
 
     public GoogleApiConfig(ResourceLoader resourceLoader, @Value("${googleapi.path}") String googleCredentialsPath) {
         this.resourceLoader = resourceLoader;
