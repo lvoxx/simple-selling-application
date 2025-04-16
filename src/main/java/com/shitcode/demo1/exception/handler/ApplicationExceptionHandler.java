@@ -19,6 +19,7 @@ import com.shitcode.demo1.exception.model.ErrorModel;
 import com.shitcode.demo1.exception.model.FileReadException;
 import com.shitcode.demo1.exception.model.FolderNotFoundException;
 import com.shitcode.demo1.exception.model.ImageEncodeException;
+import com.shitcode.demo1.exception.model.InitialGoogleDriveContextException;
 import com.shitcode.demo1.exception.model.KeyLockMissedException;
 import com.shitcode.demo1.exception.model.ResourceNotFoundException;
 import com.shitcode.demo1.exception.model.RevokeTokenException;
@@ -33,7 +34,7 @@ public class ApplicationExceptionHandler {
 
     @ExceptionHandler({ KeyLockMissedException.class, WorkerBusyException.class, InvalidParameterException.class,
             SendingMailException.class, FileReadException.class, VideoEncodeException.class, ImageEncodeException.class,
-            IOException.class, UploadFileOnGoogleDriveException.class
+            IOException.class, UploadFileOnGoogleDriveException.class, InitialGoogleDriveContextException.class
     })
     public ResponseEntity<ErrorModel> handleDataOperationException(RuntimeException ex) {
         ErrorModel errorResponse = ErrorModel.of(HttpStatus.INTERNAL_SERVER_ERROR, ex.getMessage(), null);

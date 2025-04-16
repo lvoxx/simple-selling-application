@@ -24,6 +24,7 @@ import com.google.auth.http.HttpCredentialsAdapter;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.shitcode.demo1.annotation.logging.LogCollector;
 import com.shitcode.demo1.exception.model.FolderNotFoundException;
+import com.shitcode.demo1.exception.model.InitialGoogleDriveContextException;
 import com.shitcode.demo1.exception.model.UploadFileOnGoogleDriveException;
 import com.shitcode.demo1.helper.BitSizeConverter;
 import com.shitcode.demo1.properties.ClientConfigData;
@@ -83,8 +84,8 @@ public class BackupOnGoogleDriveServiceImple implements BackupService {
             throw new FolderNotFoundException(e.getMessage());
         }
         List<String> result = new ArrayList<String>();
-        for (File videoZip : imageZipFiles) {
-            result.add(uploadBasic(videoZip));
+        for (File imageZip : imageZipFiles) {
+            result.add(uploadFile(imageZip));
         }
         return result;
     }
@@ -104,14 +105,15 @@ public class BackupOnGoogleDriveServiceImple implements BackupService {
         }
         List<String> result = new ArrayList<String>();
         for (File videoZip : videoZipFiles) {
-            result.add(uploadBasic(videoZip));
+            result.add(uploadFile(videoZip));
         }
         return result;
     }
 
     private List<File> splitFolderIntoZips(Path folderPath) throws IOException {
         if (!Files.isDirectory(folderPath)) {
-            throw new IllegalArgumentException(String.format("Path [%s] must be a directory", folderPath));
+            throw new IllegalArgumentException(
+                    String.format("Can not found directory [%s] or it is not a directory", folderPath));
         }
         String folderName = folderPath.getFileName().toString();
         String timestamp = ZonedDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH-mm-ss'Z'"));
@@ -181,24 +183,33 @@ public class BackupOnGoogleDriveServiceImple implements BackupService {
      * @return Inserted file metadata if successful, {@code null} otherwise.
      * @throws IOException if service account credentials file not found.
      */
-    public String uploadBasic(File fileToBeUploaded) throws IOException {
+    public String uploadFile(File fileToBeUploaded) throws IOException {
         // Load pre-authorized user credentials from the environment.
         // TODO(developer) - See https://developers.google.com/identity for guides on
         // implementing OAuth2 for your application.
-        HttpRequestInitializer requestInitializer = new HttpCredentialsAdapter(
-                googleCredentials);
-
         // Build a new authorized API client service.
-        Drive service = new Drive.Builder(new NetHttpTransport(),
-                GsonFactory.getDefaultInstance(),
-                requestInitializer)
-                .setApplicationName(clientConfigData.getName())
-                .build();
+        Drive service = null;
         // Upload file photo.jpg on drive.
-        com.google.api.services.drive.model.File fileMetadata = new com.google.api.services.drive.model.File();
-        fileMetadata.setName(fileToBeUploaded.getName());
+        com.google.api.services.drive.model.File fileMetadata = null;
         // Specify media type and file-path for file.
-        FileContent mediaContent = new FileContent("application/zip", fileToBeUploaded);
+        FileContent mediaContent = null;
+        try {
+            HttpRequestInitializer requestInitializer = new HttpCredentialsAdapter(
+                    googleCredentials);
+
+            service = new Drive.Builder(new NetHttpTransport(),
+                    GsonFactory.getDefaultInstance(),
+                    requestInitializer)
+                    .setApplicationName(clientConfigData.getName())
+                    .build();
+            fileMetadata = new com.google.api.services.drive.model.File();
+            fileMetadata.setName(fileToBeUploaded.getName());
+            mediaContent = new FileContent("application/zip", fileToBeUploaded);
+        } catch (Exception e) {
+            LogPrinter.printServiceLog(LogPrinter.Type.ERROR, "BackupOnGoogleDriveServiceImple", "uploadBasic",
+                    "Unable to inital Google Drive context: " + e.getMessage());
+            throw new InitialGoogleDriveContextException("Failed to initialize Google Drive context");
+        }
         try {
             com.google.api.services.drive.model.File file = service.files().create(fileMetadata, mediaContent)
                     .setFields("id")

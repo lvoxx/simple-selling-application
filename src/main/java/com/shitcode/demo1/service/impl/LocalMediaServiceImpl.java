@@ -578,10 +578,10 @@ public class LocalMediaServiceImpl implements MediaService {
                 @Override
                 public void progress(Progress progress) {
                     double percentage = (double) progress.out_time_ns / duration_ns;
-                    LogPrinter.printServiceLog(LogPrinter.Type.INFO,
+                    LogPrinter.printServiceLog(LogPrinter.Type.DEBUG,
                             "MediaServiceImpl",
                             "compressVideo",
-                            String.format("Filename: %s -> %s status: %s time: %d ms",
+                            String.format("Filename: %s -> %s status: %s time: %s ms",
                                     input.getFormat().filename, // Correctly referenced
                                     String.format("%.0f", percentage * 100), // Properly formatted percentage
                                     progress.status,
