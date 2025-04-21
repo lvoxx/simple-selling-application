@@ -122,3 +122,8 @@ exception:
   media:
     file-not-found: File not found with path [{0}].
     video-encode: An error occured during encode video.
+  backup:
+    folder-not-found: Can not found directory [{0}] or it is not a directory.
+  google:
+    failed-to-initial-context: Failed to initialize Google Drive context.
+    failed-to-upload-file: Failed to upload file [{0}] to Google Drive.
