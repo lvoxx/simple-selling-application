@@ -17,8 +17,18 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     @Query("SELECT p FROM Product p WHERE LOWER(p.name) LIKE LOWER(CONCAT('%', :name, '%'))")
     Optional<Product> findByName(@Param("name") String name);
 
-    @Query("SELECT p.images FROM Product p WHERE p.id = :id")
-    List<String> findImagesById(@Param("id") Long id);
+    @Query(value = """
+            SELECT c.id AS c_id, c.name AS c_name,
+                    p.id AS p_id, p.name AS p_name, p.price, p.currency, p.in_sell_quantity AS p_quantity,
+                    d.id AS d_id, d.title AS d_title, d.type AS d_type, d.sales_percent_amount AS d_sales_percent_amount, d.exp_date AS d_exp_date
+            FROM Category c
+            LEFT JOIN Product p
+            ON c.id = p.category_id
+            LEFT JOIN Discount d
+            ON p.discount_id = d.id
+            WHERE p.id = :id
+            """,nativeQuery = true)
+    Optional<Object[]> findProductWithDiscountAndCategoryById(@Param("id") Long id);
 
     @Query("SELECT p.video FROM Product p WHERE p.id = :id")
     Optional<String> findVideoById(@Param("id") Long id);

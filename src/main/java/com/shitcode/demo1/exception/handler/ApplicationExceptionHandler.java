@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import com.paypal.core.rest.PayPalRESTException;
 import com.shitcode.demo1.exception.model.ConflictTokenException;
 import com.shitcode.demo1.exception.model.DiscountOverTimeException;
 import com.shitcode.demo1.exception.model.EmptyFileException;
@@ -34,7 +35,8 @@ public class ApplicationExceptionHandler {
 
     @ExceptionHandler({ KeyLockMissedException.class, WorkerBusyException.class, InvalidParameterException.class,
             SendingMailException.class, FileReadException.class, VideoEncodeException.class, ImageEncodeException.class,
-            IOException.class, UploadFileOnGoogleDriveException.class, InitialGoogleDriveContextException.class
+            IOException.class, UploadFileOnGoogleDriveException.class, InitialGoogleDriveContextException.class,
+            PayPalRESTException.class
     })
     public ResponseEntity<ErrorModel> handleDataOperationException(RuntimeException ex) {
         ErrorModel errorResponse = ErrorModel.of(HttpStatus.INTERNAL_SERVER_ERROR, ex.getMessage(), null);

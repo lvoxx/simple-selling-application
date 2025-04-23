@@ -148,6 +148,35 @@ public abstract class ProductDTO {
     @Data
     @EqualsAndHashCode(callSuper = false)
     @Builder
+    @Schema(name = "Product With Category And Discount Response", description = "Response containing product details for sub-discount when finding by discount id")
+    public static class ProductWithCategoryAndDiscountResponse extends AbstractAuditableEntity {
+
+        @Schema(description = "Unique identifier of the product", example = "101")
+        private Long id;
+
+        @Schema(description = "Name of the product", example = "Wireless Headphones")
+        private String name;
+
+        @Schema(description = "Quantity of the product available for sale", example = "50")
+        private Integer availableQuatity;
+
+        @Schema(description = "Price of the product", example = "199.99", format = "double")
+        private Double price;
+
+        @Builder.Default
+        @Schema(description = "Currency symbol for the product price", example = "$")
+        private String currency = "$";
+
+        @Schema(description = "Category the product belongs to", implementation = CategoryDTO.Response.class, example = "{\"id\": 3, \"name\": \"Electronics\"}")
+        private CategoryDTO.Response category;
+
+        @Schema(description = "Discount applied to the product", implementation = DiscountDTO.SimpleResponse.class, example = "{\"id\": 1, \"title\": \"20% off\"}")
+        private DiscountDTO.SimpleResponse discount;
+    }
+
+    @Data
+    @EqualsAndHashCode(callSuper = false)
+    @Builder
     @Schema(name = "With Discount Product Response", description = "Response containing product details for sub-discount when finding by discount id")
     public static class DiscountResponse extends AbstractAuditableEntity {
 

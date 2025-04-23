@@ -33,6 +33,16 @@ fontend-server:
     disabled: "{fontend-server.base}/activate?code=disabled-user"
     expired: "{fontend-server.base}/activate?code=expired"
   unknown: "{fontend-server.base}/error?reason=%s"
+  payment:
+    path: "{fontend-server.base}/payment"
+    create: "{fontend-server.payment.path}/create?pid=%s"
+    success: "{fontend-server.payment.path}/success?pid=%s"
+    cancel: "{fontend-server.payment.path}/cancel?pid=%s"
+    error: "{fontend-server.payment.path}/error?pid=%s"
+# Payment Code:
+# 001: Payment Failed
+# 002: Product Not Found
+# 003: Discount Over Time
 
 client:
   name: simple-selling-application

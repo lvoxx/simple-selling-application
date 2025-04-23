@@ -16,5 +16,7 @@ public enum ProductCacheType {
     @FieldNameConstants.Include
     ADMIN_PRODUCT_NAME,
     @FieldNameConstants.Include
-    INSELL_PRODUCT_NAME;
+    INSELL_PRODUCT_NAME,
+    @FieldNameConstants.Include
+    PAYMENT_PRODUCTS;
 }

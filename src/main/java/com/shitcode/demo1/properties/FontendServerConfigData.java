@@ -15,4 +15,5 @@ public class FontendServerConfigData {
     private String unknown;
     private Map<String, String> login;
     private Map<String, String> active;
+    private Map<String, String> payment;
 }

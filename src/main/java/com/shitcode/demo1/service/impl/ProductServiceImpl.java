@@ -3,11 +3,13 @@ package com.shitcode.demo1.service.impl;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.time.Instant;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -27,6 +29,8 @@ import com.shitcode.demo1.annotation.logging.LogCollector;
 import com.shitcode.demo1.component.DatabaseLock;
 import com.shitcode.demo1.dto.DiscountDTO.ApplyToProductsRequest;
 import com.shitcode.demo1.dto.DiscountDTO.ApplyToProductsResponse;
+import com.shitcode.demo1.dto.CategoryDTO;
+import com.shitcode.demo1.dto.DiscountDTO;
 import com.shitcode.demo1.dto.ProductDTO;
 import com.shitcode.demo1.dto.ProductDTO.AdminResponse;
 import com.shitcode.demo1.dto.ProductDTO.InSellResponse;
@@ -42,6 +46,7 @@ import com.shitcode.demo1.service.CategoryService;
 import com.shitcode.demo1.service.InterationEventService;
 import com.shitcode.demo1.service.MediaService;
 import com.shitcode.demo1.service.ProductService;
+import com.shitcode.demo1.utils.DiscountType;
 import com.shitcode.demo1.utils.KeyLock;
 import com.shitcode.demo1.utils.LoggingModel;
 import com.shitcode.demo1.utils.cache.ProductCacheType;
@@ -84,6 +89,38 @@ public class ProductServiceImpl implements ProductService {
         log.debug("Fetched {} in-sell products at {}", res.getTotalElements(), Instant.now());
 
         return res.map(productMapper::toProductInSellResponse);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    @Cacheable(value = ProductCacheType.Fields.PAYMENT_PRODUCTS, key = "#id")
+    public ProductDTO.ProductWithCategoryAndDiscountResponse findProductWithCategoryAndDiscount(Long id) {
+        Object[] product = productRepository.findProductWithDiscountAndCategoryById(id).orElseThrow(
+                () -> new EntityNotFoundException(
+                        messageSource.getMessage("exception.entity-not-found.product-name",
+                                new Object[] { id }, Locale.getDefault())));
+
+        CategoryDTO.Response ctgRes = CategoryDTO.Response.builder()
+                .id((Long) product[0])
+                .name(String.valueOf(product[1]))
+                .build();
+        DiscountDTO.SimpleResponse disRes = DiscountDTO.SimpleResponse.builder()
+                .id((UUID) product[7])
+                .title(String.valueOf(product[8]))
+                .type(DiscountType.valueOf(String.valueOf(product[9])))
+                .salesPercentAmount((Double) product[10])
+                .expDate(OffsetDateTime.parse(String.valueOf(product[11])))
+                .build();
+
+        ProductDTO.ProductWithCategoryAndDiscountResponse response = ProductDTO.ProductWithCategoryAndDiscountResponse
+                .builder()
+                .id((Long) product[0])
+                .name(String.valueOf(product[1]))
+                .discount(disRes)
+                .category(ctgRes)
+                .build();
+
+        return response;
     }
 
     @Override
@@ -140,6 +177,7 @@ public class ProductServiceImpl implements ProductService {
             @CacheEvict(value = ProductCacheType.Fields.INSELL_PRODUCTS, allEntries = true),
             @CacheEvict(value = ProductCacheType.Fields.ADMIN_PRODUCT_ID, key = "#id"),
             @CacheEvict(value = ProductCacheType.Fields.INSELL_PRODUCT_ID, key = "#id"),
+            @CacheEvict(value = ProductCacheType.Fields.PAYMENT_PRODUCTS, key = "#id"),
             @CacheEvict(value = ProductCacheType.Fields.ADMIN_PRODUCT_NAME, key = "#result.name"),
             @CacheEvict(value = ProductCacheType.Fields.INSELL_PRODUCT_NAME, key = "#result.name")
     })
@@ -225,7 +263,8 @@ public class ProductServiceImpl implements ProductService {
             @CacheEvict(value = ProductCacheType.Fields.ADMIN_PRODUCTS, allEntries = true),
             @CacheEvict(value = ProductCacheType.Fields.INSELL_PRODUCTS, allEntries = true),
             @CacheEvict(value = ProductCacheType.Fields.ADMIN_PRODUCT_ID, key = "#requests.productIds"),
-            @CacheEvict(value = ProductCacheType.Fields.INSELL_PRODUCT_ID, key = "#requests.productIds")
+            @CacheEvict(value = ProductCacheType.Fields.INSELL_PRODUCT_ID, key = "#requests.productIds"),
+            @CacheEvict(value = ProductCacheType.Fields.PAYMENT_PRODUCTS, key = "#requests.productIds")
     })
     public ApplyToProductsResponse putDiscountToProducts(ApplyToProductsRequest requests) {
         requests.getProductIds().forEach(pId -> {
@@ -239,7 +278,8 @@ public class ProductServiceImpl implements ProductService {
             @CacheEvict(value = ProductCacheType.Fields.ADMIN_PRODUCTS, allEntries = true),
             @CacheEvict(value = ProductCacheType.Fields.INSELL_PRODUCTS, allEntries = true),
             @CacheEvict(value = ProductCacheType.Fields.ADMIN_PRODUCT_ID, key = "#id"),
-            @CacheEvict(value = ProductCacheType.Fields.INSELL_PRODUCT_ID, key = "#id")
+            @CacheEvict(value = ProductCacheType.Fields.INSELL_PRODUCT_ID, key = "#id"),
+            @CacheEvict(value = ProductCacheType.Fields.PAYMENT_PRODUCTS, key = "#id")
     })
     public InSellResponse sellWith(Integer quantity, Long id) {
         log.debug("Selling {} units of product ID: {}", quantity, id);
@@ -258,7 +298,8 @@ public class ProductServiceImpl implements ProductService {
             @CacheEvict(value = ProductCacheType.Fields.ADMIN_PRODUCTS, allEntries = true),
             @CacheEvict(value = ProductCacheType.Fields.INSELL_PRODUCTS, allEntries = true),
             @CacheEvict(value = ProductCacheType.Fields.ADMIN_PRODUCT_ID, key = "#id"),
-            @CacheEvict(value = ProductCacheType.Fields.INSELL_PRODUCT_ID, key = "#id")
+            @CacheEvict(value = ProductCacheType.Fields.INSELL_PRODUCT_ID, key = "#id"),
+            @CacheEvict(value = ProductCacheType.Fields.PAYMENT_PRODUCTS, key = "#id")
     })
     public synchronized InSellResponse importWith(Integer quantity, Long id) {
         log.debug("Importing {} units for product ID: {}", quantity, id);
@@ -277,7 +318,8 @@ public class ProductServiceImpl implements ProductService {
             @CacheEvict(value = ProductCacheType.Fields.ADMIN_PRODUCTS, allEntries = true),
             @CacheEvict(value = ProductCacheType.Fields.INSELL_PRODUCTS, allEntries = true),
             @CacheEvict(value = ProductCacheType.Fields.ADMIN_PRODUCT_ID, key = "#id"),
-            @CacheEvict(value = ProductCacheType.Fields.INSELL_PRODUCT_ID, key = "#id")
+            @CacheEvict(value = ProductCacheType.Fields.INSELL_PRODUCT_ID, key = "#id"),
+            @CacheEvict(value = ProductCacheType.Fields.PAYMENT_PRODUCTS, key = "#id")
     })
     public synchronized InSellResponse exportWith(Integer quantity, Long id) {
         log.debug("Exporting {} units from product ID: {}", quantity, id);
@@ -296,7 +338,8 @@ public class ProductServiceImpl implements ProductService {
             @CacheEvict(value = ProductCacheType.Fields.ADMIN_PRODUCTS, allEntries = true),
             @CacheEvict(value = ProductCacheType.Fields.INSELL_PRODUCTS, allEntries = true),
             @CacheEvict(value = ProductCacheType.Fields.ADMIN_PRODUCT_ID, key = "#id"),
-            @CacheEvict(value = ProductCacheType.Fields.INSELL_PRODUCT_ID, key = "#id")
+            @CacheEvict(value = ProductCacheType.Fields.INSELL_PRODUCT_ID, key = "#id"),
+            @CacheEvict(value = ProductCacheType.Fields.PAYMENT_PRODUCTS, key = "#id")
     })
     public synchronized void delete(Long id) {
         log.debug("Deleting product with ID: {}", id);

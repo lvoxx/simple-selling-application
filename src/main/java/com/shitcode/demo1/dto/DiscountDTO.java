@@ -46,6 +46,17 @@ public abstract class DiscountDTO {
 
     @Data
     @Builder
+    public static class SimpleResponse {
+        private UUID id;
+        private String title;
+        private DiscountType type;
+        private Double salesPercentAmount;
+        @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ssXXX")
+        private OffsetDateTime expDate;
+    }
+
+    @Data
+    @Builder
     public static class ApplyToProductsRequest {
         private List<Long> productIds;
         private UUID discountId;

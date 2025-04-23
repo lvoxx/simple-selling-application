@@ -39,13 +39,15 @@ public interface ProductService {
 
         ProductDTO.InSellResponse findInSellWithName(String name);
 
+        ProductDTO.ProductWithCategoryAndDiscountResponse findProductWithCategoryAndDiscount(Long id);
+
         ProductDTO.AdminResponse create(ProductDTO.CreateRequest jsonRequest, List<MultipartFile> images,
                         MultipartFile video)
                         throws FileNotFoundException, IOException;
 
         ProductDTO.AdminResponse update(ProductDTO.UpdateRequest request, List<MultipartFile> images,
                         MultipartFile video, Long id) throws FileNotFoundException, IOException;
-                        
+
         DiscountDTO.ApplyToProductsResponse putDiscountToProducts(DiscountDTO.ApplyToProductsRequest requests);
 
         ProductDTO.InSellResponse sellWith(Integer quantity, Long id);

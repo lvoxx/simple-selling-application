@@ -74,6 +74,18 @@ validation:
       null: Enabled cannot be null.
     is-valid-email:
       null: IsValidEmail cannot be null.
+  payment:
+    name:
+      blank: Payment name cannot be blank.
+      size: Payment name must not exceed 100 characters.
+    description:
+      blank: Payment description cannot be blank.
+      size: Payment description must not exceed 1000 characters.
+    product:
+      empty: Product cannot be empty.
+      null-id: Product id cannot be null.
+      null-quantity: Product quantity cannot be null.
+      min-quantity: Product quantity must be at least 1.
 
 success:
   user:

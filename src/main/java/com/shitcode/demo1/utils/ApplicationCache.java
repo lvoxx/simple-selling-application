@@ -75,6 +75,8 @@ public abstract class ApplicationCache {
                                 buildCache(100, 600, 12, TimeUnit.HOURS));
                 caches.put(ProductCacheType.Fields.INSELL_PRODUCT_ID,
                                 buildCache(500, 2500, 12, TimeUnit.HOURS));
+                caches.put(ProductCacheType.Fields.PAYMENT_PRODUCTS,
+                                buildCache(100, 500, 12, TimeUnit.HOURS));
                 // * DISCOUNT
                 caches.put(DiscountCacheType.Fields.DISCOUNTS_TITLE_EXPDATE,
                                 buildCache(50, 150, 1, TimeUnit.HOURS));
