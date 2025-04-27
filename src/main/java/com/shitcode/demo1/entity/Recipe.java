@@ -34,17 +34,27 @@ public class Recipe extends AbstractAuditableEntity {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID id;
 
+    @Column(nullable = false, updatable = false)
     private String name;
 
     @Enumerated(EnumType.STRING)
     @Builder.Default
     private RecipeStatus status = RecipeStatus.PENDING;
 
-    @Column(length = 1000)
+    @Column(length = 1000, updatable = false)
     private String description;
 
-    @Column(nullable = false, precision = 2)
+    @Column(nullable = false, updatable = false, precision = 2)
     private Double total;
+
+    @Column(nullable = false, updatable = false)
+    private String username;
+
+    @Column(nullable = false, updatable = false)
+    private String shippingAddress;
+
+    @Column(nullable = false, updatable = false, precision = 2)
+    private Double shippingFee;
 
     @OneToMany(mappedBy = "recipe", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default

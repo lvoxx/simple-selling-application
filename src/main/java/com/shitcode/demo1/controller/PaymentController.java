@@ -54,7 +54,7 @@ public class PaymentController {
             @AuthenticationPrincipal UserDetails userDetails)
             throws Exception {
         return responseService.execute(
-                () -> paymentService.createPaymentAndRedirectToCheckOutPage(request),
+                () -> paymentService.createPaymentAndRedirectToCheckOutPage(request, userDetails),
                 PAYOUT);
     }
 

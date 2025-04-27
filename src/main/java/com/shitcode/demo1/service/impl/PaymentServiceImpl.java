@@ -5,6 +5,7 @@ import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.view.RedirectView;
 
@@ -74,7 +75,7 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     @Override
-    public RedirectView createPaymentAndRedirectToCheckOutPage(PaymentDTO.Request request) throws PayPalRESTException {
+    public RedirectView createPaymentAndRedirectToCheckOutPage(PaymentDTO.Request request, UserDetails userDetails) throws PayPalRESTException {
         try {
             AtomicDouble total = new AtomicDouble(0.0);
             List<RecipeProduct> recipeProduct = new ArrayList<>();
@@ -126,6 +127,9 @@ public class PaymentServiceImpl implements PaymentService {
             Recipe recipe = Recipe.builder()
                     .name(request.getName())
                     .description(request.getDescription())
+                    .shippingAddress(request.getShippingAddress())
+                    .shippingFee(request.getShippingFee())
+                    .username(userDetails.getUsername())
                     .total(total.get())
                     .status(RecipeStatus.PENDING)
                     .recipeProducts(recipeProduct)

@@ -1,9 +1,14 @@
 package com.shitcode.demo1.dto;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
+import com.shitcode.demo1.entity.Recipe;
+import com.shitcode.demo1.utils.DiscountType;
+
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
@@ -20,7 +25,6 @@ public abstract class PaymentDTO {
     @Builder
     @Schema(name = "Payment Request", description = "Request payload for creating a recipe")
     public static class Request {
-
         @NotBlank(message = "{payment.name.blank}")
         @Size(max = 100, message = "{payment.name.size}")
         private String name;
@@ -33,6 +37,14 @@ public abstract class PaymentDTO {
         private List<ProductQuantityDTO> products;
 
         private UUID discountId;
+
+        @NotNull(message = "{payment.shipping-address.null}")
+        @Size(max = 300, message = "{payment.shipping-address.size}")
+        private String shippingAddress;
+
+        @NotNull(message = "{payment.shipping-fee.null}")
+        @DecimalMin(value = "0", message = "{payment.shipping-fee.min}")
+        private Double shippingFee;
     }
 
     @Data
@@ -40,16 +52,16 @@ public abstract class PaymentDTO {
     @Builder
     @Schema(name = "Payment Response", description = "Response containing Recipe and PayPal transaction data")
     public static class Response extends AbstractAuditableEntity {
-        private Long id;
+        private UUID recipeId;
         private String name;
+        private Recipe.RecipeStatus status;
+        private String description;
+        private Double total;
         private String username;
         private String shippingAddress;
         private String shippingFee;
-        private String description;
-        private Double total;
-        private List<ProductWithQuantityResponse> products;
-        private List<PaypalTransactionResponse> transactions;
-        private UUID discountId;
+        private List<ProductWithQuantityResponse> recipeProducts;
+        private PaypalTransactionResponse paypalTransaction;
     }
 
     @Data
@@ -69,19 +81,21 @@ public abstract class PaymentDTO {
     @Data
     @Builder
     public static class ProductWithQuantityResponse {
-        private Long id;
-        private String name;
-        private Double price;
+        private String categoryName;
+        private String productName;
         private Integer quantity;
+        private Double price;
+        private String discountName;
+        private DiscountType discountType;
+        private Double discountAmount;
         private Double subTotal;
     }
 
     @Data
     @Builder
     public static class PaypalTransactionResponse {
-        private String id;
-        private String status;
-        private String paymentMethod;
+        private String transactionId;
         private Double amount;
+        private LocalDateTime transactionDate;
     }
 }

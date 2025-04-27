@@ -75,6 +75,12 @@ validation:
     is-valid-email:
       null: IsValidEmail cannot be null.
   payment:
+    shipping-address:
+      null: Shipping address cannot be null.
+      size: Shipping address must not exceed 300 characters.
+    shipping-fee:
+      null: Shipping fee cannot be null.
+      min: Shipping fee must be greater than 0.
     name:
       blank: Payment name cannot be blank.
       size: Payment name must not exceed 100 characters.
