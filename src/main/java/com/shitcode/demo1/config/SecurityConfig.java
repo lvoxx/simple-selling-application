@@ -56,10 +56,10 @@ public class SecurityConfig {
                                               // Please impl cors
                 .authorizeHttpRequests(auth -> {
                     auth
-                            .anyRequest().permitAll()
                             // Admin paths
                             .requestMatchers(securePaths)
-                            .hasRole(adminRole);
+                            .hasRole(adminRole)
+                            .anyRequest().permitAll();
                 })
                 .exceptionHandling(exception -> exception
                         .authenticationEntryPoint(jwtAuthenticationEntryPoint))
