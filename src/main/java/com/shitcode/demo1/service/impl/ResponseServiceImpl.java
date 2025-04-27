@@ -24,6 +24,8 @@ import com.shitcode.demo1.utils.RateLimiterPlan;
 
 import io.github.bucket4j.Bucket;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.AllArgsConstructor;
+import lombok.Data;
 
 @Service
 @LogCollector(loggingModel = LoggingModel.SERVICE)
@@ -52,9 +54,9 @@ public class ResponseServiceImpl implements ResponseService {
         @Override
         public ResponseEntity<?> mapping(@NonNull ThrowingSupplier<ResponseEntity<?>> service,
                         @NonNull RateLimiterPlan plan) throws Exception {
-                Boolean isBucketConsumed = false;
+                RateLimitResult res = resolveRateLimit(plan);
                 ResponseDTO.ResponseDTOBuilder builder = ResponseDTO.builder()
-                                .rateLimits(resolveRateLimit(isBucketConsumed, plan));
+                                .rateLimits(res.getRateLimits());
                 // +--------------------------------+
                 // * Start Proceeding Controller Code.
                 // +--------------------------------+
@@ -63,11 +65,12 @@ public class ResponseServiceImpl implements ResponseService {
                 // * End Proceed Controller Code.
                 // +--------------------------------+
 
-                if (!isBucketConsumed) {
+                if (!res.isBucketConsumed()) {
                         throw new ExceededRateLimterException(messageSource.getMessage("exception.rate-limit.exceed",
                                         new Object[] {}, Locale.getDefault()));
 
-                        // HARDCODE, NOT RECOMMENDED: If you wanna to notify client with message, you can use this code instead of
+                        // HARDCODE, NOT RECOMMENDED: If you wanna to notify client with message, you
+                        // can use this code instead of
                         // throw exception.
                         // return new ResponseEntity<ErrorModel>(
                         // ErrorModel.of(HttpStatus.TOO_MANY_REQUESTS, "{exception.rate-limit.exceed}",
@@ -91,8 +94,7 @@ public class ResponseServiceImpl implements ResponseService {
          */
         @Override
         public <T> T execute(ThrowingSupplier<T> service, RateLimiterPlan plan) throws Exception {
-                Boolean isBucketConsumed = false;
-                resolveRateLimit(isBucketConsumed, plan);
+                RateLimitResult res = resolveRateLimit(plan);
 
                 // +--------------------------------+
                 // * Start Proceeding Controller Code.
@@ -102,7 +104,7 @@ public class ResponseServiceImpl implements ResponseService {
                 // * End Proceed Controller Code.
                 // +--------------------------------+
 
-                if (!isBucketConsumed) {
+                if (!res.isBucketConsumed()) {
                         throw new ExceededRateLimterException(messageSource.getMessage("exception.rate-limit.exceed",
                                         new Object[] {}, Locale.getDefault()));
                 }
@@ -116,7 +118,8 @@ public class ResponseServiceImpl implements ResponseService {
                 return DatetimeFormat.format(refillSeconds, TimeConversionMode.SECOND, Format.SHORT);
         }
 
-        private ResponseDTO.RateLimits resolveRateLimit(Boolean isBucketConsumed, RateLimiterPlan plan) {
+        private RateLimitResult resolveRateLimit(RateLimiterPlan plan) {
+                boolean isBucketConsumed = false;
                 // * Ip Address
                 HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder
                                 .currentRequestAttributes()).getRequest();
@@ -133,7 +136,15 @@ public class ResponseServiceImpl implements ResponseService {
                 long capacity = plan.getLimit().getCapacity();
 
                 // * Create A Common Builder With The Shared Values
-                return ResponseDTO.RateLimits.builder().remaining(remainingToken).total(capacity)
-                                .resetAfter(getFullRefillTime(bucket, plan)).build();
+                return RateLimitResult.of(isBucketConsumed,
+                                ResponseDTO.RateLimits.builder().remaining(remainingToken).total(capacity)
+                                                .resetAfter(getFullRefillTime(bucket, plan)).build());
+        }
+
+        @Data
+        @AllArgsConstructor(staticName = "of")
+        private static class RateLimitResult {
+                private boolean isBucketConsumed;
+                private ResponseDTO.RateLimits rateLimits;
         }
 }
