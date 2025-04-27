@@ -1,5 +1,8 @@
 package com.shitcode.demo1.controller;
 
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -46,7 +49,10 @@ public class PaymentController {
     }
 
     @PostMapping("/payout")
-    public RedirectView pay(@RequestBody PaymentDTO.Request request) throws Exception {
+    @PreAuthorize("hasAnyRole('USER', 'SUPER-USER', 'ADMIN')")
+    public RedirectView pay(@RequestBody PaymentDTO.Request request,
+            @AuthenticationPrincipal UserDetails userDetails)
+            throws Exception {
         return responseService.execute(
                 () -> paymentService.createPaymentAndRedirectToCheckOutPage(request),
                 PAYOUT);
