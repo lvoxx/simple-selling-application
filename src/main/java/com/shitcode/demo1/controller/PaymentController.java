@@ -49,7 +49,7 @@ public class PaymentController {
     }
 
     @PostMapping("/payout")
-    @PreAuthorize("hasAnyRole('USER', 'SUPER-USER', 'ADMIN')")
+    @PreAuthorize("isAuthenticated()")
     public RedirectView pay(@RequestBody PaymentDTO.Request request,
             @AuthenticationPrincipal UserDetails userDetails)
             throws Exception {

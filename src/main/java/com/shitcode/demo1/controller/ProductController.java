@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -67,12 +68,29 @@ public class ProductController {
                                 RateLimiterPlan.SOFT);
         }
 
-        @GetMapping("/admin")
+        @Operation(summary = "Find an in-sell product by ID", description = "Retrieves detailed information of an in-sell product by its ID.")
+        @ApiResponses(value = {
+                        @ApiResponse(responseCode = "200", description = "Product found successfully", content = @Content(mediaType = "application/vnd.lvoxx.app-v1+json", schema = @Schema(implementation = ResponseDTO.class))),
+                        @ApiResponse(responseCode = "400", description = "Invalid product ID supplied", content = @Content(mediaType = "application/vnd.lvoxx.app-v1+json", schema = @Schema(implementation = ErrorModel.class))),
+                        @ApiResponse(responseCode = "404", description = "Product not found", content = @Content(mediaType = "application/vnd.lvoxx.app-v1+json", schema = @Schema(implementation = ErrorModel.class))),
+                        @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content(mediaType = "application/vnd.lvoxx.app-v1+json", schema = @Schema(implementation = ErrorModel.class)))
+        })
+        @GetMapping("/insell/{id}")
+        public ResponseEntity<?> findInSellProductById(
+                        @Parameter(description = "ID of the in-sell product", example = "1") @PathVariable Long id)
+                        throws Exception {
+                return responseService.mapping(
+                                () -> ResponseEntity.ok().body(productService.findInSellProductWithId(id)),
+                                RateLimiterPlan.HEAVY_LOADS);
+        }
+
         @Operation(summary = "Retrieve admin products with pagination", description = "Fetches a paginated list of admin products, allowing sorting and ordering.", responses = {
                         @ApiResponse(responseCode = "200", description = "Successful retrieval of admin products", content = @Content(mediaType = "application/vnd.lvoxx.app-v1+json", schema = @Schema(implementation = ResponseDTO.class))),
                         @ApiResponse(responseCode = "400", description = "Invalid request parameters", content = @Content(mediaType = "application/vnd.lvoxx.app-v1+json", schema = @Schema(implementation = ErrorModel.class))),
                         @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content(mediaType = "application/vnd.lvoxx.app-v1+json", schema = @Schema(implementation = ErrorModel.class)))
         })
+        @PreAuthorize("hasAnyRole('SUPER-USER','ADMIN')")
+        @GetMapping("/admin")
         public ResponseEntity<?> getAdminProducts(
                         @Parameter(description = "Number of insell products per page", example = "30") @RequestParam(defaultValue = "30") int size,
 
@@ -95,6 +113,7 @@ public class ProductController {
                         @ApiResponse(responseCode = "404", description = "Product not found", content = @Content(mediaType = "application/vnd.lvoxx.app-v1+json", schema = @Schema(implementation = ErrorModel.class))),
                         @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content(mediaType = "application/vnd.lvoxx.app-v1+json", schema = @Schema(implementation = ErrorModel.class)))
         })
+        @PreAuthorize("hasAnyRole('SUPER-USER','ADMIN')")
         @GetMapping("/admin/{id}")
         public ResponseEntity<?> findAdminProductById(
                         @Parameter(description = "ID of the admin product", example = "1") @PathVariable Long id)
@@ -104,29 +123,14 @@ public class ProductController {
                                 RateLimiterPlan.SOFT);
         }
 
-        @Operation(summary = "Find an in-sell product by ID", description = "Retrieves detailed information of an in-sell product by its ID.")
-        @ApiResponses(value = {
-                        @ApiResponse(responseCode = "200", description = "Product found successfully", content = @Content(mediaType = "application/vnd.lvoxx.app-v1+json", schema = @Schema(implementation = ResponseDTO.class))),
-                        @ApiResponse(responseCode = "400", description = "Invalid product ID supplied", content = @Content(mediaType = "application/vnd.lvoxx.app-v1+json", schema = @Schema(implementation = ErrorModel.class))),
-                        @ApiResponse(responseCode = "404", description = "Product not found", content = @Content(mediaType = "application/vnd.lvoxx.app-v1+json", schema = @Schema(implementation = ErrorModel.class))),
-                        @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content(mediaType = "application/vnd.lvoxx.app-v1+json", schema = @Schema(implementation = ErrorModel.class)))
-        })
-        @GetMapping("/insell/{id}")
-        public ResponseEntity<?> findInSellProductById(
-                        @Parameter(description = "ID of the in-sell product", example = "1") @PathVariable Long id)
-                        throws Exception {
-                return responseService.mapping(
-                                () -> ResponseEntity.ok().body(productService.findInSellProductWithId(id)),
-                                RateLimiterPlan.HEAVY_LOADS);
-        }
-
-        @PostMapping("/admin")
         @Operation(summary = "Create a new product", description = "Creates a new product with the provided details.")
         @ApiResponses(value = {
                         @ApiResponse(responseCode = "201", description = "Product created successfully", content = @Content(mediaType = "application/vnd.lvoxx.app-v1+json", schema = @Schema(implementation = ResponseDTO.class))),
                         @ApiResponse(responseCode = "400", description = "Invalid request body", content = @Content(mediaType = "application/vnd.lvoxx.app-v1+json", schema = @Schema(implementation = ErrorModel.class))),
                         @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content(mediaType = "application/vnd.lvoxx.app-v1+json", schema = @Schema(implementation = ErrorModel.class)))
         })
+        @PreAuthorize("hasAnyRole('SUPER-USER','ADMIN')")
+        @PostMapping("/admin")
         public ResponseEntity<?> createProduct(@RequestPart("product") @Valid ProductDTO.CreateRequest jsonRequest,
                         @RequestPart("images") List<MultipartFile> imageRequests,
                         @RequestPart("video") MultipartFile videoRequest) throws Exception {
@@ -137,13 +141,14 @@ public class ProductController {
                                 RateLimiterPlan.BASIC);
         }
 
-        @PutMapping("/admin/{id}")
         @Operation(summary = "Update product information", description = "Updates the details of a product by its ID.")
         @ApiResponses(value = {
                         @ApiResponse(responseCode = "200", description = "Product updated successfully", content = @Content(mediaType = "application/vnd.lvoxx.app-v1+json", schema = @Schema(implementation = ResponseDTO.class))),
                         @ApiResponse(responseCode = "400", description = "Invalid request body", content = @Content(mediaType = "application/vnd.lvoxx.app-v1+json", schema = @Schema(implementation = ErrorModel.class))),
                         @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content(mediaType = "application/vnd.lvoxx.app-v1+json", schema = @Schema(implementation = ErrorModel.class)))
         })
+        @PreAuthorize("hasAnyRole('SUPER-USER','ADMIN')")
+        @PutMapping("/admin/{id}")
         public ResponseEntity<?> updateProductInformation(@PathVariable Long id,
                         @RequestPart("product") @Valid ProductDTO.UpdateRequest request,
                         @RequestPart("images") List<MultipartFile> newImageRequests,

@@ -43,10 +43,3 @@ fontend-server:
 # 001: Payment Failed
 # 002: Product Not Found
 # 003: Discount Over Time
-
-client:
-  name: simple-selling-application
-  roles:
-    user: USER
-    super-user: SUPER-USER
-    admin: ADMIN

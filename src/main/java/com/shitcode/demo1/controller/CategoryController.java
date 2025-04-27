@@ -2,6 +2,7 @@ package com.shitcode.demo1.controller;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -97,7 +98,6 @@ public class CategoryController {
                                 ID_PLAN);
         }
 
-        @PostMapping(produces = "application/vnd.lvoxx.app-v1+json")
         @Operation(summary = "Create a new category", description = "Adds a new category to the system. Requires a valid JWT token for authentication.", security = @SecurityRequirement(name = "bearerAuth"))
         @ApiResponses(value = {
                         @ApiResponse(responseCode = "201", description = "Category created successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseDTO.class))),
@@ -108,6 +108,8 @@ public class CategoryController {
 
                         @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorModel.class)))
         })
+        @PreAuthorize("hasAnyRole('SUPER-USER','ADMIN')")
+        @PostMapping(produces = "application/vnd.lvoxx.app-v1+json")
         public ResponseEntity<?> createCategoryByBodyV1(
                         @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Category details to be created", required = true, content = @Content(mediaType = "application/json", schema = @Schema(implementation = CategoryDTO.Request.class))) @Valid @RequestBody CategoryDTO.Request request)
                         throws Exception {
@@ -116,19 +118,20 @@ public class CategoryController {
                                 MANAGE_PLAN);
         }
 
-        @PutMapping(path = "/{id}", produces = "application/vnd.lvoxx.app-v1+json")
         @Operation(summary = "Update an existing category", description = "Updates the details of an existing category by its ID. Requires a valid JWT token for authentication.", security = @SecurityRequirement(name = "bearerAuth"))
         @ApiResponses(value = {
-                        @ApiResponse(responseCode = "200", description = "Category updated successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseDTO.class))),
-
-                        @ApiResponse(responseCode = "400", description = "Invalid input data", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorModel.class))),
-
-                        @ApiResponse(responseCode = "401", description = "Unauthorized - JWT token is missing or invalid", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorModel.class))),
-
-                        @ApiResponse(responseCode = "404", description = "Category not found", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorModel.class))),
-
-                        @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorModel.class)))
+                @ApiResponse(responseCode = "200", description = "Category updated successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseDTO.class))),
+                
+                @ApiResponse(responseCode = "400", description = "Invalid input data", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorModel.class))),
+                
+                @ApiResponse(responseCode = "401", description = "Unauthorized - JWT token is missing or invalid", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorModel.class))),
+                
+                @ApiResponse(responseCode = "404", description = "Category not found", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorModel.class))),
+                
+                @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorModel.class)))
         })
+        @PreAuthorize("hasAnyRole('SUPER-USER','ADMIN')")
+        @PutMapping(path = "/{id}", produces = "application/vnd.lvoxx.app-v1+json")
         public ResponseEntity<?> updateCategoryByIdAndBodyV1(
                         @Parameter(description = "ID of the category to update", required = true) @PathVariable Long id,
                         @Valid @RequestBody CategoryDTO.Request request) throws Exception {
@@ -138,17 +141,18 @@ public class CategoryController {
                                 MANAGE_PLAN);
         }
 
-        @DeleteMapping(path = "/{id}", produces = "application/vnd.lvoxx.app-v1+json")
         @Operation(summary = "Delete a category", description = "Deletes a category by its ID. Requires a valid JWT token for authentication.", security = @SecurityRequirement(name = "bearerAuth"))
         @ApiResponses(value = {
-                        @ApiResponse(responseCode = "204", description = "Category deleted successfully"),
-
-                        @ApiResponse(responseCode = "404", description = "Category not found", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorModel.class))),
-
-                        @ApiResponse(responseCode = "401", description = "Unauthorized - JWT token is missing or invalid", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorModel.class))),
-
-                        @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorModel.class)))
+                @ApiResponse(responseCode = "204", description = "Category deleted successfully"),
+                
+                @ApiResponse(responseCode = "404", description = "Category not found", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorModel.class))),
+                
+                @ApiResponse(responseCode = "401", description = "Unauthorized - JWT token is missing or invalid", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorModel.class))),
+                
+                @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorModel.class)))
         })
+        @PreAuthorize("hasAnyRole('SUPER-USER','ADMIN')")
+        @DeleteMapping(path = "/{id}", produces = "application/vnd.lvoxx.app-v1+json")
         public ResponseEntity<?> deleteCategoryByIdV1(
                         @Parameter(description = "ID of the category to delete", required = true) @PathVariable Long id)
                         throws Exception {

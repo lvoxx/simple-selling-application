@@ -5,41 +5,33 @@ auth-token:
   register-revoke-exp-date-format: M
 
 security-path:
-  everyone: [
-      #! ⇩ ⇩ ⇩ CAUTION: DO NOT public these in production enviroment ⇩ ⇩ ⇩
-      /swagger-ui.html,
-      /docs/**,
-      /ui-docs/**,
-      /swagger-ui/**,
-      /v3/api-docs/**,
-      /,
-      /h2-console/**,
-      #! ⇧ ⇧ ⇧ CAUTION: DO NOT public these in production enviroment ⇧ ⇧ ⇧
+  everyone:
+    [
       /products,
       /products/**,
       /categories,
       /categories/**,
       /auth,
       /auth/**,
-      /product-interaction,
-      /product-interaction/**,
       /media,
       /media/**,
+    ]
+  user: []
+  super-user: []
+  admin: [
       /backup,
       /backup/**,
-      /payment,
-      /payment/**
+      #! ⇩ ⇩ ⇩ CAUTION: DO NOT public these in production enviroment ⇩ ⇩ ⇩
+      
+      #! ⇧ ⇧ ⇧ CAUTION: DO NOT public these in production enviroment ⇧ ⇧ ⇧
     ]
-  user: [/users/**, /dashboard/user, /dashboard/user/**]
-  super-user:
-    [
-      /manage/products,
-      /manage/products/**,
-      /manage/categories,
-      /manage/categories/**,
-      /manage/users,
-      /manage/users/**,
-      /dashboard/admin,
-      /dashboard/admin/**,
-    ]
-  admin: [/app, /app/**]
+  auth-user:
+    [/payment, /payment/**, /product-interaction, /product-interaction/**]
+  super-user-and-admin: []
+
+client:
+  name: simple-selling-application
+  roles:
+    user: USER
+    super-user: SUPER-USER
+    admin: ADMIN

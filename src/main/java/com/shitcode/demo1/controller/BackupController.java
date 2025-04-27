@@ -6,8 +6,8 @@ import java.util.Optional;
 
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.format.annotation.DateTimeFormat.ISO;
-import jakarta.validation.constraints.Pattern;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -27,6 +27,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.PostConstruct;
+import jakarta.validation.constraints.Pattern;
 import lombok.Data;
 
 @Data
@@ -60,6 +61,7 @@ public class BackupController {
             @ApiResponse(responseCode = "200", description = "Media files backed up successfully", content = @Content(mediaType = "application/vnd.lvoxx.app-v1+json", schema = @Schema(implementation = List.class))),
             @ApiResponse(responseCode = "500", description = "Internal server error during backup", content = @Content)
     })
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping(name = "/media", produces = "application/vnd.lvoxx.app-v1+json")
     public ResponseEntity<?> backupMedia(
             @Parameter(description = "Date for which to backup files (defaults to current date)") @RequestParam(name = "d", required = false) @DateTimeFormat(iso = ISO.DATE) LocalDate date,

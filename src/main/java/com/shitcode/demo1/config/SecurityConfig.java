@@ -19,22 +19,26 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtGra
 import org.springframework.security.web.SecurityFilterChain;
 
 import com.shitcode.demo1.properties.ClientConfigData;
-import com.shitcode.demo1.properties.SecurityPathsConfigData;
 import com.shitcode.demo1.security.JWTAuthenticationEntryPoint;
 
 @Configuration
 @EnableWebSecurity
-@EnableMethodSecurity
+@EnableMethodSecurity(prePostEnabled = true, securedEnabled = true, jsr250Enabled = true)
 public class SecurityConfig {
-
-    private final SecurityPathsConfigData securityPathsConfigData;
     private final ClientConfigData clientConfigData;
     private final JwtDecoder jwtDecoder;
     private final JWTAuthenticationEntryPoint jwtAuthenticationEntryPoint;
 
-    public SecurityConfig(SecurityPathsConfigData securityPathsConfigData, ClientConfigData clientConfigData,
-            JwtDecoder jwtDecoder, JWTAuthenticationEntryPoint jwtAuthenticationEntryPoint) {
-        this.securityPathsConfigData = securityPathsConfigData;
+    private final String[] securePaths = { "/swagger-ui.html",
+            "/docs/**",
+            "/ui-docs/**",
+            "/swagger-ui/**",
+            "/v3/api-docs/**",
+            "/",
+            "/h2-console/**" };
+
+    public SecurityConfig(ClientConfigData clientConfigData, JwtDecoder jwtDecoder,
+            JWTAuthenticationEntryPoint jwtAuthenticationEntryPoint) {
         this.clientConfigData = clientConfigData;
         this.jwtDecoder = jwtDecoder;
         this.jwtAuthenticationEntryPoint = jwtAuthenticationEntryPoint;
@@ -42,23 +46,20 @@ public class SecurityConfig {
 
     @Bean
     SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        // Roles
+        String adminRole = clientConfigData.getRoles().getAdmin();
+
         return http
                 .csrf(csrf -> csrf.disable()) // Disable CSRF for REST APIs
-                .cors(cors -> cors.disable()) // For quick project, if you're deploy this to production enviroment
+                .cors(cors -> cors.disable()) // README: For quick project, if you're deploy this to production
+                                              // enviroment
                                               // Please impl cors
                 .authorizeHttpRequests(auth -> {
                     auth
-                            .requestMatchers(securityPathsConfigData.getEveryone()).permitAll()
-                            // Users paths
-                            .requestMatchers(securityPathsConfigData.getUser())
-                            .hasRole(clientConfigData.getRoles().getUser())
-                            // Super user paths
-                            .requestMatchers(securityPathsConfigData.getSuperUser())
-                            .hasRole(clientConfigData.getRoles().getSuperUser())
+                            .anyRequest().permitAll()
                             // Admin paths
-                            .requestMatchers(securityPathsConfigData.getAdmin())
-                            .hasRole(clientConfigData.getRoles().getAdmin())
-                            .anyRequest().authenticated();
+                            .requestMatchers(securePaths)
+                            .hasRole(adminRole);
                 })
                 .exceptionHandling(exception -> exception
                         .authenticationEntryPoint(jwtAuthenticationEntryPoint))
