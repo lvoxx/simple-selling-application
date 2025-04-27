@@ -9,4 +9,8 @@ import com.shitcode.demo1.utils.RateLimiterPlan;
 public interface ResponseService {
     ResponseEntity<?> mapping(@NonNull ThrowingSupplier<ResponseEntity<?>> service,
             @NonNull RateLimiterPlan plan) throws Exception;
+
+    <T> T execute(
+            @NonNull ThrowingSupplier<T> service,
+            @NonNull RateLimiterPlan plan) throws Exception;
 }

@@ -17,6 +17,7 @@ import com.shitcode.demo1.exception.model.EntityExistsException;
 import com.shitcode.demo1.exception.model.EntityNotChangedException;
 import com.shitcode.demo1.exception.model.EntityNotFoundException;
 import com.shitcode.demo1.exception.model.ErrorModel;
+import com.shitcode.demo1.exception.model.ExceededRateLimterException;
 import com.shitcode.demo1.exception.model.FileReadException;
 import com.shitcode.demo1.exception.model.FolderNotFoundException;
 import com.shitcode.demo1.exception.model.ImageEncodeException;
@@ -49,6 +50,11 @@ public class ApplicationExceptionHandler {
         return new ResponseEntity<>(errorResponse, HttpStatus.UNPROCESSABLE_ENTITY);
     }
 
+    @ExceptionHandler({ ExceededRateLimterException.class })
+    public ResponseEntity<ErrorModel> handleDDoSException(RuntimeException ex) {
+        ErrorModel errorResponse = ErrorModel.of(HttpStatus.TOO_MANY_REQUESTS, ex.getMessage(), null);
+        return new ResponseEntity<>(errorResponse, HttpStatus.TOO_MANY_REQUESTS);
+    }
     @ExceptionHandler({ RevokeTokenException.class })
     public ResponseEntity<ErrorModel> handleOtherOffer(RuntimeException ex) {
         ErrorModel errorResponse = ErrorModel.of(HttpStatus.I_AM_A_TEAPOT, ex.getMessage(), null);

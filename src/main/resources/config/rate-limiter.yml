@@ -39,3 +39,7 @@ rate-limiter:
   backup:
     media: HARD
     sql: HARD
+  payment:
+    payout: HARD
+    payment-id: MEDIUM
+    payments: SOFT
