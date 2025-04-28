@@ -57,13 +57,6 @@ public class ResponseServiceImpl implements ResponseService {
                 RateLimitResult res = resolveRateLimit(plan);
                 ResponseDTO.ResponseDTOBuilder builder = ResponseDTO.builder()
                                 .rateLimits(res.getRateLimits());
-                // +--------------------------------+
-                // * Start Proceeding Controller Code.
-                // +--------------------------------+
-                ResponseEntity<?> response = service.get();
-                // +--------------------------------+
-                // * End Proceed Controller Code.
-                // +--------------------------------+
 
                 if (!res.isBucketConsumed()) {
                         throw new ExceededRateLimterException(messageSource.getMessage("exception.rate-limit.exceed",
@@ -77,6 +70,15 @@ public class ResponseServiceImpl implements ResponseService {
                         // null),
                         // HttpStatusCode.valueOf(HttpStatus.TOO_MANY_REQUESTS.value()));
                 }
+                
+                // +--------------------------------+
+                // * Start Proceeding Controller Code.
+                // +--------------------------------+
+                ResponseEntity<?> response = service.get();
+                // +--------------------------------+
+                // * End Proceed Controller Code.
+                // +--------------------------------+
+
                 return ResponseEntity.status(response.getStatusCode())
                                 .headers(response.getHeaders())
                                 .body(builder.data(response.getBody())
@@ -96,6 +98,11 @@ public class ResponseServiceImpl implements ResponseService {
         public <T> T execute(ThrowingSupplier<T> service, RateLimiterPlan plan) throws Exception {
                 RateLimitResult res = resolveRateLimit(plan);
 
+                if (!res.isBucketConsumed()) {
+                        throw new ExceededRateLimterException(messageSource.getMessage("exception.rate-limit.exceed",
+                                        new Object[] {}, Locale.getDefault()));
+                }
+
                 // +--------------------------------+
                 // * Start Proceeding Controller Code.
                 // +--------------------------------+
@@ -104,10 +111,6 @@ public class ResponseServiceImpl implements ResponseService {
                 // * End Proceed Controller Code.
                 // +--------------------------------+
 
-                if (!res.isBucketConsumed()) {
-                        throw new ExceededRateLimterException(messageSource.getMessage("exception.rate-limit.exceed",
-                                        new Object[] {}, Locale.getDefault()));
-                }
                 return response;
         }
 
