@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
@@ -14,9 +15,12 @@ import com.paypal.api.payments.Links;
 import com.paypal.api.payments.Payment;
 import com.paypal.base.rest.PayPalRESTException;
 import com.shitcode.demo1.annotation.logging.LogCollector;
+import com.shitcode.demo1.dto.CategoryDTO;
+import com.shitcode.demo1.dto.DiscountDTO;
 import com.shitcode.demo1.dto.PaymentDTO;
 import com.shitcode.demo1.dto.PaymentDTO.ProductQuantityDTO;
 import com.shitcode.demo1.dto.ProductDTO;
+import com.shitcode.demo1.dto.DiscountDTO.SimpleResponse;
 import com.shitcode.demo1.entity.PaypalTransaction;
 import com.shitcode.demo1.entity.Recipe;
 import com.shitcode.demo1.entity.Recipe.RecipeStatus;
@@ -75,40 +79,56 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     @Override
-    public RedirectView createPaymentAndRedirectToCheckOutPage(PaymentDTO.Request request, UserDetails userDetails) throws PayPalRESTException {
+    public RedirectView createPaymentAndRedirectToCheckOutPage(PaymentDTO.Request request, UserDetails userDetails)
+            throws PayPalRESTException {
         try {
             AtomicDouble total = new AtomicDouble(0.0);
             List<RecipeProduct> recipeProduct = new ArrayList<>();
+            // Calc total prices base on product and its discount
             for (ProductQuantityDTO product : request.getProducts()) {
-                ProductDTO.ProductWithCategoryAndDiscountResponse productEntity = productService
+                ProductDTO.ProductWithCategoryAndDiscountResponse prodRes = productService
                         .findProductWithCategoryAndDiscount(product.getProductId());
-                Double subTotal = productEntity.getPrice().doubleValue() * product.getQuantity();
+                CategoryDTO.Response ctgRes = prodRes.getCategory();
+                DiscountDTO.SimpleResponse disRes = Optional.ofNullable(prodRes.getDiscount())
+                        .orElse(SimpleResponse.builder()
+                                .title(null)
+                                .type(null)
+                                .salesPercentAmount(Double.valueOf(0.0))
+                                .expDate(null)
+                                .build());
+                Double tempTotal = prodRes.getPrice().doubleValue() * product.getQuantity();
+                Double subTotal = tempTotal - (tempTotal * disRes.getSalesPercentAmount());
                 total.addAndGet(subTotal);
                 RecipeProduct recipe = RecipeProduct.builder()
-                        .categoryId(productEntity.getCategory().getId())
-                        .categoryName(productEntity.getCategory().getName())
-                        .productId(productEntity.getId())
-                        .productName(productEntity.getName())
+                        .categoryId(ctgRes.getId())
+                        .categoryName(ctgRes.getName())
+                        .productId(prodRes.getId())
+                        .productName(prodRes.getName())
                         .quantity(product.getQuantity())
-                        .price(productEntity.getPrice())
+                        .price(prodRes.getPrice())
+                        .discountName(
+                                disRes.getTitle())
+                        .discountType(
+                                disRes.getType())
+                        .discountAmount(disRes.getSalesPercentAmount())
                         .subTotal(subTotal)
                         .build();
-                if (productEntity.getDiscount() != null) {
-                    if (productEntity.getDiscount().getExpDate().isBefore(OffsetDateTime.now())) {
+                if (disRes != null) {
+                    if (disRes.getExpDate().isBefore(OffsetDateTime.now())) {
                         throw new DiscountOverTimeException(
                                 String.format("Discount %s has been expired, try again later.",
-                                        productEntity.getDiscount().getTitle()));
+                                        disRes.getTitle()));
                     }
-                    recipe.setDiscountName(productEntity.getDiscount().getTitle());
-                    recipe.setDiscountType(productEntity.getDiscount().getType());
-                    recipe.setDiscountAmount(productEntity.getDiscount().getSalesPercentAmount());
+                    recipe.setDiscountName(disRes.getTitle());
+                    recipe.setDiscountType(disRes.getType());
+                    recipe.setDiscountAmount(disRes.getSalesPercentAmount());
                 }
                 recipeProduct.add(recipe);
             }
-
+            Double totalPrice = total.get() - request.getShippingFee();
             // Create paypal transaction
             Payment payment = paypalService.createPayment(
-                    total.get(),
+                    totalPrice,
                     CURRENCY,
                     METHOD,
                     "sale",
@@ -119,7 +139,7 @@ public class PaymentServiceImpl implements PaymentService {
             // Save to database
             PaypalTransaction paypalTransaction = PaypalTransaction.builder()
                     .transactionId(payment.getId())
-                    .amount(total.get())
+                    .amount(totalPrice)
                     .transactionDate(LocalDateTime.now())
                     .build();
             paypalTransaction = paypalTransactionRepository.save(paypalTransaction);
@@ -130,7 +150,7 @@ public class PaymentServiceImpl implements PaymentService {
                     .shippingAddress(request.getShippingAddress())
                     .shippingFee(request.getShippingFee())
                     .username(userDetails.getUsername())
-                    .total(total.get())
+                    .total(totalPrice)
                     .status(RecipeStatus.PENDING)
                     .recipeProducts(recipeProduct)
                     .paypalTransaction(paypalTransaction)

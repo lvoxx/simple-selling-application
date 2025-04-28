@@ -36,8 +36,6 @@ public abstract class PaymentDTO {
         @NotEmpty(message = "{payment.product.empty}")
         private List<ProductQuantityDTO> products;
 
-        private UUID discountId;
-
         @NotNull(message = "{payment.shipping-address.null}")
         @Size(max = 300, message = "{payment.shipping-address.size}")
         private String shippingAddress;
