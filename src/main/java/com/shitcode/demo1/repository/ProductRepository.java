@@ -21,10 +21,10 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
             SELECT c.id AS c_id, c.name AS c_name,
                     p.id AS p_id, p.name AS p_name, p.price, p.currency, p.in_sell_quantity AS p_quantity,
                     d.id AS d_id, d.title AS d_title, d.type AS d_type, d.sales_percent_amount AS d_sales_percent_amount, d.exp_date AS d_exp_date
-            FROM Category c
-            LEFT JOIN Product p
+            FROM categories c
+            LEFT JOIN products p
             ON c.id = p.category_id
-            LEFT JOIN Discount d
+            LEFT JOIN discounts d
             ON p.discount_id = d.id
             WHERE p.id = :id
             """,nativeQuery = true)

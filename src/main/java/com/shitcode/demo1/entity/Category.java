@@ -24,7 +24,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "category", uniqueConstraints = { @UniqueConstraint(columnNames = "name") })
+@Table(name = "categories", uniqueConstraints = { @UniqueConstraint(columnNames = "name") })
 public class Category extends AbstractAuditableEntity {
 
     @Id

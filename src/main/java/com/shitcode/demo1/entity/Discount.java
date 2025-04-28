@@ -30,7 +30,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "discount", indexes = @Index(name = "idx_discount_title", columnList = "title"))
+@Table(name = "discounts", indexes = @Index(name = "idx_discount_title", columnList = "title"))
 public class Discount extends AbstractAuditableEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
