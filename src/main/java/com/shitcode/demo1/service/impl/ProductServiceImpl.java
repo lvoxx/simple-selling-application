@@ -27,10 +27,10 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.shitcode.demo1.annotation.logging.LogCollector;
 import com.shitcode.demo1.component.DatabaseLock;
-import com.shitcode.demo1.dto.DiscountDTO.ApplyToProductsRequest;
-import com.shitcode.demo1.dto.DiscountDTO.ApplyToProductsResponse;
 import com.shitcode.demo1.dto.CategoryDTO;
 import com.shitcode.demo1.dto.DiscountDTO;
+import com.shitcode.demo1.dto.DiscountDTO.ApplyToProductsRequest;
+import com.shitcode.demo1.dto.DiscountDTO.ApplyToProductsResponse;
 import com.shitcode.demo1.dto.ProductDTO;
 import com.shitcode.demo1.dto.ProductDTO.AdminResponse;
 import com.shitcode.demo1.dto.ProductDTO.InSellResponse;
@@ -48,6 +48,8 @@ import com.shitcode.demo1.service.MediaService;
 import com.shitcode.demo1.service.ProductService;
 import com.shitcode.demo1.utils.DiscountType;
 import com.shitcode.demo1.utils.KeyLock;
+import com.shitcode.demo1.utils.LogPrinter;
+import com.shitcode.demo1.utils.LogPrinter.Type;
 import com.shitcode.demo1.utils.LoggingModel;
 import com.shitcode.demo1.utils.cache.ProductCacheType;
 
@@ -95,27 +97,43 @@ public class ProductServiceImpl implements ProductService {
     @Transactional(readOnly = true)
     @Cacheable(value = ProductCacheType.Fields.PAYMENT_PRODUCTS, key = "#id")
     public ProductDTO.ProductWithCategoryAndDiscountResponse findProductWithCategoryAndDiscount(Long id) {
-        Object[] product = productRepository.findProductWithDiscountAndCategoryById(id).orElseThrow(
-                () -> new EntityNotFoundException(
+        Object[] product = productRepository.findProductWithDiscountAndCategoryById(id)
+                .orElseThrow(() -> new EntityNotFoundException(
                         messageSource.getMessage("exception.entity-not-found.product-name",
                                 new Object[] { id }, Locale.getDefault())));
+        LogPrinter.printServiceLog(Type.INFO, "ProductServiceImpl", "findProductWithCategoryAndDiscount",
+                "Product: " + product);
+
+        // Check if p.id (product[2]) is null (product not found)
+        if (product[2] == null) {
+            throw new EntityNotFoundException(
+                    messageSource.getMessage("exception.entity-not-found.product-name",
+                            new Object[] { id }, Locale.getDefault()));
+        }
 
         CategoryDTO.Response ctgRes = CategoryDTO.Response.builder()
                 .id((Long) product[0])
-                .name(String.valueOf(product[1]))
+                .name((String) product[1])
                 .build();
-        DiscountDTO.SimpleResponse disRes = DiscountDTO.SimpleResponse.builder()
-                .id((UUID) product[7])
-                .title(String.valueOf(product[8]))
-                .type(DiscountType.valueOf(String.valueOf(product[9])))
-                .salesPercentAmount((Double) product[10])
-                .expDate(OffsetDateTime.parse(String.valueOf(product[11])))
-                .build();
+
+        DiscountDTO.SimpleResponse disRes = null;
+        if (product[7] != null) { // Discount might be null
+            disRes = DiscountDTO.SimpleResponse.builder()
+                    .id((UUID) product[7])
+                    .title((String) product[8])
+                    .type(DiscountType.valueOf((String) product[9]))
+                    .salesPercentAmount((Double) product[10])
+                    .expDate(product[11] != null ? OffsetDateTime.parse(product[11].toString()) : null)
+                    .build();
+        }
 
         ProductDTO.ProductWithCategoryAndDiscountResponse response = ProductDTO.ProductWithCategoryAndDiscountResponse
                 .builder()
-                .id((Long) product[0])
-                .name(String.valueOf(product[1]))
+                .id((Long) product[2])
+                .name((String) product[3])
+                .price((Double) product[4])
+                .currency((String) product[5])
+                .availableQuatity((Integer) product[6])
                 .discount(disRes)
                 .category(ctgRes)
                 .build();
