@@ -4,10 +4,10 @@ ON products USING GIN (to_tsvector('english', name));
 
 -- Discount
 CREATE INDEX IF NOT EXISTS idx_discount_title_btree
-ON discount(title);
+ON discounts(title);
 
 CREATE INDEX IF NOT EXISTS idx_discount_exp_date_brin 
-ON discount USING BRIN (exp_date);
+ON discounts USING BRIN (exp_date);
 
 -- Product Interaction
 CREATE INDEX IF NOT EXISTS idx_product_interaction_on_time_brin 
