@@ -3,13 +3,12 @@ package com.shitcode.demo1.service.impl;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.time.Instant;
-import java.time.OffsetDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -42,14 +41,13 @@ import com.shitcode.demo1.exception.model.EntityNotFoundException;
 import com.shitcode.demo1.helper.PaginationProvider;
 import com.shitcode.demo1.mapper.ProductMapper;
 import com.shitcode.demo1.repository.ProductRepository;
+import com.shitcode.demo1.repository.dto.ProductCategoryDiscountDTO;
 import com.shitcode.demo1.service.CategoryService;
 import com.shitcode.demo1.service.InterationEventService;
 import com.shitcode.demo1.service.MediaService;
 import com.shitcode.demo1.service.ProductService;
 import com.shitcode.demo1.utils.DiscountType;
 import com.shitcode.demo1.utils.KeyLock;
-import com.shitcode.demo1.utils.LogPrinter;
-import com.shitcode.demo1.utils.LogPrinter.Type;
 import com.shitcode.demo1.utils.LoggingModel;
 import com.shitcode.demo1.utils.cache.ProductCacheType;
 
@@ -97,43 +95,34 @@ public class ProductServiceImpl implements ProductService {
     @Transactional(readOnly = true)
     @Cacheable(value = ProductCacheType.Fields.PAYMENT_PRODUCTS, key = "#id")
     public ProductDTO.ProductWithCategoryAndDiscountResponse findProductWithCategoryAndDiscount(Long id) {
-        Object[] product = productRepository.findProductWithDiscountAndCategoryById(id)
+        ProductCategoryDiscountDTO product = productRepository.findProductWithDiscountAndCategoryById(id)
                 .orElseThrow(() -> new EntityNotFoundException(
                         messageSource.getMessage("exception.entity-not-found.product-name",
                                 new Object[] { id }, Locale.getDefault())));
-        LogPrinter.printServiceLog(Type.INFO, "ProductServiceImpl", "findProductWithCategoryAndDiscount",
-                "Product: " + product);
-
-        // Check if p.id (product[2]) is null (product not found)
-        if (product[2] == null) {
-            throw new EntityNotFoundException(
-                    messageSource.getMessage("exception.entity-not-found.product-name",
-                            new Object[] { id }, Locale.getDefault()));
-        }
 
         CategoryDTO.Response ctgRes = CategoryDTO.Response.builder()
-                .id((Long) product[0])
-                .name((String) product[1])
+                .id(product.getCategoryId())
+                .name(product.getCategoryName())
                 .build();
 
         DiscountDTO.SimpleResponse disRes = null;
-        if (product[7] != null) { // Discount might be null
+        if (product.getDiscountId() != null) { // Discount might be null
             disRes = DiscountDTO.SimpleResponse.builder()
-                    .id((UUID) product[7])
-                    .title((String) product[8])
-                    .type(DiscountType.valueOf((String) product[9]))
-                    .salesPercentAmount((Double) product[10])
-                    .expDate(product[11] != null ? OffsetDateTime.parse(product[11].toString()) : null)
+                    .id(product.getDiscountId())
+                    .title(product.getDiscountTitle())
+                    .type(DiscountType.valueOf(product.getDiscountType()))
+                    .salesPercentAmount(product.getSalesPercentAmount())
+                    .expDate(product.getDiscountExpDate().atZone(ZoneId.systemDefault()).toOffsetDateTime())
                     .build();
         }
 
         ProductDTO.ProductWithCategoryAndDiscountResponse response = ProductDTO.ProductWithCategoryAndDiscountResponse
                 .builder()
-                .id((Long) product[2])
-                .name((String) product[3])
-                .price((Double) product[4])
-                .currency((String) product[5])
-                .availableQuatity((Integer) product[6])
+                .id(product.getProductId())
+                .name(product.getProductName())
+                .price(product.getPrice().doubleValue())
+                .currency(product.getCurrency())
+                .availableQuatity(product.getQuantity())
                 .discount(disRes)
                 .category(ctgRes)
                 .build();

@@ -3,6 +3,7 @@ package com.shitcode.demo1.repository;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.math.BigDecimal;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -22,8 +23,13 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ActiveProfiles;
 
 import com.shitcode.demo1.entity.Category;
+import com.shitcode.demo1.entity.Discount;
 import com.shitcode.demo1.entity.Product;
+import com.shitcode.demo1.repository.dto.ProductCategoryDiscountDTO;
 import com.shitcode.demo1.testcontainer.AbstractRepositoryTest;
+import com.shitcode.demo1.utils.DiscountType;
+import com.shitcode.demo1.utils.LogPrinter;
+import com.shitcode.demo1.utils.LogPrinter.Type;
 
 @AutoConfigureTestDatabase(replace = Replace.NONE) // Dont load String datasource autoconfig
 @ActiveProfiles("test")
@@ -36,6 +42,8 @@ public class ProductRepositoryTest extends AbstractRepositoryTest {
     ProductRepository productRepository;
     @Autowired
     CategoryRepository categoryRepository;
+    @Autowired
+    DiscountRepository discountRepository;
 
     @BeforeEach
     void setUp() {
@@ -44,6 +52,13 @@ public class ProductRepositoryTest extends AbstractRepositoryTest {
                 Category.builder().name("Fashion").build(),
                 Category.builder().name("Computer").build()));
 
+        Discount discount = discountRepository.saveAndFlush(Discount.builder()
+                .title("Summer Sale")
+                .type(DiscountType.HOLIDAY_SALES)
+                .salesPercentAmount(15.0)
+                .expDate(OffsetDateTime.now().plusDays(30))
+                .build());
+
         List<Product> products = List.of(
                 Product.builder()
                         .name("Smartphone")
@@ -51,6 +66,7 @@ public class ProductRepositoryTest extends AbstractRepositoryTest {
                         .inSellQuantity(30)
                         .price(BigDecimal.valueOf(499.99))
                         .category(categories.get(0))
+                        .discount(discount)
                         .build(),
 
                 Product.builder()
@@ -59,6 +75,7 @@ public class ProductRepositoryTest extends AbstractRepositoryTest {
                         .inSellQuantity(70)
                         .price(BigDecimal.valueOf(19.99))
                         .category(categories.get(1))
+                        .discount(discount)
                         .build(),
 
                 Product.builder()
@@ -67,6 +84,7 @@ public class ProductRepositoryTest extends AbstractRepositoryTest {
                         .inSellQuantity(5)
                         .price(BigDecimal.valueOf(999.99))
                         .category(categories.get(2))
+                        .discount(discount)
                         .build());
         productRepository.saveAll(products);
     }
@@ -195,4 +213,21 @@ public class ProductRepositoryTest extends AbstractRepositoryTest {
         assertThat(page.getNumberOfElements()).isEqualTo(1);
     }
 
+    @Test
+    @DisplayName("Should return product with discount and category when finding by product id")
+    void shouldReturnProductWithDiscountAndCategory_WhenFindingByProductId() {
+        // Given
+        Long id = 1L;
+        // When
+        Optional<ProductCategoryDiscountDTO> product = productRepository
+                .findProductWithDiscountAndCategoryById(id);
+        // Then
+        LogPrinter.printLog(Type.INFO, LogPrinter.Flag.REPOSITORY_FLAG, product.get().toString());
+
+        assertThat(product.get()).isNotNull().satisfies(p -> {
+            assertThat(p.getCategoryId()).isEqualTo(1L);
+            assertThat(p.getCategoryName()).isEqualTo("Phone");
+            assertThat(p.getProductName()).isEqualTo("Smartphone");
+        });
+    }
 }

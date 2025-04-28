@@ -113,16 +113,14 @@ public class PaymentServiceImpl implements PaymentService {
                         .discountAmount(disRes.getSalesPercentAmount())
                         .subTotal(subTotal)
                         .build();
-                if (disRes != null) {
+                if (disRes.getExpDate() != null) {
                     if (disRes.getExpDate().isBefore(OffsetDateTime.now())) {
                         throw new DiscountOverTimeException(
                                 String.format("Discount %s has been expired, try again later.",
                                         disRes.getTitle()));
                     }
-                    recipe.setDiscountName(disRes.getTitle());
-                    recipe.setDiscountType(disRes.getType());
-                    recipe.setDiscountAmount(disRes.getSalesPercentAmount());
                 }
+
                 recipeProduct.add(recipe);
             }
             Double totalPrice = total.get() - request.getShippingFee();

@@ -3,6 +3,7 @@ package com.shitcode.demo1.utils;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Optional;
+import java.util.stream.IntStream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,7 +16,6 @@ public class LogPrinter {
         private static final Logger logger = LoggerFactory.getLogger(LogPrinter.class);
         private static final String PREFIX = "[%s] ";
         private static final String TIME_FORMAT = "at %s - ";
-
 
         /**
          * Constants representing different log flags used in categorizing logs.
@@ -118,7 +118,7 @@ public class LogPrinter {
         public static void printLog(Type type, String flag, String message) {
                 String time = LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
                 String timeFormat = String.format(TIME_FORMAT, time);
-                flag = Optional.ofNullable(flag).orElse("INFO");
+                flag = Optional.ofNullable(flag).orElse(Flag.UTILS_FLAG);
                 type = Optional.ofNullable(type).orElse(LogPrinter.Type.INFO);
 
                 // [flag] at time - message
@@ -127,6 +127,19 @@ public class LogPrinter {
                                 .append(timeFormat)
                                 .append(message)
                                 .toString();
+                extracteLogType(type, logMessage);
+        }
+
+        public static void prettyPrintObjectArray(Type type, Object[] objects) {
+                final Type finalType = Optional.ofNullable(type).orElse(LogPrinter.Type.INFO);
+
+                extracteLogType(finalType, "---- Printing Object[] fields ----");
+                IntStream.range(0, objects.length)
+                                .forEach(i -> extracteLogType(finalType, "Field[" + i + "] = " + objects[i]));
+                extracteLogType(finalType, "----------------------------------");
+        }
+
+        private static void extracteLogType(Type type, String logMessage) {
                 switch (type) {
                         case LogPrinter.Type.ERROR:
                                 logger.error(logMessage);
