@@ -194,10 +194,16 @@ public class PaymentServiceImpl implements PaymentService {
             throws PayPalRESTException {
         try {
             Payment payment = paypalService.executePayment(paymentId, payerId);
-            if (payment.getState().equals(PAYMENT_STATE)) {
-                return new RedirectView(successFontendUrl);
+            if (!payment.getState().equals(PAYMENT_STATE)) {
+                return new RedirectView(cancelFontendUrl);
             }
-            return new RedirectView(cancelFontendUrl);
+            PaypalTransaction paypalTransaction = paypalService.findByTransactionId(paymentId);
+            Recipe recipe = recipeRepository.findById(paypalTransaction.getRecipe().getId()).get();
+            recipe.setStatus(RecipeStatus.SUCCESS);
+            recipeRepository.save(recipe);
+
+            paypalService.save(paypalTransaction);
+            return new RedirectView(successFontendUrl);
         } catch (PayPalRESTException e) {
             LogPrinter.printServiceLog(Type.ERROR, PaymentServiceImpl.class.getName(),
                     "createPaymentAndRedirectToCheckOutPage", e.getMessage());
@@ -207,7 +213,8 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Override
     public Response findByRecipeId(UUID recipeId) {
-        Recipe recipe = recipeRepository.findById(recipeId).orElseThrow(() -> new EntityNotFoundException("Recipe not found"));
+        Recipe recipe = recipeRepository.findById(recipeId)
+                .orElseThrow(() -> new EntityNotFoundException("Recipe not found"));
         return recipeMapper.toRecipeResponse(recipe);
     }
 }
