@@ -286,7 +286,7 @@ public class AuthControllerTest {
                                 .param("token", token))
                                 .andDo(print())
                                 .andExpect(status().is3xxRedirection())
-                                .andExpect(redirectedUrl(fontendServerConfigData.getActive().get("disabled")));
+                                .andExpect(redirectedUrl(fontendServerConfigData.getActive().getDisabled()));
         }
 
         @SuppressWarnings("unchecked")
@@ -309,7 +309,7 @@ public class AuthControllerTest {
                                 .param("token", token))
                                 .andDo(print())
                                 .andExpect(status().is3xxRedirection())
-                                .andExpect(redirectedUrl(fontendServerConfigData.getActive().get("expired")));
+                                .andExpect(redirectedUrl(fontendServerConfigData.getActive().getExpired()));
         }
 
         @SuppressWarnings("unchecked")
