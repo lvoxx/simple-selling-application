@@ -23,6 +23,7 @@ import com.shitcode.demo1.exception.model.FolderNotFoundException;
 import com.shitcode.demo1.exception.model.ImageEncodeException;
 import com.shitcode.demo1.exception.model.InitialGoogleDriveContextException;
 import com.shitcode.demo1.exception.model.KeyLockMissedException;
+import com.shitcode.demo1.exception.model.OutOfStockException;
 import com.shitcode.demo1.exception.model.ResourceNotFoundException;
 import com.shitcode.demo1.exception.model.RevokeTokenException;
 import com.shitcode.demo1.exception.model.SendingMailException;
@@ -85,5 +86,11 @@ public class ApplicationExceptionHandler {
     public ResponseEntity<ErrorModel> handleBadRequestsException(RuntimeException ex) {
         ErrorModel errorResponse = ErrorModel.of(HttpStatus.BAD_REQUEST, ex.getMessage(), null);
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler({ OutOfStockException.class })
+    public ResponseEntity<ErrorModel> handleReasonaleRequestsException(RuntimeException ex) {
+        ErrorModel errorResponse = ErrorModel.of(HttpStatus.NOT_ACCEPTABLE, ex.getMessage(), null);
+        return new ResponseEntity<>(errorResponse, HttpStatus.NOT_ACCEPTABLE);
     }
 }

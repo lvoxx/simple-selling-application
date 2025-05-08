@@ -29,6 +29,7 @@ import com.shitcode.demo1.entity.Recipe.RecipeStatus;
 import com.shitcode.demo1.entity.RecipeProduct;
 import com.shitcode.demo1.exception.model.DiscountOverTimeException;
 import com.shitcode.demo1.exception.model.EntityNotFoundException;
+import com.shitcode.demo1.exception.model.OutOfStockException;
 import com.shitcode.demo1.mapper.RecipeMapper;
 import com.shitcode.demo1.properties.FontendServerConfigData;
 import com.shitcode.demo1.properties.LvoxxServerConfigData;
@@ -102,6 +103,10 @@ public class PaymentServiceImpl implements PaymentService {
             for (ProductQuantityDTO product : request.getProducts()) {
                 ProductDTO.ProductWithCategoryAndDiscountResponse prodRes = productService
                         .findProductWithCategoryAndDiscount(product.getProductId());
+                if (prodRes.getAvailableQuatity() < product.getQuantity()) {
+                    throw new OutOfStockException(
+                            String.format("Product %s is out of stock, try again later.", prodRes.getName()));
+                }
                 CategoryDTO.Response ctgRes = prodRes.getCategory();
                 DiscountDTO.SimpleResponse disRes = Optional.ofNullable(prodRes.getDiscount())
                         .orElse(SimpleResponse.builder()
