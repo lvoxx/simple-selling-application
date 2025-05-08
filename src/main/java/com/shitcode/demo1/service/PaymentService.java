@@ -7,7 +7,7 @@ import com.paypal.base.rest.PayPalRESTException;
 import com.shitcode.demo1.dto.PaymentDTO;
 
 public interface PaymentService {
-    RedirectView createPaymentAndRedirectToCheckOutPage(PaymentDTO.Request request, UserDetails userDetails) throws PayPalRESTException;
+    PaymentDTO.Response createPaymentAndRedirectToCheckOutPage(PaymentDTO.Request request, UserDetails userDetails) throws PayPalRESTException;
 
     RedirectView executePaymentAndRedirectToSuccessPage(String paymentId, String payerId) throws PayPalRESTException;
 }

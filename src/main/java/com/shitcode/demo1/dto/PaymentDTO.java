@@ -54,6 +54,7 @@ public abstract class PaymentDTO {
         private String name;
         private Recipe.RecipeStatus status;
         private String description;
+        private String redirectToPayoutUrl;
         private Double total;
         private String username;
         private String shippingAddress;

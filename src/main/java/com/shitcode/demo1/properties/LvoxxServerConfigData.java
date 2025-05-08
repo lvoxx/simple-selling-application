@@ -18,6 +18,7 @@ public class LvoxxServerConfigData {
     private ExternalDocumentationConfig externalDocumentation;
     private boolean productDeploy;
     private String feLoginUrl;
+    private String paymentSuccessPath;
 
     @Data
     public static class ServerConfig {

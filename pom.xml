@@ -58,6 +58,7 @@
 		<google-auth-library-oauth2-http.version>1.33.1</google-auth-library-oauth2-http.version>
 		<paypal-rest-api-sdk.version>1.14.0</paypal-rest-api-sdk.version>
 		<paypal-core.version>1.7.2</paypal-core.version>
+		<cloudinary.version>1.39.0</cloudinary.version>
 
 		<assertj.verion>3.27.3</assertj.verion>
 		<mockito.verion>5.15.2</mockito.verion>
@@ -168,6 +169,11 @@
 			<groupId>net.lingala.zip4j</groupId>
 			<artifactId>zip4j</artifactId>
 			<version>${zip4j.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.cloudinary</groupId>
+			<artifactId>cloudinary-http44</artifactId>
+			<version>${cloudinary.version}</version>
 		</dependency>
 
 		<!-- OpenAPI -->

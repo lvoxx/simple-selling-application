@@ -27,7 +27,9 @@ import com.shitcode.demo1.entity.Recipe.RecipeStatus;
 import com.shitcode.demo1.entity.RecipeProduct;
 import com.shitcode.demo1.exception.model.DiscountOverTimeException;
 import com.shitcode.demo1.exception.model.EntityNotFoundException;
+import com.shitcode.demo1.mapper.RecipeMapper;
 import com.shitcode.demo1.properties.FontendServerConfigData;
+import com.shitcode.demo1.properties.LvoxxServerConfigData;
 import com.shitcode.demo1.repository.PaypalTransactionRepository;
 import com.shitcode.demo1.repository.RecipeProductRepository;
 import com.shitcode.demo1.repository.RecipeRepository;
@@ -49,7 +51,9 @@ public class PaymentServiceImpl implements PaymentService {
     private final PaypalTransactionRepository paypalTransactionRepository;
     private final RecipeProductRepository recipeProductRepository;
     private final ProductService productService;
+    private final RecipeMapper recipeMapper;
     private final FontendServerConfigData fontendServerConfigData;
+    private final LvoxxServerConfigData lvoxxServerConfigData;
 
     private final String APPROVAL_LINK = "approval_url";
     private final String PAYMENT_STATE = "approved";
@@ -58,29 +62,38 @@ public class PaymentServiceImpl implements PaymentService {
 
     public PaymentServiceImpl(PaypalService paypalService, ProductService productService,
             FontendServerConfigData fontendServerConfigData, RecipeRepository recipeRepository,
-            PaypalTransactionRepository paypalTransactionRepository, RecipeProductRepository recipeProductRepository) {
+            PaypalTransactionRepository paypalTransactionRepository, RecipeProductRepository recipeProductRepository,
+            RecipeMapper recipeMapper, LvoxxServerConfigData lvoxxServerConfigData) {
         this.recipeRepository = recipeRepository;
         this.paypalTransactionRepository = paypalTransactionRepository;
         this.paypalService = paypalService;
         this.productService = productService;
+        this.recipeMapper = recipeMapper;
         this.fontendServerConfigData = fontendServerConfigData;
         this.recipeProductRepository = recipeProductRepository;
+        this.lvoxxServerConfigData = lvoxxServerConfigData;
     }
 
-    private String successUrl;
-    private String cancelUrl;
-    private String errorUrl;
+    private String successFontendUrl;
+    private String successBackendUrl;
+    private String cancelFontendUrl;
+    private String errorFontendUrl;
 
     @PostConstruct
     void setUp() {
-        successUrl = fontendServerConfigData.getPayment().get("success");
-        cancelUrl = fontendServerConfigData.getPayment().get("cancel");
-        errorUrl = fontendServerConfigData.getPayment().get("error");
+        successFontendUrl = fontendServerConfigData.getPayment().get("success");
+        cancelFontendUrl = fontendServerConfigData.getPayment().get("cancel");
+        errorFontendUrl = fontendServerConfigData.getPayment().get("error");
+        successBackendUrl = (lvoxxServerConfigData.isProductDeploy() ? lvoxxServerConfigData.getDevServer().getBaseUrl()
+                : lvoxxServerConfigData.getProdServer().getBaseUrl())
+                .concat(lvoxxServerConfigData.getPaymentSuccessPath());
     }
 
     @Override
-    public RedirectView createPaymentAndRedirectToCheckOutPage(PaymentDTO.Request request, UserDetails userDetails)
+    public PaymentDTO.Response createPaymentAndRedirectToCheckOutPage(PaymentDTO.Request request,
+            UserDetails userDetails)
             throws PayPalRESTException {
+        PaymentDTO.Response res = null;
         try {
             AtomicDouble total = new AtomicDouble(0.0);
             List<RecipeProduct> recipeProduct = new ArrayList<>();
@@ -131,8 +144,17 @@ public class PaymentServiceImpl implements PaymentService {
                     METHOD,
                     "sale",
                     request.getDescription(),
-                    cancelUrl,
-                    successUrl);
+                    cancelFontendUrl,
+                    successBackendUrl); // README: If you want to set success url for other website, you can set it
+                                        // here.
+
+            // Get approval url
+            String approvalUrl = null;
+            for (Links links : payment.getLinks()) {
+                if (links.getRel().equals(APPROVAL_LINK)) {
+                    approvalUrl = links.getHref();
+                }
+            }
 
             // Save to database
             PaypalTransaction paypalTransaction = PaypalTransaction.builder()
@@ -153,18 +175,17 @@ public class PaymentServiceImpl implements PaymentService {
                     .recipeProducts(recipeProduct)
                     .paypalTransaction(paypalTransaction)
                     .build();
-            recipeRepository.save(recipe);
-            for (Links links : payment.getLinks()) {
-                if (links.getRel().equals(APPROVAL_LINK)) {
-                    return new RedirectView(links.getHref());
-                }
-            }
+            recipe = recipeRepository.save(recipe);
+
+            // Map to response
+            res = recipeMapper.toRecipeResponse(recipe);
+            res.setRedirectToPayoutUrl(approvalUrl);
         } catch (PayPalRESTException | EntityNotFoundException | DiscountOverTimeException e) {
             LogPrinter.printServiceLog(Type.ERROR, PaymentServiceImpl.class.getName(),
                     "createPaymentAndRedirectToCheckOutPage", e.getMessage());
             throw e;
         }
-        return new RedirectView(errorUrl);
+        return res;
     }
 
     @Override
@@ -173,13 +194,13 @@ public class PaymentServiceImpl implements PaymentService {
         try {
             Payment payment = paypalService.executePayment(paymentId, payerId);
             if (payment.getState().equals(PAYMENT_STATE)) {
-                return new RedirectView(successUrl);
+                return new RedirectView(successFontendUrl);
             }
-            return new RedirectView(cancelUrl);
+            return new RedirectView(cancelFontendUrl);
         } catch (PayPalRESTException e) {
             LogPrinter.printServiceLog(Type.ERROR, PaymentServiceImpl.class.getName(),
                     "createPaymentAndRedirectToCheckOutPage", e.getMessage());
         }
-        return new RedirectView(errorUrl);
+        return new RedirectView(errorFontendUrl);
     }
 }

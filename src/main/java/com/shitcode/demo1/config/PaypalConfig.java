@@ -5,6 +5,11 @@ import org.springframework.context.annotation.Configuration;
 
 import com.paypal.base.rest.APIContext;
 import com.shitcode.demo1.properties.PaypalConfigData;
+import com.shitcode.demo1.utils.LogPrinter;
+import com.shitcode.demo1.utils.LogPrinter.Flag;
+import com.shitcode.demo1.utils.LogPrinter.Type;
+
+import jakarta.annotation.PostConstruct;
 
 @Configuration
 public class PaypalConfig {
@@ -14,8 +19,15 @@ public class PaypalConfig {
         this.paypalConfigData = paypalConfigData;
     }
 
+    @PostConstruct
+    public void debugPaypalConfig() {
+        LogPrinter.printLog(Type.INFO, Flag.START_UP, "CLIENT_ID: " + paypalConfigData.getClientId());
+        LogPrinter.printLog(Type.INFO, Flag.START_UP, "CLIENT_SECRET: " + paypalConfigData.getClientSecret());
+        LogPrinter.printLog(Type.INFO, Flag.START_UP, "MODE: " + paypalConfigData.getMode());
+    }
+
     @Bean
-    public APIContext apiContext() {
+    APIContext apiContext() {
         return new APIContext(paypalConfigData.getClientId(), paypalConfigData.getClientSecret(),
                 paypalConfigData.getMode());
     }

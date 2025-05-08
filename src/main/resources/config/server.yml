@@ -23,6 +23,7 @@ lvoxx-server:
     url: https://github.com/lvoxx/SimpleSellingApplication
   product-deploy: false
   fe-login-url: "{lvoxx-server.fontend-server.base-url/login}"
+  payment-success-path: /payment/success
 
 fontend-server:
   base: http://localhost:5000

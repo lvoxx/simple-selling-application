@@ -17,6 +17,7 @@ public interface RecipeMapper {
     @Mapping(source = "id", target = "recipeId")
     @Mapping(source = "recipeProducts", target = "recipeProducts")
     @Mapping(source = "paypalTransaction", target = "paypalTransaction")
+    @Mapping(target = "redirectToPayoutUrl", ignore = true)
     PaymentDTO.Response toRecipeResponse(Recipe recipe);
 
     @Mapping(source = "categoryName", target = "categoryName")
