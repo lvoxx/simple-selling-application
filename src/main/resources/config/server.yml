@@ -23,23 +23,26 @@ lvoxx-server:
     url: https://github.com/lvoxx/SimpleSellingApplication
   product-deploy: false
   fe-login-url: "{lvoxx-server.fontend-server.base-url/login}"
-  payment-success-path: /payment/success
+  payment:
+    success-path: "{lvoxx-server.fontend-server.base-url/payment/success}"
+    cancel-path: "{lvoxx-server.fontend-server.base-url/payment/cancel?name=%s}"
+    error-path: "{lvoxx-server.fontend-server.base-url/payment/error?name=%s}"
 
 fontend-server:
   base: http://localhost:5000
+  unknown: "{fontend-server.base}/error?reason=%s"
   login:
     base: "{fontend-server.base}/login"
   active:
     success: "{fontend-server.base}/activate?code=success"
     disabled: "{fontend-server.base}/activate?code=disabled-user"
     expired: "{fontend-server.base}/activate?code=expired"
-  unknown: "{fontend-server.base}/error?reason=%s"
   payment:
     path: "{fontend-server.base}/payment"
-    create: "{fontend-server.payment.path}/create?pid=%s"
-    success: "{fontend-server.payment.path}/success?pid=%s"
-    cancel: "{fontend-server.payment.path}/cancel?pid=%s"
-    error: "{fontend-server.payment.path}/error?pid=%s"
+    create: "{fontend-server.payment.path}/create?name=%s"
+    success: "{fontend-server.payment.path}/success?name=%s"
+    cancel: "{fontend-server.payment.path}/cancel?name=%s"
+    error: "{fontend-server.payment.path}/error?name=%s"
 # Payment Code:
 # 001: Payment Failed
 # 002: Product Not Found

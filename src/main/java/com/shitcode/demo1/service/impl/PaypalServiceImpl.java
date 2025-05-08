@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
+import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
 
 import com.paypal.api.payments.Amount;
@@ -15,6 +16,9 @@ import com.paypal.api.payments.Transaction;
 import com.paypal.base.rest.APIContext;
 import com.paypal.base.rest.PayPalRESTException;
 import com.shitcode.demo1.annotation.logging.LogCollector;
+import com.shitcode.demo1.entity.PaypalTransaction;
+import com.shitcode.demo1.exception.model.EntityNotFoundException;
+import com.shitcode.demo1.repository.PaypalTransactionRepository;
 import com.shitcode.demo1.service.PaypalService;
 import com.shitcode.demo1.utils.LoggingModel;
 
@@ -30,9 +34,14 @@ import com.shitcode.demo1.utils.LoggingModel;
 public class PaypalServiceImpl implements PaypalService {
 
     private final APIContext apiContext;
+    private final PaypalTransactionRepository paypalTransactionRepository;
+    private final MessageSource messageSource;
 
-    public PaypalServiceImpl(APIContext apiContext) {
+    public PaypalServiceImpl(APIContext apiContext, PaypalTransactionRepository paypalTransactionRepository,
+            MessageSource messageSource) {
         this.apiContext = apiContext;
+        this.paypalTransactionRepository = paypalTransactionRepository;
+        this.messageSource = messageSource;
     }
 
     @Override
@@ -81,6 +90,19 @@ public class PaypalServiceImpl implements PaypalService {
         paymentExecution.setPayerId(payerId);
 
         return payment.execute(apiContext, paymentExecution);
+    }
+
+    @Override
+    public PaypalTransaction findByTransactionId(String transactionId) {
+        return paypalTransactionRepository.findByTransactionId(transactionId)
+                .orElseThrow(() -> new EntityNotFoundException(messageSource.getMessage(
+                        "exception.entity-not-found.paypal-transaction", new Object[] { transactionId },
+                        Locale.getDefault())));
+    }
+
+    @Override
+    public PaypalTransaction save(PaypalTransaction paypalTransaction) {
+        return paypalTransactionRepository.save(paypalTransaction);
     }
 
 }

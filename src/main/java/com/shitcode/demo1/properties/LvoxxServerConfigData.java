@@ -18,12 +18,23 @@ public class LvoxxServerConfigData {
     private ExternalDocumentationConfig externalDocumentation;
     private boolean productDeploy;
     private String feLoginUrl;
-    private String paymentSuccessPath;
+    private PaymentConfig payment;
+
+    public String getBaseServerUrl(){
+        return (productDeploy ? devServer : prodServer).getBaseUrl();
+    }
 
     @Data
     public static class ServerConfig {
         private String baseUrl;
         private String description;
+    }
+
+    @Data
+    public static class PaymentConfig {
+        private String successPath;
+        private String cancelPath;
+        private String errorPath;
     }
 
     @Data

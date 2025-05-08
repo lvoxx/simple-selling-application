@@ -5,6 +5,7 @@ import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
@@ -17,10 +18,11 @@ import com.paypal.base.rest.PayPalRESTException;
 import com.shitcode.demo1.annotation.logging.LogCollector;
 import com.shitcode.demo1.dto.CategoryDTO;
 import com.shitcode.demo1.dto.DiscountDTO;
+import com.shitcode.demo1.dto.DiscountDTO.SimpleResponse;
 import com.shitcode.demo1.dto.PaymentDTO;
 import com.shitcode.demo1.dto.PaymentDTO.ProductQuantityDTO;
+import com.shitcode.demo1.dto.PaymentDTO.Response;
 import com.shitcode.demo1.dto.ProductDTO;
-import com.shitcode.demo1.dto.DiscountDTO.SimpleResponse;
 import com.shitcode.demo1.entity.PaypalTransaction;
 import com.shitcode.demo1.entity.Recipe;
 import com.shitcode.demo1.entity.Recipe.RecipeStatus;
@@ -30,7 +32,6 @@ import com.shitcode.demo1.exception.model.EntityNotFoundException;
 import com.shitcode.demo1.mapper.RecipeMapper;
 import com.shitcode.demo1.properties.FontendServerConfigData;
 import com.shitcode.demo1.properties.LvoxxServerConfigData;
-import com.shitcode.demo1.repository.PaypalTransactionRepository;
 import com.shitcode.demo1.repository.RecipeProductRepository;
 import com.shitcode.demo1.repository.RecipeRepository;
 import com.shitcode.demo1.service.PaymentService;
@@ -48,7 +49,6 @@ public class PaymentServiceImpl implements PaymentService {
 
     private final PaypalService paypalService;
     private final RecipeRepository recipeRepository;
-    private final PaypalTransactionRepository paypalTransactionRepository;
     private final RecipeProductRepository recipeProductRepository;
     private final ProductService productService;
     private final RecipeMapper recipeMapper;
@@ -62,10 +62,9 @@ public class PaymentServiceImpl implements PaymentService {
 
     public PaymentServiceImpl(PaypalService paypalService, ProductService productService,
             FontendServerConfigData fontendServerConfigData, RecipeRepository recipeRepository,
-            PaypalTransactionRepository paypalTransactionRepository, RecipeProductRepository recipeProductRepository,
+            RecipeProductRepository recipeProductRepository,
             RecipeMapper recipeMapper, LvoxxServerConfigData lvoxxServerConfigData) {
         this.recipeRepository = recipeRepository;
-        this.paypalTransactionRepository = paypalTransactionRepository;
         this.paypalService = paypalService;
         this.productService = productService;
         this.recipeMapper = recipeMapper;
@@ -74,19 +73,21 @@ public class PaymentServiceImpl implements PaymentService {
         this.lvoxxServerConfigData = lvoxxServerConfigData;
     }
 
-    private String successFontendUrl;
     private String successBackendUrl;
+    private String cancelBackendUrl;
+    private String successFontendUrl;
     private String cancelFontendUrl;
     private String errorFontendUrl;
 
     @PostConstruct
     void setUp() {
-        successFontendUrl = fontendServerConfigData.getPayment().get("success");
-        cancelFontendUrl = fontendServerConfigData.getPayment().get("cancel");
-        errorFontendUrl = fontendServerConfigData.getPayment().get("error");
-        successBackendUrl = (lvoxxServerConfigData.isProductDeploy() ? lvoxxServerConfigData.getDevServer().getBaseUrl()
-                : lvoxxServerConfigData.getProdServer().getBaseUrl())
-                .concat(lvoxxServerConfigData.getPaymentSuccessPath());
+        successFontendUrl = fontendServerConfigData.getPayment().getSuccess();
+        cancelFontendUrl = fontendServerConfigData.getPayment().getCancel();
+        errorFontendUrl = fontendServerConfigData.getPayment().getError();
+        successBackendUrl = lvoxxServerConfigData.getBaseServerUrl()
+                .concat(lvoxxServerConfigData.getPayment().getSuccessPath());
+        cancelBackendUrl = lvoxxServerConfigData.getBaseServerUrl()
+                .concat(lvoxxServerConfigData.getPayment().getCancelPath());
     }
 
     @Override
@@ -144,7 +145,7 @@ public class PaymentServiceImpl implements PaymentService {
                     METHOD,
                     "sale",
                     request.getDescription(),
-                    cancelFontendUrl,
+                    cancelBackendUrl,
                     successBackendUrl); // README: If you want to set success url for other website, you can set it
                                         // here.
 
@@ -162,7 +163,7 @@ public class PaymentServiceImpl implements PaymentService {
                     .amount(totalPrice)
                     .transactionDate(LocalDateTime.now())
                     .build();
-            paypalTransaction = paypalTransactionRepository.save(paypalTransaction);
+            paypalTransaction = paypalService.save(paypalTransaction);
             recipeProduct = recipeProductRepository.saveAll(recipeProduct);
             Recipe recipe = Recipe.builder()
                     .name(request.getName())
@@ -202,5 +203,11 @@ public class PaymentServiceImpl implements PaymentService {
                     "createPaymentAndRedirectToCheckOutPage", e.getMessage());
         }
         return new RedirectView(errorFontendUrl);
+    }
+
+    @Override
+    public Response findByRecipeId(UUID recipeId) {
+        Recipe recipe = recipeRepository.findById(recipeId).orElseThrow(() -> new EntityNotFoundException("Recipe not found"));
+        return recipeMapper.toRecipeResponse(recipe);
     }
 }

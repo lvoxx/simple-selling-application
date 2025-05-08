@@ -130,16 +130,16 @@ public class AuthController {
                                         COMPLETE_SIGNUP);
                 } catch (UserDisabledException | TokenExpiredException e) {
                         if (e instanceof UserDisabledException) {
-                                response.sendRedirect(fontendServerConfigData.getActive().get("disabled"));
+                                response.sendRedirect(fontendServerConfigData.getActive().getDisabled());
                         } else if (e instanceof TokenExpiredException) {
-                                response.sendRedirect(fontendServerConfigData.getActive().get("expired"));
+                                response.sendRedirect(fontendServerConfigData.getActive().getExpired());
                         }
                 } catch (Exception e) {
                         LogPrinter.printControllerLog(Type.ERROR, request.getContextPath(), "AuthController",
                                         "activeUserV1", e.getMessage());
                         response.sendRedirect(String.format(fontendServerConfigData.getUnknown(), e.getMessage()));
                 }
-                response.sendRedirect(fontendServerConfigData.getActive().get("success"));
+                response.sendRedirect(fontendServerConfigData.getActive().getSuccess());
         }
 
 }

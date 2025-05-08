@@ -121,6 +121,7 @@ exception:
     discount-id: Can not found discount with id [{0}]
     registration-name: Can not found registration token with name [{0}]
     registration-token: Can not found registration token with token [{0}]
+    paypal-transaction: Can not found paypal transaction with transaction id [{0}]
   entity-not-changed:
     user:
       locked: The user has been locked.
