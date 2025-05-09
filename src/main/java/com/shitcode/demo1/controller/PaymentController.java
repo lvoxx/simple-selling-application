@@ -2,10 +2,12 @@ package com.shitcode.demo1.controller;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.lang.NonNull;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -67,6 +69,11 @@ public class PaymentController {
     public RedirectView success(@RequestParam String paymentId,
             @RequestParam("PayerID") String payerId) throws Exception {
         return paymentService.executePaymentAndRedirectToSuccessPage(paymentId, payerId);
+    }
+
+    @GetMapping("/cancel")
+    public RedirectView cancel(@NonNull @PathVariable String recipeId) {
+        return paymentService.payoutIsCanceled(recipeId);
     }
 
 }

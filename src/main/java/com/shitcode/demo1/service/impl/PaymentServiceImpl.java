@@ -218,9 +218,27 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     @Override
+    public RedirectView payoutIsCanceled(String recipeId) {
+        Recipe recipe = findRecipeEntityById(UUID.fromString(recipeId));
+        recipe.setStatus(RecipeStatus.CANCELED);
+        saveRecipe(recipe);
+        return new RedirectView(fontendServerConfigData.getPaymentCreateUrl("Canceled payment id #" + recipeId));
+    }
+
+    @Override
     public Response findByRecipeId(UUID recipeId) {
-        Recipe recipe = recipeRepository.findById(recipeId)
-                .orElseThrow(() -> new EntityNotFoundException("Recipe not found"));
+        Recipe recipe = findRecipeEntityById(recipeId);
         return recipeMapper.toRecipeResponse(recipe);
     }
+
+    private Recipe findRecipeEntityById(UUID recipeId) {
+        Recipe recipe = recipeRepository.findById(recipeId)
+                .orElseThrow(() -> new EntityNotFoundException("Recipe not found"));
+        return recipe;
+    }
+
+    private Recipe saveRecipe(Recipe recipe) {
+        return recipeRepository.save(recipe);
+    }
+
 }

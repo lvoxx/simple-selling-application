@@ -15,4 +15,6 @@ public interface PaymentService {
     RedirectView executePaymentAndRedirectToSuccessPage(String paymentId, String payerId) throws PayPalRESTException;
 
     PaymentDTO.Response findByRecipeId(UUID recipeId);
+
+    RedirectView payoutIsCanceled(String recipeId);
 }
