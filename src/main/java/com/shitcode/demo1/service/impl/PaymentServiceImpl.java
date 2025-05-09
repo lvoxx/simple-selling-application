@@ -164,6 +164,7 @@ public class PaymentServiceImpl implements PaymentService {
             recipe = recipeRepository.save(recipe);
 
             // Create paypal transaction
+            cancelBackendUrl = cancelBackendUrl.replace("empty", recipe.getId().toString());
             Payment payment = paypalService.createPayment(
                     totalPrice,
                     CURRENCY,
