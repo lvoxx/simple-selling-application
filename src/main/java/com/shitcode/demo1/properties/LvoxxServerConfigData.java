@@ -17,11 +17,26 @@ public class LvoxxServerConfigData {
     private InfoConfig info;
     private ExternalDocumentationConfig externalDocumentation;
     private boolean productDeploy;
-    private String feLoginUrl;
     private PaymentConfig payment;
 
-    public String getBaseServerUrl(){
-        return (productDeploy ? devServer : prodServer).getBaseUrl();
+    public String getBaseServerUrl() {
+        return (productDeploy ? prodServer : devServer).getBaseUrl();
+    }
+
+    public String getPaymentBaseUrl() {
+        return getBaseServerUrl() + payment.getBasePath();
+    }
+
+    public String getPaymentSuccessUrl() {
+        return getPaymentBaseUrl() + payment.getSuccessPath();
+    }
+
+    public String getPaymentCancelUrl(String name) {
+        return String.format(getPaymentBaseUrl() + payment.getCancelPath(), name);
+    }
+
+    public String getPaymentErrorUrl(String name) {
+        return String.format(getPaymentBaseUrl() + payment.getErrorPath(), name);
     }
 
     @Data
@@ -32,6 +47,7 @@ public class LvoxxServerConfigData {
 
     @Data
     public static class PaymentConfig {
+        private String basePath;
         private String successPath;
         private String cancelPath;
         private String errorPath;

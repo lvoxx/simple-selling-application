@@ -137,7 +137,7 @@ public class AuthController {
                 } catch (Exception e) {
                         LogPrinter.printControllerLog(Type.ERROR, request.getContextPath(), "AuthController",
                                         "activeUserV1", e.getMessage());
-                        response.sendRedirect(String.format(fontendServerConfigData.getUnknown(), e.getMessage()));
+                        response.sendRedirect(String.format(fontendServerConfigData.getError(), e.getMessage()));
                 }
                 response.sendRedirect(fontendServerConfigData.getActive().getSuccess());
         }

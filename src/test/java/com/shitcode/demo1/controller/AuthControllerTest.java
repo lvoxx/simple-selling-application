@@ -333,7 +333,7 @@ public class AuthControllerTest {
                                 .andDo(print())
                                 .andExpect(status().is3xxRedirection())
                                 .andExpect(redirectedUrl(
-                                                String.format(fontendServerConfigData.getUnknown(), "Dummy Error")));
+                                                String.format(fontendServerConfigData.getError(), "Dummy Error")));
         }
 
 }

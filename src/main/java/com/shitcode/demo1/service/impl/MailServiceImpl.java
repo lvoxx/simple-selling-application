@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import com.google.errorprone.annotations.DoNotMock;
 import com.shitcode.demo1.annotation.logging.LogCollector;
+import com.shitcode.demo1.properties.FontendServerConfigData;
 import com.shitcode.demo1.properties.LvoxxServerConfigData;
 import com.shitcode.demo1.properties.MailingConfigData;
 import com.shitcode.demo1.service.MailService;
@@ -24,12 +25,14 @@ public class MailServiceImpl implements MailService {
 
     private final JavaMailSender mailSender;
     private final LvoxxServerConfigData serverConfigData;
+    private final FontendServerConfigData fontendServerConfigData;
     private final MailingConfigData mailingConfigData;
 
     public MailServiceImpl(JavaMailSender mailSender, LvoxxServerConfigData serverConfigData,
-            MailingConfigData mailingConfigData) {
+            MailingConfigData mailingConfigData, FontendServerConfigData fontendServerConfigData) {
         this.mailSender = mailSender;
         this.serverConfigData = serverConfigData;
+        this.fontendServerConfigData = fontendServerConfigData;
         this.mailingConfigData = mailingConfigData;
     }
 
@@ -38,9 +41,8 @@ public class MailServiceImpl implements MailService {
         // ${ActivationUrl} - active account link
         // ${LoginUrl} - login FE link
         String activationLink = String.format("%s%s%s?token=%s",
-                serverConfigData.isProductDeploy() ? serverConfigData.getProdServer().getBaseUrl()
-                        : serverConfigData.getDevServer().getBaseUrl(),
-                        AuthServiceImpl.getHttpServletRequest().getContextPath().concat("/auth"),
+                serverConfigData.getBaseServerUrl(),
+                AuthServiceImpl.getHttpServletRequest().getContextPath().concat("/auth"),
                 mailingConfigData.getRegisterEmail().getPath(),
                 token);
         String subject = mailingConfigData.getRegisterEmail().getSubject();
@@ -48,7 +50,7 @@ public class MailServiceImpl implements MailService {
         // Load and replace content
         String htmlContent = loadHtmlTemplate(mailingConfigData.getRegisterEmail().getTemplateUrl());
         htmlContent = htmlContent.replace("${ActivationUrl}", activationLink);
-        htmlContent = htmlContent.replace("${LoginUrl}", serverConfigData.getFeLoginUrl());
+        htmlContent = htmlContent.replace("${LoginUrl}", fontendServerConfigData.getLoginUrl());
 
         sendEmail(toEmail, subject, htmlContent);
     }

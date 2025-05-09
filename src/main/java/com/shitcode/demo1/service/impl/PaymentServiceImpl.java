@@ -85,10 +85,8 @@ public class PaymentServiceImpl implements PaymentService {
         successFontendUrl = fontendServerConfigData.getPayment().getSuccess();
         cancelFontendUrl = fontendServerConfigData.getPayment().getCancel();
         errorFontendUrl = fontendServerConfigData.getPayment().getError();
-        successBackendUrl = lvoxxServerConfigData.getBaseServerUrl()
-                .concat(lvoxxServerConfigData.getPayment().getSuccessPath());
-        cancelBackendUrl = lvoxxServerConfigData.getBaseServerUrl()
-                .concat(lvoxxServerConfigData.getPayment().getCancelPath());
+        successBackendUrl = lvoxxServerConfigData.getPaymentSuccessUrl();
+        cancelBackendUrl = lvoxxServerConfigData.getPaymentCancelUrl("empty");
     }
 
     @Override
@@ -143,28 +141,10 @@ public class PaymentServiceImpl implements PaymentService {
                 recipeProduct.add(recipe);
             }
             Double totalPrice = total.get() - request.getShippingFee();
-            // Create paypal transaction
-            Payment payment = paypalService.createPayment(
-                    totalPrice,
-                    CURRENCY,
-                    METHOD,
-                    "sale",
-                    request.getDescription(),
-                    cancelBackendUrl,
-                    successBackendUrl); // README: If you want to set success url for other website, you can set it
-                                        // here.
-
-            // Get approval url
-            String approvalUrl = null;
-            for (Links links : payment.getLinks()) {
-                if (links.getRel().equals(APPROVAL_LINK)) {
-                    approvalUrl = links.getHref();
-                }
-            }
 
             // Save to database
             PaypalTransaction paypalTransaction = PaypalTransaction.builder()
-                    .transactionId(payment.getId())
+                    .transactionId("unsaved")
                     .amount(totalPrice)
                     .transactionDate(LocalDateTime.now())
                     .build();
@@ -182,6 +162,26 @@ public class PaymentServiceImpl implements PaymentService {
                     .paypalTransaction(paypalTransaction)
                     .build();
             recipe = recipeRepository.save(recipe);
+
+            // Create paypal transaction
+            Payment payment = paypalService.createPayment(
+                    totalPrice,
+                    CURRENCY,
+                    METHOD,
+                    "sale",
+                    request.getDescription(),
+                    cancelBackendUrl,
+                    successBackendUrl); // README: If you want to set success url for other website, you can set it
+                                        // here.
+            paypalTransaction.setTransactionId(payment.getId());
+            paypalService.save(paypalTransaction);
+            // Get approval url
+            String approvalUrl = null;
+            for (Links links : payment.getLinks()) {
+                if (links.getRel().equals(APPROVAL_LINK)) {
+                    approvalUrl = links.getHref();
+                }
+            }
 
             // Map to response
             res = recipeMapper.toRecipeResponse(recipe);

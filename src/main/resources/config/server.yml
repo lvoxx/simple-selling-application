@@ -6,7 +6,7 @@ lvoxx-server:
     base-url: http://api.lvoxxapplication.com
     description: Product BE Server
   fontend-server:
-    base-url:
+    base-url: http://localhost:5000
   contact:
     name: Lvoxx
     email: lvoxxartist@gmail.com
@@ -22,27 +22,27 @@ lvoxx-server:
     description: Full Documentation
     url: https://github.com/lvoxx/SimpleSellingApplication
   product-deploy: false
-  fe-login-url: "{lvoxx-server.fontend-server.base-url/login}"
   payment:
-    success-path: "{lvoxx-server.fontend-server.base-url/payment/success}"
-    cancel-path: "{lvoxx-server.fontend-server.base-url/payment/cancel?name=%s}"
-    error-path: "{lvoxx-server.fontend-server.base-url/payment/error?name=%s}"
+    base-path: /payment
+    success-path: /success
+    cancel-path: /cancel?rid=%s
+    error-path: /error?name=%s
 
 fontend-server:
   base: http://localhost:5000
-  unknown: "{fontend-server.base}/error?reason=%s"
+  error: /error?reason=%s
   login:
-    base: "{fontend-server.base}/login"
+    base: /login
   active:
-    success: "{fontend-server.base}/activate?code=success"
-    disabled: "{fontend-server.base}/activate?code=disabled-user"
-    expired: "{fontend-server.base}/activate?code=expired"
+    success: /activate?code=success
+    disabled: /activate?code=disabled-user
+    expired: /activate?code=expired
   payment:
-    path: "{fontend-server.base}/payment"
-    create: "{fontend-server.payment.path}/create?name=%s"
-    success: "{fontend-server.payment.path}/success?name=%s"
-    cancel: "{fontend-server.payment.path}/cancel?name=%s"
-    error: "{fontend-server.payment.path}/error?name=%s"
+    base-path: /payment
+    create: /create?name=%s
+    success: /success?name=%s
+    cancel: /cancel?name=%s
+    error: /error?name=%s
 # Payment Code:
 # 001: Payment Failed
 # 002: Product Not Found
